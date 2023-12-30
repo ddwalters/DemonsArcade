@@ -224,7 +224,7 @@ GameObject:
   - component: {fileID: 5154259370721648959}
   m_Layer: 0
   m_Name: Hallway 4
-  m_TagString: Untagged
+  m_TagString: Hallway
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -264,7 +264,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8aec871e276acb540b6236260872a2b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  collide: 0
+  roomSpawn: {fileID: 5584690423876456956}
 --- !u!65 &5002894143913834189
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -695,7 +695,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8aec871e276acb540b6236260872a2b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  collide: 0
+  roomSpawn: {fileID: 5584690423876456956}
 --- !u!54 &6082754734543718368
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -888,5 +888,10 @@ PrefabInstance:
 --- !u!4 &1615755400729650564 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6320151148431507291, guid: 73fdc355c6decc141aeea0e641713a64, type: 3}
+  m_PrefabInstance: {fileID: 4745104066758154975}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &5584690423876456956 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 889796672300714787, guid: 73fdc355c6decc141aeea0e641713a64, type: 3}
   m_PrefabInstance: {fileID: 4745104066758154975}
   m_PrefabAsset: {fileID: 0}

@@ -6,6 +6,7 @@ public class RoomSpawn : MonoBehaviour
 {
     //private RoomTemplates template;
     private RoomTemplates roomTemplates;
+    private checkroomcollision checkroom;
     public GameObject template;
     public int attempts;
 
@@ -34,10 +35,13 @@ public class RoomSpawn : MonoBehaviour
                 GameObject prefab = roomPrefabs[rand];
                 GameObject Room = Instantiate(prefab, transform.position, transform.rotation);
                 Room.transform.SetParent(gameObject.transform);
-                //checkroomcollision checkroom = Room.GetComponent<checkroomcollision>();
                 roomTemplates.Rooms.Add(Room);
-
-                //checkroom.onStart = false;
+                checkroomcollision checkroom = Room.GetComponent<checkroomcollision>();
+                if (checkroom.Collide == true)
+                {
+                    Destroy(Room);
+                    spawnRoom();
+                }
             }
         }
         else

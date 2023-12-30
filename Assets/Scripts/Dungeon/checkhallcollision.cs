@@ -5,23 +5,30 @@ using UnityEngine;
 public class checkhallcollision : MonoBehaviour
 {
     // Start is called before the first frame update
-    public bool collide;
+    public GameObject roomSpawn;
+    public bool Collide;
 
     void Start()
     {
         
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void OnTriggerStay(Collider other)
     {
         HallwaySpawn hallspawn = transform.GetComponentInParent<HallwaySpawn>();
-        //Debug.Log("collision");
-        //|| other.gameObject.tag == "Room"
+
         if (other.gameObject.tag == "Hallway" || other.gameObject.tag == "Room")
         {
-            Debug.Log("Hall:collide");
-            Destroy(this.gameObject);
-            hallspawn.spawnHall();
+            Collide = true;
+            hallspawn.collideTrue(Collide);
+            //Debug.Log(Collide);
+            return;
+        }
+        else if (other.gameObject.tag != "Hallway" && other.gameObject.tag != "Room")
+        {
+            Collide = false;
+            hallspawn.collideTrue(Collide);
+            return;
         }
     }
 
