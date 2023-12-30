@@ -1,23 +1,22 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.PackageManager;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public CharacterController controller;
-    public GameObject playerMenuUI;
+    [SerializeField] GameObject player;
+    [SerializeField] CharacterController controller;
 
-    public float UIOffsetX;
-    public float UIOffsetY;
-    public float UIOffsetZ;
+    float gravity = -9.81f;
+    [SerializeField] float speed = 12f;
+    [SerializeField] float jumpHeight = 3f;
 
-    public float speed = 12f;
-    public float gravity = -9.81f;
-    public float jumpHeight = 3f;
-
-    public Transform groundCheck;
-    public float groundDistance = 0.4f;
-    public LayerMask groundMask;
+    [SerializeField] Transform groundCheck;
+    float groundDistance = 0.4f;
+    LayerMask groundMask;
 
     Vector3 velocity;
     bool isGrounded;
@@ -25,7 +24,6 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         MovePlayer();
-        MoveUI();
     }
 
     void MovePlayer()
@@ -52,13 +50,5 @@ public class PlayerMovement : MonoBehaviour
         velocity.y += gravity * Time.deltaTime;
 
         controller.Move(velocity * Time.deltaTime);
-    }
-
-    void MoveUI()
-    {
-        playerMenuUI.transform.position = 
-            new Vector3(controller.transform.position.x + UIOffsetX, 
-                        controller.transform.position.y + UIOffsetY, 
-                        controller.transform.position.z + UIOffsetZ);
     }
 }
