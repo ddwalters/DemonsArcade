@@ -7,7 +7,7 @@ public class RoomSpawn : MonoBehaviour
     //private RoomTemplates template;
     private RoomTemplates roomTemplates;
     private checkroomcollision checkroom;
-    public GameObject doorPrefab;
+    public GameObject deadEnd;
     public GameObject template;
 
     public bool collide;
@@ -62,7 +62,7 @@ public class RoomSpawn : MonoBehaviour
 
     public void spawnDoor()
     {
-        GameObject Door = Instantiate(doorPrefab, transform.position, transform.rotation);
+        GameObject Door = Instantiate(deadEnd, transform.position, transform.rotation);
         Door.transform.SetParent(gameObject.transform);
 
     }
