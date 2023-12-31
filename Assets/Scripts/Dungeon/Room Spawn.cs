@@ -7,7 +7,10 @@ public class RoomSpawn : MonoBehaviour
     //private RoomTemplates template;
     private RoomTemplates roomTemplates;
     private checkroomcollision checkroom;
+    public GameObject doorPrefab;
     public GameObject template;
+
+    public bool collide;
     public int attempts;
 
     //public List<GameObject> Rooms;
@@ -19,6 +22,13 @@ public class RoomSpawn : MonoBehaviour
         spawnRoom();
     }
 
+    public bool collideTrue(bool RoomCollide)
+    {
+        collide = RoomCollide;
+        //Debug.Log("collide: " + collide);
+        return collide;
+    }
+
     public void spawnRoom()
     {
         if (attempts < 10)
@@ -27,29 +37,46 @@ public class RoomSpawn : MonoBehaviour
             roomTemplates = template.GetComponent<RoomTemplates>();
             GameObject[] roomPrefabs = roomTemplates.RoomPrefabs;
 
+            int rand = Random.Range(0, roomPrefabs.Length);
+            GameObject prefab = roomPrefabs[rand];
+            GameObject Room = Instantiate(prefab, transform.position, transform.rotation);
+            Room.transform.SetParent(gameObject.transform);
+            roomTemplates.Rooms.Add(Room);
+            checkroomcollision checkroom = Room.GetComponent<checkroomcollision>();
+
+            StartCoroutine(checkcollide(Room));
 
             int len = roomTemplates.Rooms.Count;
-            if (len <= 6)
+            if (len <= 4)
             {
-                int rand = Random.Range(0, roomPrefabs.Length);
-                GameObject prefab = roomPrefabs[rand];
-                GameObject Room = Instantiate(prefab, transform.position, transform.rotation);
-                Room.transform.SetParent(gameObject.transform);
-                roomTemplates.Rooms.Add(Room);
-                checkroomcollision checkroom = Room.GetComponent<checkroomcollision>();
-                if (checkroom.Collide == true)
-                {
-                    Destroy(Room);
-                    spawnRoom();
-                }
+                //if enough rooms spawn a room
             }
         }
         else
         {
-
+            spawnDoor();
         }
         attempts++;
         
+    }
+
+    public void spawnDoor()
+    {
+        GameObject Door = Instantiate(doorPrefab, transform.position, transform.rotation);
+        Door.transform.SetParent(gameObject.transform);
+
+    }
+
+    IEnumerator checkcollide(GameObject Room)
+    {
+        yield return new WaitForSeconds(0.1f);
+        if (collide == true)
+        {
+            Destroy(Room);
+            Debug.Log("Destroy:Room");
+            spawnRoom();
+            yield return null;
+        }
     }
 
     // Update is called once per frame

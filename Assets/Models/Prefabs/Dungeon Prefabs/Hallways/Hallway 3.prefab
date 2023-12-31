@@ -578,7 +578,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 14, y: 5, z: 5}
+  m_Size: {x: 13, y: 3.5, z: 3.5}
   m_Center: {x: 18, y: 2.5, z: 5}
 --- !u!54 &5533774068733760726
 Rigidbody:
@@ -603,7 +603,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
@@ -619,7 +619,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8aec871e276acb540b6236260872a2b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomSpawn: {fileID: 163669450008943187}
+  Collide: 0
 --- !u!1 &4472004837426687307
 GameObject:
   m_ObjectHideFlags: 0
@@ -894,7 +894,7 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 14, y: 5, z: 5}
+  m_Size: {x: 13, y: 4, z: 3.5}
   m_Center: {x: 8, y: 2.5, z: 0}
 --- !u!114 &6995235700482926193
 MonoBehaviour:
@@ -908,7 +908,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8aec871e276acb540b6236260872a2b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomSpawn: {fileID: 163669450008943187}
+  Collide: 0
 --- !u!54 &5159955080193426702
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -932,7 +932,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 0
+  m_IsKinematic: 1
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
@@ -1207,11 +1207,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 73fdc355c6decc141aeea0e641713a64, type: 3}
---- !u!1 &163669450008943187 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 889796672300714787, guid: 73fdc355c6decc141aeea0e641713a64, type: 3}
-  m_PrefabInstance: {fileID: 1016768037171417456}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6460948987697147435 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6320151148431507291, guid: 73fdc355c6decc141aeea0e641713a64, type: 3}

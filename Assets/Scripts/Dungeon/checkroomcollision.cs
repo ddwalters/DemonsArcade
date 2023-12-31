@@ -13,14 +13,19 @@ public class checkroomcollision : MonoBehaviour
 
     public void OnTriggerStay(Collider other)
     {
+        RoomSpawn roomspawn = transform.GetComponentInParent<RoomSpawn>();
+
         if (other.gameObject.tag == "Hallway" || other.gameObject.tag == "Room")
         {
             Collide = true;
+            roomspawn.collideTrue(Collide);
+            //Debug.Log(Collide);
             return;
         }
         else if (other.gameObject.tag != "Hallway" && other.gameObject.tag != "Room")
         {
             Collide = false;
+            roomspawn.collideTrue(Collide);
             return;
         }
     }

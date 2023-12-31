@@ -5,7 +5,6 @@ using UnityEngine;
 public class checkhallcollision : MonoBehaviour
 {
     // Start is called before the first frame update
-    public GameObject roomSpawn;
     public bool Collide;
 
     void Start()

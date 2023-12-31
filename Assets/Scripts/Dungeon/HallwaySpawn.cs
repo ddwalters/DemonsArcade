@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class HallwaySpawn : MonoBehaviour
 {
-
+    private RoomTemplates roomTemplates;
+    public GameObject template;
     public GameObject[] hallway_prefabs;
     public GameObject doorPrefab;
     private checkhallcollision checkhall;
     private checkroomcollision checkroom;
+
+    private GameObject Door;
 
     public bool collide;
     public int attempts;
@@ -24,32 +27,45 @@ public class HallwaySpawn : MonoBehaviour
     public bool collideTrue(bool HallCollide)
     {
         collide = HallCollide;
-        Debug.Log("collide: " + collide);
+        //Debug.Log("collide: " + collide);
         return collide;
     }
 
     public void spawnHall() //selects a random prefab from my list of hallway prefabs and instantiates it
     {
-        if (attempts < 15)
+        template = GameObject.FindGameObjectWithTag("DungeonGenerator");
+        roomTemplates = template.GetComponent<RoomTemplates>();
+
+
+        int len = roomTemplates.Rooms.Count;
+        if (len <= 6)
         {
-            int rand = Random.Range(0, hallway_prefabs.Length);
-            GameObject prefab = hallway_prefabs[rand];
-            GameObject hallway = Instantiate(prefab, transform.position, transform.rotation);
-            hallway.transform.SetParent(gameObject.transform);
-            checkhallcollision checkhall = hallway.GetComponent<checkhallcollision>();
+            if (attempts < 4)
+            {
+                int rand = Random.Range(0, hallway_prefabs.Length);
+                GameObject prefab = hallway_prefabs[rand];
+                GameObject hallway = Instantiate(prefab, transform.position, transform.rotation);
+                hallway.transform.SetParent(gameObject.transform);
+                checkhallcollision checkhall = hallway.GetComponent<checkhallcollision>();
 
-            //Debug.Log(collide);
-            //Debug.Log(checkhall.Collide);
+                //Debug.Log(collide);
+                //Debug.Log(checkhall.Collide);
 
-            StartCoroutine(checkcollide(hallway));
+                StartCoroutine(checkcollide(hallway));
 
-            
+
+            }
+            else if (attempts == 4)
+            {
+                spawnDoor();
+            }
+            attempts++; //increment
         }
-        else if (attempts == 15)
+        else if (collide == false)
         {
             spawnDoor();
         }
-        attempts++; //increment
+        
 
     }
 
@@ -57,6 +73,8 @@ public class HallwaySpawn : MonoBehaviour
     public void spawnDoor()
     {
         GameObject Door = Instantiate(doorPrefab, transform.position, transform.rotation);
+        Door.transform.SetParent(gameObject.transform);
+
     }
 
     IEnumerator checkcollide(GameObject hallway)
