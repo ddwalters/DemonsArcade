@@ -54,7 +54,7 @@ public class RoomSpawn : MonoBehaviour
         {
             spawnDoor();
         }
-        attempts++; // increment 
+        attempts++;
     }
 
     public void spawnDoor()
@@ -69,9 +69,7 @@ public class RoomSpawn : MonoBehaviour
         if (collide == true)
         {
             Destroy(Room);
-            Debug.Log("Destroy:Room");
             spawnRoom();
         }
     }
-
 }
