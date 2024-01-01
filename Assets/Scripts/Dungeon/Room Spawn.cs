@@ -4,16 +4,14 @@ using UnityEngine;
 
 public class RoomSpawn : MonoBehaviour
 {
-    //private RoomTemplates template;
     private RoomTemplates roomTemplates;
     private checkroomcollision checkroom;
+
     public GameObject deadEnd;
     public GameObject template;
 
     public bool collide;
     public int attempts;
-
-    //public List<GameObject> Rooms;
 
     // Start is called before the first frame update
     void Start()
@@ -25,16 +23,19 @@ public class RoomSpawn : MonoBehaviour
     public bool collideTrue(bool RoomCollide)
     {
         collide = RoomCollide;
-        //Debug.Log("collide: " + collide);
         return collide;
     }
 
     public void spawnRoom()
     {
+        // obtain Dungeon Generator object to draw the prefabs from and any other relevant information
+        template = GameObject.FindGameObjectWithTag("DungeonGenerator");
+        roomTemplates = template.GetComponent<RoomTemplates>();
+
+        // if attemps made to spawn a room is less than 10, proceed on another attempt
         if (attempts < 10)
         {
-            template = GameObject.FindGameObjectWithTag("DungeonGenerator");
-            roomTemplates = template.GetComponent<RoomTemplates>();
+            // pick a random room prefab to spawn
             GameObject[] roomPrefabs = roomTemplates.RoomPrefabs;
 
             int rand = Random.Range(0, roomPrefabs.Length);
@@ -44,30 +45,25 @@ public class RoomSpawn : MonoBehaviour
             roomTemplates.Rooms.Add(Room);
             checkroomcollision checkroom = Room.GetComponent<checkroomcollision>();
 
-            StartCoroutine(checkcollide(Room));
+            StartCoroutine(checkCollide(Room));
 
             int len = roomTemplates.Rooms.Count;
-            if (len <= 4)
-            {
-                //if enough rooms spawn a room
-            }
         }
+        // give up
         else
         {
             spawnDoor();
         }
-        attempts++;
-        
+        attempts++; // increment 
     }
 
     public void spawnDoor()
     {
         GameObject Door = Instantiate(deadEnd, transform.position, transform.rotation);
         Door.transform.SetParent(gameObject.transform);
-
     }
 
-    IEnumerator checkcollide(GameObject Room)
+    IEnumerator checkCollide(GameObject Room)
     {
         yield return new WaitForSeconds(0.1f);
         if (collide == true)
@@ -75,13 +71,7 @@ public class RoomSpawn : MonoBehaviour
             Destroy(Room);
             Debug.Log("Destroy:Room");
             spawnRoom();
-            yield return null;
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 }

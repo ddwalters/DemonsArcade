@@ -4,36 +4,22 @@ using UnityEngine;
 
 public class checkhallcollision : MonoBehaviour
 {
-    // Start is called before the first frame update
     public bool Collide;
 
-    void Start()
+    private void OnTriggerStay(Collider other)
     {
-        
-    }
+        HallwaySpawn hallSpawn = transform.GetComponentInParent<HallwaySpawn>();
 
-    public void OnTriggerStay(Collider other)
-    {
-        HallwaySpawn hallspawn = transform.GetComponentInParent<HallwaySpawn>();
-
-        if (other.gameObject.tag == "Hallway" || other.gameObject.tag == "Room")
+        // if colliding with a room/hallway, relay that info to the spawn node
+        if (other.CompareTag("Hallway") || other.CompareTag("Room"))
         {
             Collide = true;
-            hallspawn.collideTrue(Collide);
-            //Debug.Log(Collide);
-            return;
         }
-        else if (other.gameObject.tag != "Hallway" && other.gameObject.tag != "Room")
+        else
         {
             Collide = false;
-            hallspawn.collideTrue(Collide);
-            return;
         }
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        hallSpawn.collideTrue(Collide);
     }
 }

@@ -5,34 +5,21 @@ using UnityEngine;
 public class checkroomcollision : MonoBehaviour
 {
     public bool Collide;
-    // Start is called before the first frame update
-    void Start()
+
+    private void OnTriggerStay(Collider other)
     {
+        RoomSpawn roomSpawn = transform.GetComponentInParent<RoomSpawn>();
 
-    }
-
-    public void OnTriggerStay(Collider other)
-    {
-        RoomSpawn roomspawn = transform.GetComponentInParent<RoomSpawn>();
-
-        if (other.gameObject.tag == "Hallway" || other.gameObject.tag == "Room")
+        // if colliding with a room/hallway, relay that info to the spawn node
+        if (other.CompareTag("Hallway") || other.CompareTag("Room"))
         {
             Collide = true;
-            roomspawn.collideTrue(Collide);
-            //Debug.Log(Collide);
-            return;
         }
-        else if (other.gameObject.tag != "Hallway" && other.gameObject.tag != "Room")
+        else
         {
             Collide = false;
-            roomspawn.collideTrue(Collide);
-            return;
         }
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        roomSpawn.collideTrue(Collide);
     }
 }
