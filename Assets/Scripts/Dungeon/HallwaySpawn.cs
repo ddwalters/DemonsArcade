@@ -37,7 +37,7 @@ public class HallwaySpawn : MonoBehaviour
 
         // check if there are enough rooms before making more
         int len = roomTemplates.Rooms.Count;
-        if (len <= 6)
+        if (len <= roomTemplates.MaxRooms)
         {
             // if attemps made to spawn a room is less than [num], proceed on another attempt
             if (attempts < 4)
