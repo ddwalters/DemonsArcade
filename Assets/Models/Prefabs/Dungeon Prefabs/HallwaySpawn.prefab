@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3629001456845644790
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5934425184517829638}
+  - component: {fileID: 4158243235443113891}
+  m_Layer: 0
+  m_Name: HallwaySpawn
+  m_TagString: Untagged
+  m_Icon: {fileID: 6519382022992737161, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5934425184517829638
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3629001456845644790}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.47500002, y: 0.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4158243235443113891
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3629001456845644790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 769853bb69dd17f4498ac91c0e3bccdc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  template: {fileID: 0}
+  hallway_prefabs:
+  - {fileID: 679049882513305570, guid: f94bc09d22c19fd4e99d13f3d068af72, type: 3}
+  - {fileID: 7785959789770692113, guid: e5f69dfe5b1e1ff4b9f194506c15d271, type: 3}
+  - {fileID: 7828520238220924456, guid: 759f4a7207ea8dd489cbefe08ca5dbd8, type: 3}
+  - {fileID: 9172409150745296931, guid: 7a49c6e2d21954942a4b8199a9d829e8, type: 3}
+  - {fileID: 5711378450743550747, guid: 6ef85183bcf037545903998347054aee, type: 3}
+  doorPrefab: {fileID: 9172409150745296931, guid: 7a49c6e2d21954942a4b8199a9d829e8, type: 3}
+  collide: 0
+  attempts: 0
