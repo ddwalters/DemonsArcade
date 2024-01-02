@@ -1,39 +1,48 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-interface IInteractable
-{
-    public void Interact();
-
-    public void OpenLootView()
-    {
-        MouseLook mouse = new MouseLook();
-        mouse.unlockMouse();
-    }
-
-    public void CloseLootView()
-    {
-        MouseLook mouse = new MouseLook();
-        mouse.lockMouse();
-    }
-}
+using UnityEngine.InputSystem;
 
 public class Interactor : MonoBehaviour
 {
-    [SerializeField] Transform InteractorSource;
-    [SerializeField] float InteractRange;
+    [SerializeField] private Transform _interactionPoint;
+    [SerializeField] private float _interactionPointRadius = 0.5f;
+    [SerializeField] private LayerMask _interactableMask;
+    [SerializeField] private InteractionPromptUI _interactionPromptUI;
+    
+    private readonly Collider[] _colliders = new Collider[3];
+    [SerializeField] private int _numFound;
+
+    private IInteractable _interactable;
 
     void Update()
     {
-        if(Input.GetKeyUp(KeyCode.E))
+        _numFound = Physics.OverlapSphereNonAlloc(_interactionPoint.position, _interactionPointRadius, _colliders, _interactableMask);
+        
+        if (_numFound > 0)
         {
-            Ray r = new Ray(InteractorSource.position, InteractorSource.forward);
-            if (Physics.Raycast(r, out RaycastHit hitInfo, InteractRange) && 
-                hitInfo.collider.gameObject.TryGetComponent(out IInteractable interactableObj))
+            _interactable = _colliders[0].GetComponent<IInteractable>();
+        
+            if (_interactable != null && Input.GetKeyUp(KeyCode.E))
             {
-                interactableObj.Interact();
+                _interactionPromptUI.SetUp(_interactable.InteractionPrompt);
+
+                if (Input.GetKeyUp(KeyCode.E))
+                    _interactable.Interact(this);
             }
         }
+        else
+        {
+            if (_interactable != null)
+                _interactable = null;
+            
+            _interactionPromptUI.Close();
+        }
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(_interactionPoint.position, _interactionPointRadius);
     }
 }
