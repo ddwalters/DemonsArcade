@@ -9,12 +9,6 @@ public class transition : MonoBehaviour
 
     public float transitionTime;
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void ChangeScene()
     {
         StartCoroutine(Loadlevel(SceneManager.GetActiveScene().buildIndex + 1));
@@ -31,6 +25,5 @@ public class transition : MonoBehaviour
         yield return new WaitForSeconds(transitionTime);
 
         Transition.SetTrigger("End");
-
     }
 }
