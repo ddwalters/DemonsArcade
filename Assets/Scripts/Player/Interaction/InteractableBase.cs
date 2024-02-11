@@ -5,19 +5,22 @@ using UnityEngine;
 public class InteractableBase : MonoBehaviour, IInteractable
 {
     [Header("InteractableSettings")]
-    public float holdDuration;
+    [SerializeField] private float holdDuration;
     public float HoldDuration => holdDuration;
 
-    public bool holdInteract;
+    [SerializeField] private bool holdInteract;
     public bool HoldInteract => holdInteract;
 
 
-    public bool multipleUse;
+    [SerializeField] private bool multipleUse;
     public bool MultipleUse => multipleUse;
 
 
-    public bool isInteractable;
+    [SerializeField] private bool isInteractable;
     public bool IsInteractable => isInteractable;
+
+    [SerializeField] private string tooltipMessage = "Interact";
+    public string TooltipMessage => tooltipMessage;
 
     public virtual void OnInteract()
     {

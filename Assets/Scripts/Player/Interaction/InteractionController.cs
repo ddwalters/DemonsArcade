@@ -53,14 +53,14 @@ public class InteractionController : MonoBehaviour
                 if (interactionData.IsEmpty())
                 {
                     interactionData.Interactable = interactable;
-                    uiPanel.SetToolTip("Interact");
+                    uiPanel.SetToolTip(interactable.TooltipMessage);
                 }
                 else
                 {
                     if (!interactionData.IsSameInteractable(interactable))
                     {
                         interactionData.Interactable = interactable;
-                        uiPanel.SetToolTip("Interact");
+                        uiPanel.SetToolTip(interactable.TooltipMessage);
                     }
                 }
             }
@@ -89,19 +89,21 @@ public class InteractionController : MonoBehaviour
         {
             _interacting = false;
             _holdTimer = 0f;
+            uiPanel.UpdateProgressBar(_holdTimer);
         }
 
         if (_interacting)
         {
             if (!interactionData.Interactable.IsInteractable)
                 return;
-            
-            if (interactionData.Interactable.holdInteract)
+
+            if (interactionData.Interactable.HoldInteract)
             {
                 _holdTimer += Time.deltaTime;
 
                 float progressTimer = _holdTimer / interactionData.Interactable.HoldDuration;
                 uiPanel.UpdateProgressBar(progressTimer);
+
                 if (progressTimer > 1f)
                 {
                     interactionData.Interact();
