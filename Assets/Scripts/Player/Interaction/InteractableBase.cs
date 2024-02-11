@@ -5,7 +5,7 @@ using UnityEngine;
 public class InteractableBase : MonoBehaviour, IInteractable
 {
     [Header("InteractableSettings")]
-    public float holdDuration; // may need to be public
+    public float holdDuration;
     public float HoldDuration => holdDuration;
 
     public bool holdInteract;
@@ -19,8 +19,9 @@ public class InteractableBase : MonoBehaviour, IInteractable
     public bool isInteractable;
     public bool IsInteractable => isInteractable;
 
-    public void OnInteract()
+    public virtual void OnInteract()
     {
-        Debug.Log("Interacted" + gameObject.name);
+        Debug.Log("Interacted: " + gameObject.name);
+        // might use this to have popup?
     }
 }

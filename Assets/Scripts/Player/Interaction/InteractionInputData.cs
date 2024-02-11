@@ -5,11 +5,11 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "InteractionInputData", menuName = "InteractionSystem/InputData")]
 public class InteractionInputData : ScriptableObject
 {
-    private bool _interactClick;
-    public bool InteractClick
+    private bool _interactClicked;
+    public bool InteractClicked
     {
-        get => _interactClick;
-        set => _interactClick = value;
+        get => _interactClicked;
+        set => _interactClicked = value;
     }
 
     private bool _interactRelease;
@@ -21,7 +21,7 @@ public class InteractionInputData : ScriptableObject
 
     public void ResetInput()
     {
-        _interactClick = false;
+        _interactClicked = false;
         _interactRelease = false;
     }
 }
