@@ -15,7 +15,6 @@ public class InteractableBase : MonoBehaviour, IInteractable
     [SerializeField] private bool multipleUse;
     public bool MultipleUse => multipleUse;
 
-
     [SerializeField] private bool isInteractable;
     public bool IsInteractable => isInteractable;
 
