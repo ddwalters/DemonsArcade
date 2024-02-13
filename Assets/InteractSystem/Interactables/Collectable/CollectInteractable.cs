@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PoisonMushroomInteractableItem : InteractableBase
+public class CollectInteractable : InteractableBase
 {
     public override void OnInteract()
     {

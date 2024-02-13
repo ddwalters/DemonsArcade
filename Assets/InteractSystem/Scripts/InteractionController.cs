@@ -14,6 +14,10 @@ public class InteractionController : MonoBehaviour
     [Header("UI")]
     [SerializeField] private InteractionUIPanel uiPanel;
 
+    [Header("UI.2")]
+    [SerializeField] private GameObject playerHud;
+    [SerializeField] private GameObject playerInventory;
+
     [Space]
     [Header("Ray Settings")]
     [SerializeField] private float rayDistance;
@@ -116,5 +120,31 @@ public class InteractionController : MonoBehaviour
                 _interacting = false;
             }
         }
+    }
+
+    public void ActivatePlayerHub()
+    {
+        DeactivateHud();
+        playerHud.SetActive(true);
+        FirstPersonController playerController = GetComponent<FirstPersonController>();
+        playerController.lockCursor = true;
+        playerController.playerCanMove = true;
+        //activate player and enemy controllers
+    }
+
+    public void ActivateLootView()
+    {
+        DeactivateHud();
+        playerInventory.SetActive(true);
+        FirstPersonController playerController = GetComponent<FirstPersonController>();
+        playerController.lockCursor = false;
+        playerController.playerCanMove = false;
+        //deactivate player and enemy controllers
+    }
+
+    public void DeactivateHud()
+    {
+        playerHud.SetActive(false);
+        playerInventory.SetActive(false);
     }
 }

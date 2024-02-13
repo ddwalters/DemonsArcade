@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Inventory
 {
     /*
-        All of these Interfaces could most likelu be merged into one
+        All of these Interfaces could most likely be merged into one
         Good practice is to not give information that isn't needed but 
         having 3 interfaces for one thing doesn't seem swell either
      */
@@ -69,12 +69,12 @@ namespace Inventory
 
         private void RotateItem()
         {
-            if (Input.GetKeyDown(KeyCode.F))
+            if (Input.GetKeyDown(KeyCode.R))
             {
                 use = true;
             }
 
-            if (Input.GetKeyUp(KeyCode.F))
+            if (Input.GetKeyUp(KeyCode.R))
             {
                 use = false;
             }

@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InteractableBase : MonoBehaviour, IInteractable
@@ -11,7 +9,6 @@ public class InteractableBase : MonoBehaviour, IInteractable
     [SerializeField] private bool holdInteract;
     public bool HoldInteract => holdInteract;
 
-
     [SerializeField] private bool multipleUse;
     public bool MultipleUse => multipleUse;
 
@@ -21,9 +18,5 @@ public class InteractableBase : MonoBehaviour, IInteractable
     [SerializeField] private string tooltipMessage = "Interact";
     public string TooltipMessage => tooltipMessage;
 
-    public virtual void OnInteract()
-    {
-        Debug.Log("Interacted: " + gameObject.name);
-        // might use this to have popup?
-    }
+    public virtual void OnInteract() { }
 }
