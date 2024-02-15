@@ -35,9 +35,8 @@ namespace Inventory
         private void Awake()
         {
             if (Instance != null)
-            {
                 return;
-            }
+
             Instance = this;
             _interactInput = GetComponent<IInteractInput>();
             _cursorInput = GetComponent<ICursorInput>();
@@ -47,14 +46,10 @@ namespace Inventory
         private void Update()
         {
             if (ActiveGrid == null || !ActiveGrid.enabled)
-            {
                 return;
-            }
 
             if (_currentlySelectedInventoryItem != null)
-            {
                 _currentlySelectedInventoryItem.RectTransform.position = _cursorInput.CursorPosition;
-            }
 
             if (_useInput is { Use: true })
             {
@@ -69,9 +64,8 @@ namespace Inventory
             }
 
             if (_interactInput is not { Interact: true })
-            {
                 return;
-            }
+
             _interactInput.Interact = false;
 
             var pos = ActiveGrid.GetTiledGridPosition(_cursorInput.CursorPosition);

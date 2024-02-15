@@ -57,27 +57,19 @@ namespace Inventory
         private void DragItem()
         {
             if (Input.GetMouseButtonDown(0))
-            {
                 interact = true;
-            }
 
             if (Input.GetMouseButtonUp(0))
-            {
                 interact = false;
-            }
         }
 
         private void RotateItem()
         {
             if (Input.GetKeyDown(KeyCode.R))
-            {
                 use = true;
-            }
 
             if (Input.GetKeyUp(KeyCode.R))
-            {
                 use = false;
-            }
         }
     }
 }

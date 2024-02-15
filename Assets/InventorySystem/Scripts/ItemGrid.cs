@@ -35,6 +35,7 @@ namespace Inventory
                 GridInventoryData = gridData
             };
             _gridBase = new GridBase().InitializeGrid(gridParameters);
+            Debug.Log(_gridBase);
 
             if (_inventoryItems == null)
             {
@@ -67,6 +68,7 @@ namespace Inventory
             _gridPosition.x = Mathf.FloorToInt(_positionOnGrid.x / _gridSquareSize.x);
             _gridPosition.y = -Mathf.FloorToInt(_positionOnGrid.y / _gridSquareSize.y) - 1;
 
+            Debug.Log(_gridPosition);
             return _gridPosition;
         }
 
