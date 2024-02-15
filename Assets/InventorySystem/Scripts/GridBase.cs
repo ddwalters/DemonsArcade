@@ -106,8 +106,6 @@ namespace Inventory
         public void PlaceItem(InventoryItem item, int x, int y)
         {
             AssignTiles(item, item.Position.x, item.Position.y);
-            Debug.Log(item.Position.x);
-            Debug.Log(item.Position.y);
         }
 
         public IGrid InitializeGrid(GridParameters gridParameters)
