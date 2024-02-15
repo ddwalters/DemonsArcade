@@ -40,7 +40,7 @@ namespace Inventory
             {
                 return;
             }
-
+            //
             var items = _inventoryItems.GetInventoryItems();
             var itemPrefab = _inventoryItems.GetItemPrefab();
 

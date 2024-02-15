@@ -1,14 +1,9 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class InteractionController : MonoBehaviour
 {
     [Header("Data")]
     [SerializeField] private InteractionInputData interactionInputData;
-
     [SerializeField] private InteractionData interactionData;
 
     [Header("UI")]
@@ -17,14 +12,15 @@ public class InteractionController : MonoBehaviour
     [Header("UI.2")]
     [SerializeField] private GameObject playerHud;
     [SerializeField] private GameObject playerInventory;
+    [SerializeField] private GameObject LootView;
 
     [Space]
     [Header("Ray Settings")]
     [SerializeField] private float rayDistance;
-
     [SerializeField] private float raySphereRadius;
-
     [SerializeField] private LayerMask interactableLayer;
+
+    private FirstPersonController playerController;
 
     private Camera _camera;
 
@@ -35,6 +31,12 @@ public class InteractionController : MonoBehaviour
     private void Awake()
     {
         _camera = FindAnyObjectByType<Camera>();
+    }
+
+    private void Start()
+    {
+        playerController = GetComponent<FirstPersonController>();
+
     }
 
     private void Update()
@@ -126,25 +128,49 @@ public class InteractionController : MonoBehaviour
     {
         DeactivateHud();
         playerHud.SetActive(true);
-        FirstPersonController playerController = GetComponent<FirstPersonController>();
         playerController.lockCursor = true;
         playerController.playerCanMove = true;
         //activate player and enemy controllers
     }
 
-    public void ActivateLootView()
+    public void ToggleLootView()
     {
         DeactivateHud();
-        playerInventory.SetActive(true);
-        FirstPersonController playerController = GetComponent<FirstPersonController>();
-        playerController.lockCursor = false;
-        playerController.playerCanMove = false;
-        //deactivate player and enemy controllers
+
+        if (playerController.playerCanMove == true)
+        {
+            LootView.SetActive(true);
+            playerController.lockCursor = false;
+            playerController.playerCanMove = false;
+            //deactivate player and enemy controllers
+        }
+        else
+        {
+            ActivatePlayerHub();
+        }
+    }
+
+    public void TogglePlayerInventory()
+    {
+        DeactivateHud();
+
+        if (playerController.playerCanMove == true)
+        {
+            playerInventory.SetActive(true);
+            playerController.lockCursor = false;
+            playerController.playerCanMove = false;
+            //activate player and enemy controllers
+        }
+        else
+        {
+            ActivatePlayerHub();
+        }
     }
 
     public void DeactivateHud()
     {
         playerHud.SetActive(false);
         playerInventory.SetActive(false);
+        LootView.SetActive(false);
     }
 }

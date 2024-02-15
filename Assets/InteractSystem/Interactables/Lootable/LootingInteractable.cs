@@ -7,9 +7,9 @@ public class LootingInteractable : InteractableBase
         base.OnInteract();
 
         Debug.Log("Open Crate Loot View");
-        // populate chest with look
+        // populate chest with loot
 
-        InteractionController controller = GetComponent<InteractionController>();
-        controller.ActivateLootView();
+        InteractionController controller = FindFirstObjectByType<InteractionController>();
+        controller.ToggleLootView();
     }
 }
