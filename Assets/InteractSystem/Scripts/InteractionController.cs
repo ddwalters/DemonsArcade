@@ -128,20 +128,24 @@ public class InteractionController : MonoBehaviour
     {
         DeactivateHud();
         playerHud.SetActive(true);
-        playerController.lockCursor = true;
+        Cursor.lockState = CursorLockMode.Locked;
         playerController.playerCanMove = true;
+        playerController.cameraCanMove = true;
         //activate player and enemy controllers
     }
 
     public void ToggleLootView()
     {
         DeactivateHud();
-
+    
         if (playerController.playerCanMove == true)
         {
+            playerInventory.SetActive(true);
             LootView.SetActive(true);
+            Cursor.lockState = CursorLockMode.Confined;
             playerController.lockCursor = false;
             playerController.playerCanMove = false;
+            playerController.cameraCanMove = false;
             //deactivate player and enemy controllers
         }
         else
@@ -157,8 +161,9 @@ public class InteractionController : MonoBehaviour
         if (playerController.playerCanMove == true)
         {
             playerInventory.SetActive(true);
-            playerController.lockCursor = false;
+            Cursor.lockState = CursorLockMode.Confined;
             playerController.playerCanMove = false;
+            playerController.cameraCanMove = false;
             //activate player and enemy controllers
         }
         else
