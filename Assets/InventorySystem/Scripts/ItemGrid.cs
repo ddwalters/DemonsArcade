@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Inventory
@@ -35,12 +36,9 @@ namespace Inventory
                 GridInventoryData = gridData
             };
             _gridBase = new GridBase().InitializeGrid(gridParameters);
-            Debug.Log(_gridBase);
 
             if (_inventoryItems == null)
-            {
                 return;
-            }
 
             var items = _inventoryItems.GetInventoryItems();
             var itemPrefab = _inventoryItems.GetItemPrefab();
@@ -60,6 +58,36 @@ namespace Inventory
             }
         }
 
+        public bool AddInventoryItem(InventoryItemToPlace newItem, InventoryItem prefab)
+        {
+            var items = _inventoryItems.GetInventoryItems() ?? new List<InventoryItemToPlace>();
+            items.Add(newItem);
+
+            var itemObject = Instantiate(prefab, _rectTransform);
+            itemObject.Initialize(newItem.ItemPreset.ItemData);
+
+            for (int i = 0; i < _gridSize.y; i++)
+            {
+                for (int j = 0; j < _gridSize.x; j++)
+                {
+                    if (CheckItemFits(itemObject, j, i))
+                    {
+                        PlaceItem(itemObject, j, i);
+
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public void RemoveLastInventoryItem()
+        {
+            var items = _inventoryItems.GetInventoryItems();
+            items.RemoveAt(items.Count - 1);
+        }
+
         public Vector2Int GetTiledGridPosition(Vector2 mousePosition)
         {
             _positionOnGrid.x = mousePosition.x - _rectTransform.position.x;
@@ -68,7 +96,6 @@ namespace Inventory
             _gridPosition.x = Mathf.FloorToInt(_positionOnGrid.x / _gridSquareSize.x);
             _gridPosition.y = -Mathf.FloorToInt(_positionOnGrid.y / _gridSquareSize.y) - 1;
 
-            Debug.Log(_gridPosition);
             return _gridPosition;
         }
 
