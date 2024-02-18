@@ -37,6 +37,7 @@ public class InteractionController : MonoBehaviour
     {
         playerController = GetComponent<FirstPersonController>();
 
+        ActivatePlayerHub();
     }
 
     private void Update()
@@ -127,7 +128,7 @@ public class InteractionController : MonoBehaviour
     public void ActivatePlayerHub()
     {
         DeactivateHud();
-        playerHud.SetActive(true);
+        playerHud.GetComponentInChildren<CanvasRenderer>().cull = true;
         Cursor.lockState = CursorLockMode.Locked;
         playerController.playerCanMove = true;
         playerController.cameraCanMove = true;
@@ -140,8 +141,8 @@ public class InteractionController : MonoBehaviour
     
         if (playerController.playerCanMove == true)
         {
-            playerInventory.SetActive(true);
-            LootView.SetActive(true);
+            playerInventory.GetComponentInChildren<CanvasRenderer>().cull = true;
+            LootView.GetComponentInChildren<CanvasRenderer>().cull = true;
             Cursor.lockState = CursorLockMode.Confined;
             playerController.lockCursor = false;
             playerController.playerCanMove = false;
@@ -160,7 +161,7 @@ public class InteractionController : MonoBehaviour
 
         if (playerController.playerCanMove == true)
         {
-            playerInventory.SetActive(true);
+            playerInventory.GetComponentInChildren<CanvasRenderer>().cull = true;
             Cursor.lockState = CursorLockMode.Confined;
             playerController.playerCanMove = false;
             playerController.cameraCanMove = false;
@@ -174,8 +175,8 @@ public class InteractionController : MonoBehaviour
 
     public void DeactivateHud()
     {
-        playerHud.SetActive(false);
-        playerInventory.SetActive(false);
-        LootView.SetActive(false);
+        playerHud.GetComponentInChildren<CanvasRenderer>().cull = false;
+        playerInventory.GetComponentInChildren<CanvasRenderer>().cull = false;
+        LootView.GetComponentInChildren<CanvasRenderer>().cull = false;
     }
 }

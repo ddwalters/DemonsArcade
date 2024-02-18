@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &245214679984885676
+--- !u!1 &8947823918174571687
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,48 +8,48 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 1158900157957540822}
-  - component: {fileID: 1081607965991129685}
-  - component: {fileID: 6837276128317352152}
-  - component: {fileID: 5845674556762964610}
-  - component: {fileID: 664330959652170096}
+  - component: {fileID: 3957133820660424911}
+  - component: {fileID: 7632738834043119913}
+  - component: {fileID: 8138339019728438961}
+  - component: {fileID: 3639760014331166826}
+  - component: {fileID: 4617244668728480107}
   m_Layer: 7
-  m_Name: PoisonMushroom
+  m_Name: HeallthPotion
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1158900157957540822
+--- !u!4 &3957133820660424911
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 245214679984885676}
+  m_GameObject: {fileID: 8947823918174571687}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.000000048428763, y: -0.00000007357447, z: 0.0000000065192567, w: 1}
-  m_LocalPosition: {x: 90.3065, y: 0.7000004, z: 1.596678}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 88.792, y: 1.299, z: 2.5}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &1081607965991129685
+--- !u!33 &7632738834043119913
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 245214679984885676}
-  m_Mesh: {fileID: -5362160847727887206, guid: 769bcb364254fc84f86c3bde2b625a9f, type: 3}
---- !u!23 &6837276128317352152
+  m_GameObject: {fileID: 8947823918174571687}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!23 &8138339019728438961
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 245214679984885676}
+  m_GameObject: {fileID: 8947823918174571687}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -63,7 +63,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0799a1e95665ef14f8fe2cbcd4ba3dc4, type: 2}
+  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -85,13 +85,13 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &5845674556762964610
-MeshCollider:
+--- !u!65 &3639760014331166826
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 245214679984885676}
+  m_GameObject: {fileID: 8947823918174571687}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -103,17 +103,16 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -5362160847727887206, guid: 769bcb364254fc84f86c3bde2b625a9f, type: 3}
---- !u!114 &664330959652170096
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4617244668728480107
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 245214679984885676}
+  m_GameObject: {fileID: 8947823918174571687}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 113dd58cd6671074f92997d5979d175a, type: 3}
@@ -123,8 +122,8 @@ MonoBehaviour:
   holdInteract: 0
   multipleUse: 0
   isInteractable: 1
-  tooltipMessage: Collect Poisonous Mushroom
+  tooltipMessage: Health Potion
   _itemPrefab: {fileID: 4852340190333162080, guid: 92fe143ae866a2b4092c586547e7426e, type: 3}
   _itemToPlace:
-    ItemPreset: {fileID: 11400000, guid: 2d63f1a9ee213f04fab4586a7bfe5ff6, type: 2}
+    ItemPreset: {fileID: 11400000, guid: 0cc23dfb257100343921f466f9b1544b, type: 2}
     Position: {x: 0, y: 0}
