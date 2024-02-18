@@ -1,4 +1,6 @@
 using Inventory;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class CollectInteractable : InteractableBase
@@ -9,22 +11,23 @@ public class CollectInteractable : InteractableBase
     {
         base.OnInteract();
 
-        //grid is always deactivated. How can I add item while grid is off?
-        ItemGrid grid = FindFirstObjectByType<ItemGrid>();
+        List<ItemGrid> grids = FindObjectsByType<ItemGrid>(FindObjectsSortMode.None).ToList();
+        var playerGrid = grids.FirstOrDefault(x => x.CompareTag("PlayerInventory"));
 
-        Debug.Log(grid);
+        if (playerGrid == null)
+        {
+            Debug.Log("Player Grid Not Found. " + playerGrid);
+            return;
+        }
 
-        if (grid.AddInventoryItem(_itemToPlace, _itemPrefab))
+        if (playerGrid.AddInventoryItem(_itemToPlace, _itemPrefab))
         {
             Debug.Log("Added: " + gameObject.name);
             Destroy(gameObject);
-            //success!
-            
         }
         else
         {
             Debug.Log("Inventory is full");
-            //inventory is full
         }
     }
 }

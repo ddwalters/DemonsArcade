@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -67,7 +66,7 @@ namespace Inventory
             var itemObject = Instantiate(prefab, _rectTransform);
             itemObject.Initialize(newItem.ItemPreset.ItemData);
 
-            for(int i = 0; i < _gridSize.y; i++)
+            for (int i = 0; i < _gridSize.y; i++)
             {
                 for (int j = 0; j < _gridSize.x; j++)
                 {
@@ -79,7 +78,7 @@ namespace Inventory
                     }
                 }
             }
-            
+
             return false;
         }
 
@@ -97,7 +96,6 @@ namespace Inventory
             _gridPosition.x = Mathf.FloorToInt(_positionOnGrid.x / _gridSquareSize.x);
             _gridPosition.y = -Mathf.FloorToInt(_positionOnGrid.y / _gridSquareSize.y) - 1;
 
-            Debug.Log(_gridPosition);
             return _gridPosition;
         }
 

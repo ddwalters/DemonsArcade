@@ -128,7 +128,7 @@ public class InteractionController : MonoBehaviour
     public void ActivatePlayerHub()
     {
         DeactivateHud();
-        playerHud.GetComponentInChildren<CanvasRenderer>().cull = true;
+        playerHud.GetComponent<CanvasGroup>().alpha = 1.0f;
         Cursor.lockState = CursorLockMode.Locked;
         playerController.playerCanMove = true;
         playerController.cameraCanMove = true;
@@ -141,10 +141,9 @@ public class InteractionController : MonoBehaviour
     
         if (playerController.playerCanMove == true)
         {
-            playerInventory.GetComponentInChildren<CanvasRenderer>().cull = true;
-            LootView.GetComponentInChildren<CanvasRenderer>().cull = true;
+            playerInventory.GetComponent<CanvasGroup>().alpha = 1.0f;
+            LootView.GetComponent<CanvasGroup>().alpha = 1.0f;
             Cursor.lockState = CursorLockMode.Confined;
-            playerController.lockCursor = false;
             playerController.playerCanMove = false;
             playerController.cameraCanMove = false;
             //deactivate player and enemy controllers
@@ -161,7 +160,7 @@ public class InteractionController : MonoBehaviour
 
         if (playerController.playerCanMove == true)
         {
-            playerInventory.GetComponentInChildren<CanvasRenderer>().cull = true;
+            playerInventory.GetComponent<CanvasGroup>().alpha = 1.0f;
             Cursor.lockState = CursorLockMode.Confined;
             playerController.playerCanMove = false;
             playerController.cameraCanMove = false;
@@ -175,8 +174,8 @@ public class InteractionController : MonoBehaviour
 
     public void DeactivateHud()
     {
-        playerHud.GetComponentInChildren<CanvasRenderer>().cull = false;
-        playerInventory.GetComponentInChildren<CanvasRenderer>().cull = false;
-        LootView.GetComponentInChildren<CanvasRenderer>().cull = false;
+        playerHud.GetComponent<CanvasGroup>().alpha = 0.0f;
+        playerInventory.GetComponent<CanvasGroup>().alpha = 0.0f;   
+        LootView.GetComponent<CanvasGroup>().alpha = 0.0f;
     }
 }
