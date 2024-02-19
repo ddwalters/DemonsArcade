@@ -9,5 +9,7 @@ public class PlayerInitializer : MonoBehaviour, IGetInventoryItems
 
     public List<InventoryItemToPlace> GetInventoryItems() => _itemsToPlace;
 
+    public void SetInventoryItems(List<InventoryItemToPlace> newItemsToPlace) => _itemsToPlace = newItemsToPlace;
+
     public InventoryItem GetItemPrefab() => _itemPrefab;
 }
