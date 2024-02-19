@@ -82,10 +82,11 @@ namespace Inventory
             return false;
         }
 
-        public void RemoveLastInventoryItem()
+        public void SetInventory(List<InventoryItemToPlace> newItems, Vector2Int newGridSize)
         {
-            var items = _inventoryItems.GetInventoryItems();
-            items.RemoveAt(items.Count - 1);
+            _inventoryItems.SetInventoryItems(newItems);
+            _gridSize = newGridSize;
+            InitializeGrid(_gridSize.x, _gridSize.y);
         }
 
         public Vector2Int GetTiledGridPosition(Vector2 mousePosition)
@@ -110,6 +111,22 @@ namespace Inventory
             _gridBase.PlaceItem(item, x, y);
             var position = new Vector2(x * _gridSquareSize.x, -y * _gridSquareSize.y);
             item.RectTransform.localPosition = position;
+        }
+
+        public void RemoveLastInventoryItem()
+        {
+            var items = _inventoryItems.GetInventoryItems();
+            items.RemoveAt(items.Count - 1);
+        }
+
+        public void RemoveInventoryItems()
+        {
+            var items = _inventoryItems.GetInventoryItems();
+
+            foreach(var item in items)
+            {
+                items.Remove(item);
+            }
         }
     }
 }

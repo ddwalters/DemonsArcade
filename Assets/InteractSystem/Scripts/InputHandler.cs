@@ -25,7 +25,7 @@ public class InputHandler : MonoBehaviour
         if (!playerController.playerCanMove)
         {
             if (Input.GetKeyDown(KeyCode.E))
-                controller.ActivatePlayerHub();
+                controller.ActivatePlayerHud();
         }
         else
         {
