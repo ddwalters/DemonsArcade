@@ -2637,7 +2637,7 @@ GameObject:
   - component: {fileID: 825160156}
   - component: {fileID: 825160155}
   - component: {fileID: 825160154}
-  - component: {fileID: 825160153}
+  - component: {fileID: 825160157}
   m_Layer: 7
   m_Name: Merchant
   m_TagString: Untagged
@@ -2660,23 +2660,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 304082660}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &825160153
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 825160151}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6886f7018f198e34f846bd0609ea17ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  holdDuration: 1
-  holdInteract: 1
-  multipleUse: 0
-  isInteractable: 1
-  tooltipMessage: Shop Armoury
 --- !u!136 &825160154
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2750,6 +2733,24 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 825160151}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &825160157
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 825160151}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80e20ff69e7622f458ea7fbf88c28822, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdDuration: 1
+  holdInteract: 1
+  isInteractable: 1
+  tooltipMessage: Interact
+  MerchantItems: []
+  MerchantGridSize: {x: 4, y: 8}
 --- !u!1 &825273875
 GameObject:
   m_ObjectHideFlags: 0
@@ -3385,7 +3386,7 @@ GameObject:
   - component: {fileID: 959253340}
   - component: {fileID: 959253339}
   - component: {fileID: 959253338}
-  - component: {fileID: 959253337}
+  - component: {fileID: 959253341}
   m_Layer: 7
   m_Name: Merchant
   m_TagString: Untagged
@@ -3408,23 +3409,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1206209204}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &959253337
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 959253335}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6886f7018f198e34f846bd0609ea17ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  holdDuration: 1
-  holdInteract: 1
-  multipleUse: 0
-  isInteractable: 1
-  tooltipMessage: Shop Meat
 --- !u!136 &959253338
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -3498,6 +3482,24 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 959253335}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &959253341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 959253335}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80e20ff69e7622f458ea7fbf88c28822, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdDuration: 1
+  holdInteract: 1
+  isInteractable: 1
+  tooltipMessage: Interact
+  MerchantItems: []
+  MerchantGridSize: {x: 4, y: 8}
 --- !u!4 &975725229 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6867045250379443608, guid: 33102f94aacde4173a94e523fae7ac39, type: 3}
@@ -5911,7 +5913,7 @@ GameObject:
   - component: {fileID: 1428019955}
   - component: {fileID: 1428019954}
   - component: {fileID: 1428019953}
-  - component: {fileID: 1428019952}
+  - component: {fileID: 1428019956}
   m_Layer: 7
   m_Name: Merchant
   m_TagString: Untagged
@@ -5934,23 +5936,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 941121113}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1428019952
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1428019950}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6886f7018f198e34f846bd0609ea17ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  holdDuration: 1
-  holdInteract: 1
-  multipleUse: 0
-  isInteractable: 1
-  tooltipMessage: Shop Vegetables
 --- !u!136 &1428019953
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -6024,6 +6009,24 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1428019950}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1428019956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1428019950}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80e20ff69e7622f458ea7fbf88c28822, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdDuration: 1
+  holdInteract: 1
+  isInteractable: 1
+  tooltipMessage: Interact
+  MerchantItems: []
+  MerchantGridSize: {x: 4, y: 8}
 --- !u!1 &1438677912
 GameObject:
   m_ObjectHideFlags: 0
@@ -7817,7 +7820,7 @@ GameObject:
   - component: {fileID: 1956058754}
   - component: {fileID: 1956058753}
   - component: {fileID: 1956058752}
-  - component: {fileID: 1956058751}
+  - component: {fileID: 1956058755}
   m_Layer: 7
   m_Name: Merchant
   m_TagString: Untagged
@@ -7840,23 +7843,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1043243706}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1956058751
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1956058749}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6886f7018f198e34f846bd0609ea17ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  holdDuration: 1
-  holdInteract: 1
-  multipleUse: 0
-  isInteractable: 1
-  tooltipMessage: Shop Bakery
 --- !u!136 &1956058752
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -7930,6 +7916,24 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1956058749}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &1956058755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1956058749}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80e20ff69e7622f458ea7fbf88c28822, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdDuration: 1
+  holdInteract: 1
+  isInteractable: 1
+  tooltipMessage: Interact
+  MerchantItems: []
+  MerchantGridSize: {x: 4, y: 8}
 --- !u!1 &1958359136
 GameObject:
   m_ObjectHideFlags: 0
@@ -8481,7 +8485,7 @@ GameObject:
   - component: {fileID: 2124827839}
   - component: {fileID: 2124827838}
   - component: {fileID: 2124827837}
-  - component: {fileID: 2124827836}
+  - component: {fileID: 2124827840}
   m_Layer: 7
   m_Name: Merchant
   m_TagString: Untagged
@@ -8504,23 +8508,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 335225104}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2124827836
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2124827834}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6886f7018f198e34f846bd0609ea17ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  holdDuration: 1
-  holdInteract: 1
-  multipleUse: 0
-  isInteractable: 1
-  tooltipMessage: Shop Fish Hut
 --- !u!136 &2124827837
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -8594,6 +8581,24 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2124827834}
   m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &2124827840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2124827834}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80e20ff69e7622f458ea7fbf88c28822, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdDuration: 1
+  holdInteract: 1
+  isInteractable: 1
+  tooltipMessage: Interact
+  MerchantItems: []
+  MerchantGridSize: {x: 4, y: 8}
 --- !u!33 &51470810804604879
 MeshFilter:
   m_ObjectHideFlags: 0
