@@ -5,13 +5,17 @@ using UnityEngine;
 
 public class MerchantInitializer : InteractableBase
 {
+    [SerializeField] InventoryItem ItemPrefab;
     [SerializeField] List<InventoryItemToPlace> MerchantItems;
-    [SerializeField] Vector2Int MerchantGridSize;
     public override void OnInteract()
     {
         List<ItemGrid> grids = FindObjectsByType<ItemGrid>(FindObjectsSortMode.None).ToList();
         var merchantGrid = grids.FirstOrDefault(x => x.CompareTag("MerchantInventory"));
 
-        merchantGrid.SetInventory(MerchantItems, MerchantGridSize);
+        merchantGrid.RemoveInventoryItems();
+        merchantGrid.SetInventory(MerchantItems, ItemPrefab);
+
+        InteractionController controller = FindFirstObjectByType<InteractionController>();
+        controller.ToggleMerchantView();
     }
 }

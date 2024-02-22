@@ -82,11 +82,24 @@ namespace Inventory
             return false;
         }
 
-        public void SetInventory(List<InventoryItemToPlace> newItems, Vector2Int newGridSize)
+        public void SetInventory(List<InventoryItemToPlace> newItems, InventoryItem prefab)
         {
-            _inventoryItems.SetInventoryItems(newItems);
-            _gridSize = newGridSize;
-            InitializeGrid(_gridSize.x, _gridSize.y);
+            foreach (var item in newItems)
+            {
+                var itemObject = Instantiate(prefab, _rectTransform);
+                itemObject.Initialize(item.ItemPreset.ItemData);
+
+                for (int i = 0; i < _gridSize.y; i++)
+                {
+                    for (int j = 0; j < _gridSize.x; j++)
+                    {
+                        if (CheckItemFits(itemObject, j, i))
+                        {
+                            PlaceItem(itemObject, j, i);
+                        }
+                    }
+                }
+            }
         }
 
         public Vector2Int GetTiledGridPosition(Vector2 mousePosition)
@@ -115,18 +128,22 @@ namespace Inventory
 
         public void RemoveLastInventoryItem()
         {
+            if (_inventoryItems == null)
+                return;
+
             var items = _inventoryItems.GetInventoryItems();
             items.RemoveAt(items.Count - 1);
         }
 
         public void RemoveInventoryItems()
         {
+            if (_inventoryItems == null)
+                return;
+
             var items = _inventoryItems.GetInventoryItems();
 
             foreach(var item in items)
-            {
                 items.Remove(item);
-            }
         }
     }
 }

@@ -138,58 +138,53 @@ public class InteractionController : MonoBehaviour
 
     public void ToggleLootView()
     {
-        DeactivateHud();
-    
-        if (playerController.playerCanMove == true)
-        {
-            playerGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
-            LootGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
-            Cursor.lockState = CursorLockMode.Confined;
-            playerController.playerCanMove = false;
-            playerController.cameraCanMove = false;
-            //deactivate player and enemy controllers
-        }
-        else
+        if (playerController.playerCanMove != true)
         {
             ActivatePlayerHud();
+            return;
         }
+
+        DeactivateHud();
+        playerGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
+        LootGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
+        Cursor.lockState = CursorLockMode.Confined;
+        playerController.playerCanMove = false;
+        playerController.cameraCanMove = false;
+        //deactivate player and enemy controllers
     }
 
     public void ToggleMerchantView()
     {
-        DeactivateHud();
-
-        if (playerController.playerCanMove == true)
-        {
-            playerGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
-            MerchantGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
-            Cursor.lockState = CursorLockMode.Confined;
-            playerController.playerCanMove = false;
-            playerController.cameraCanMove = false;
-            //deactivate player and enemy controllers
-        }
-        else
+        if (playerController.playerCanMove != true)
         {
             ActivatePlayerHud();
+            return;
         }
+
+        DeactivateHud();
+        playerGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
+        MerchantGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
+        Cursor.lockState = CursorLockMode.Confined;
+        playerController.playerCanMove = false;
+        playerController.cameraCanMove = false;
+        //deactivate player and enemy controllers
     }
 
     public void TogglePlayerInventory()
     {
-        DeactivateHud();
-
-        if (playerController.playerCanMove == true)
-        {
-            playerGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
-            Cursor.lockState = CursorLockMode.Confined;
-            playerController.playerCanMove = false;
-            playerController.cameraCanMove = false;
-            //activate player and enemy controllers
-        }
-        else
+        if (playerController.playerCanMove != true)
         {
             ActivatePlayerHud();
+            return;
         }
+
+        DeactivateHud();
+        playerGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
+        Cursor.lockState = CursorLockMode.Confined;
+        playerController.playerCanMove = false;
+        playerController.cameraCanMove = false;
+        //activate player and enemy controllers
+
     }
 
     public void DeactivateHud()
