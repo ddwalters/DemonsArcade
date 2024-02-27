@@ -15,6 +15,8 @@ namespace Inventory
         private IGrid _gridBase;
         private IGetInventoryItems _inventoryItems;
 
+        private bool storeTypeInventory;
+
         private void Awake()
         {
             _inventoryItems = GetComponent<IGetInventoryItems>();
@@ -27,6 +29,8 @@ namespace Inventory
 
         private void InitializeGrid(int x, int y)
         {
+            storeTypeInventory = false;
+
             _rectTransform.sizeDelta = new Vector2(x * _gridSquareSize.x, y * _gridSquareSize.y);
             var gridData = new InventoryItem[x, y];
             var gridParameters = new GridParameters
@@ -82,8 +86,10 @@ namespace Inventory
             return false;
         }
 
-        public void SetInventory(List<InventoryItemToPlace> newItems, InventoryItem prefab)
+        public void SetInventory(List<InventoryItemToPlace> newItems, InventoryItem prefab, bool isMerchantInventory)
         {
+            storeTypeInventory = isMerchantInventory;
+
             foreach (var item in newItems)
             {
                 bool itemPlaced = false;
@@ -121,6 +127,8 @@ namespace Inventory
 
             return _gridPosition;
         }
+
+        public bool IsInventoryStoreType() => storeTypeInventory;
 
         public InventoryItem GrabItem(int x, int y) => _gridBase.GrabItem(x, y);
 

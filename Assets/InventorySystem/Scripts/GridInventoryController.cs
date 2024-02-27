@@ -77,11 +77,11 @@ namespace Inventory
                 return;
             }
 
-            if (!ActiveGrid.CheckItemFits(_currentlySelectedInventoryItem, pos.x, pos.y))
+            // grid shouldn't be allowed if it is a merchants inventory
+            if (!ActiveGrid.CheckItemFits(_currentlySelectedInventoryItem, pos.x, pos.y) || ActiveGrid.IsInventoryStoreType())
             {
                 while (_currentlySelectedInventoryItem.Orientation != _currentlySelectedInventoryItemLastOrientation)
                 {
-                    Debug.Log("Rotating!");
                     _currentlySelectedInventoryItem.Rotate();
                     Debug.Log($"New rotation: {_currentlySelectedInventoryItem.Orientation}");
                 }
