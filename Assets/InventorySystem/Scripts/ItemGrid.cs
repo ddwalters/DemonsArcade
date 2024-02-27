@@ -86,16 +86,25 @@ namespace Inventory
         {
             foreach (var item in newItems)
             {
+                bool itemPlaced = false;
+
                 var itemObject = Instantiate(prefab, _rectTransform);
                 itemObject.Initialize(item.ItemPreset.ItemData);
 
                 for (int i = 0; i < _gridSize.y; i++)
                 {
+                    if (itemPlaced)
+                        continue;
+
                     for (int j = 0; j < _gridSize.x; j++)
                     {
+                        if (itemPlaced)
+                            continue;
+
                         if (CheckItemFits(itemObject, j, i))
                         {
                             PlaceItem(itemObject, j, i);
+                            itemPlaced = true;
                         }
                     }
                 }
