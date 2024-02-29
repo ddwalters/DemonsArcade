@@ -88,6 +88,7 @@ namespace Inventory
 
         public void SetInventory(List<InventoryItemToPlace> newItems, InventoryItem prefab, bool isMerchantInventory)
         {
+            RemoveInventoryItems();
             storeTypeInventory = isMerchantInventory;
 
             foreach (var item in newItems)
@@ -143,6 +144,27 @@ namespace Inventory
             item.RectTransform.localPosition = position;
         }
 
+        public List<InventoryItem> GetUIItems()
+        {
+            var list = new List<InventoryItem>();
+
+            for (int i = 0; i < _gridSize.y; i++)
+            {
+                for (int j = 0; j < _gridSize.x; j++)
+                {
+                    var item = _gridBase.GetItem(i, j);
+
+                    if (!list.Contains(item) && item != null)
+                    {
+                        list.Add(item);
+                        Debug.Log(item.name);
+                    }
+                }
+            }
+
+            return list;
+        }
+
         public void RemoveLastInventoryItem()
         {
             if (_inventoryItems == null)
@@ -154,13 +176,10 @@ namespace Inventory
 
         public void RemoveInventoryItems()
         {
-            if (_inventoryItems == null)
-                return;
-
-            var items = _inventoryItems.GetInventoryItems();
-
-            foreach(var item in items)
-                items.Remove(item);
+            for (var i = gameObject.transform.childCount - 1; i >= 0; i--)
+            {
+                Destroy(gameObject.transform.GetChild(i).gameObject);
+            }
         }
     }
 }

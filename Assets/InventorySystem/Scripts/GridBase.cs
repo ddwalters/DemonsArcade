@@ -58,9 +58,6 @@ namespace Inventory
 
         public InventoryItem GrabItem(int x, int y)
         {
-            // if grid is on
-            // if () {}
-
             var item = _gridData[x, y];
             if (item == null)
                 return item;

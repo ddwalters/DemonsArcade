@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Interaction Data", menuName = "InteractionSystem/InteractionData")]
@@ -8,7 +6,7 @@ public class InteractionData : ScriptableObject
     private InteractableBase _interactable;
     public InteractableBase Interactable
     {
-        get => _interactable; 
+        get => _interactable;
         set => _interactable = value;
     }
 
