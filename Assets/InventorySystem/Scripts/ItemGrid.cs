@@ -15,6 +15,8 @@ namespace Inventory
         private IGrid _gridBase;
         private IGetInventoryItems _inventoryItems;
 
+        private bool storeTypeInventory;
+
         private void Awake()
         {
             _inventoryItems = GetComponent<IGetInventoryItems>();
@@ -27,6 +29,8 @@ namespace Inventory
 
         private void InitializeGrid(int x, int y)
         {
+            storeTypeInventory = false;
+
             _rectTransform.sizeDelta = new Vector2(x * _gridSquareSize.x, y * _gridSquareSize.y);
             var gridData = new InventoryItem[x, y];
             var gridParameters = new GridParameters
@@ -82,10 +86,36 @@ namespace Inventory
             return false;
         }
 
-        public void RemoveLastInventoryItem()
+        public void SetInventory(List<InventoryItemToPlace> newItems, InventoryItem prefab, bool isMerchantInventory)
         {
-            var items = _inventoryItems.GetInventoryItems();
-            items.RemoveAt(items.Count - 1);
+            RemoveInventoryItems();
+            storeTypeInventory = isMerchantInventory;
+
+            foreach (var item in newItems)
+            {
+                bool itemPlaced = false;
+
+                var itemObject = Instantiate(prefab, _rectTransform);
+                itemObject.Initialize(item.ItemPreset.ItemData);
+
+                for (int i = 0; i < _gridSize.y; i++)
+                {
+                    if (itemPlaced)
+                        continue;
+
+                    for (int j = 0; j < _gridSize.x; j++)
+                    {
+                        if (itemPlaced)
+                            continue;
+
+                        if (CheckItemFits(itemObject, j, i))
+                        {
+                            PlaceItem(itemObject, j, i);
+                            itemPlaced = true;
+                        }
+                    }
+                }
+            }
         }
 
         public Vector2Int GetTiledGridPosition(Vector2 mousePosition)
@@ -99,6 +129,8 @@ namespace Inventory
             return _gridPosition;
         }
 
+        public bool IsInventoryStoreType() => storeTypeInventory;
+
         public InventoryItem GrabItem(int x, int y) => _gridBase.GrabItem(x, y);
 
         public bool CheckItemFits(InventoryItem item, int x, int y) => _gridBase.CheckItemFits(item, x, y);
@@ -110,6 +142,44 @@ namespace Inventory
             _gridBase.PlaceItem(item, x, y);
             var position = new Vector2(x * _gridSquareSize.x, -y * _gridSquareSize.y);
             item.RectTransform.localPosition = position;
+        }
+
+        public List<InventoryItem> GetUIItems()
+        {
+            var list = new List<InventoryItem>();
+
+            for (int i = 0; i < _gridSize.y; i++)
+            {
+                for (int j = 0; j < _gridSize.x; j++)
+                {
+                    var item = _gridBase.GetItem(i, j);
+
+                    if (!list.Contains(item) && item != null)
+                    {
+                        list.Add(item);
+                        Debug.Log(item.name);
+                    }
+                }
+            }
+
+            return list;
+        }
+
+        public void RemoveLastInventoryItem()
+        {
+            if (_inventoryItems == null)
+                return;
+
+            var items = _inventoryItems.GetInventoryItems();
+            items.RemoveAt(items.Count - 1);
+        }
+
+        public void RemoveInventoryItems()
+        {
+            for (var i = gameObject.transform.childCount - 1; i >= 0; i--)
+            {
+                Destroy(gameObject.transform.GetChild(i).gameObject);
+            }
         }
     }
 }
