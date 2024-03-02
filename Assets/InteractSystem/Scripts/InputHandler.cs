@@ -37,6 +37,8 @@ public class InputHandler : MonoBehaviour
 
         // Inventory //
         if (Input.GetKeyDown(KeyCode.I))
-            controller.TogglePlayerInventory();
+        {
+            controller.PlayerInventoryAndStats();
+        }
     }
 }
