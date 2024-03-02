@@ -75,7 +75,7 @@ public class PlayerStats : MonoBehaviour
         vitalityText = uiTexts.FirstOrDefault(x => x.CompareTag("VitalityText"));
         enduranceText = uiTexts.FirstOrDefault(x => x.CompareTag("EnduranceText"));
         intelligenceText = uiTexts.FirstOrDefault(x => x.CompareTag("IntelligenceText"));
-        luckText = uiTexts.FirstOrDefault(x => x.CompareTag("SPText"));
+        luckText = uiTexts.FirstOrDefault(x => x.CompareTag("LuckText"));
     }
 
     private void Start()
@@ -89,7 +89,8 @@ public class PlayerStats : MonoBehaviour
         staminaText.text = currentStamina + "/" + maxStamina;
         manaText.text = currentMana + "/" + maxMana;
 
-        // xp slider stuff
+        xpSlider.maxValue = nextLevelXP;
+        xpSlider.value = currentXP;
 
         spText.text = "SP: " + SP;
         strengthText.text = strength.ToString();
@@ -153,8 +154,9 @@ public class PlayerStats : MonoBehaviour
             nextLevelXP *= 3;
         }
 
-        // xp bar max = nextLevelXP
-        // xp bar fill = currentXP
+        xpSlider.maxValue = nextLevelXP;
+        xpSlider.value = currentXP;
+
     }
     #endregion
 
@@ -445,8 +447,8 @@ public class PlayerStats : MonoBehaviour
     {
         currentLvl = 1;
 
-        maxHealth = 20;
-        currentHealth = 20;
+        maxHealth = 15;
+        currentHealth = 15;
         maxStamina = 20;
         currentStamina = 20;
         maxMana = 10;
