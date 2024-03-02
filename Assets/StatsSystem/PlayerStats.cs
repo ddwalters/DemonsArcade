@@ -6,13 +6,14 @@ using UnityEngine.UI;
 
 public class PlayerStats : MonoBehaviour
 {
+    bool playerIsInitialized;
+
     int currentLvl;
     int currentXP;
     int nextLevelXP;
     TextMeshProUGUI lvlText;
     Slider xpSlider;
     TextMeshProUGUI xpText;
-
 
     int maxHealth;
     int currentHealth;
@@ -37,26 +38,20 @@ public class PlayerStats : MonoBehaviour
     int strength;
     TextMeshProUGUI strengthText;
 
-
     int agility;
     TextMeshProUGUI agilityText;
-
 
     int vitality;
     TextMeshProUGUI vitalityText;
 
-
     int endurance;
     TextMeshProUGUI enduranceText;
-
 
     int intelligence;
     TextMeshProUGUI intelligenceText;
 
-
     int luck;
     TextMeshProUGUI luckText;
-
 
     private void Awake()
     {
@@ -85,6 +80,9 @@ public class PlayerStats : MonoBehaviour
 
     private void Start()
     {
+        if (!playerIsInitialized)
+            InitializePlayer();
+
         lvlText.text = "Lvl: " + currentLvl;
         xpText.text = "Exp: " + currentXP + "/" + nextLevelXP;
         healthText.text = currentHealth + "/" + maxHealth;
@@ -170,14 +168,14 @@ public class PlayerStats : MonoBehaviour
     public void IncreaseStrength()
     {
         strength += 1;
-        // strength text update
+        strengthText.text = strength.ToString();
     }
 
     public void StrengthBuff(int buffAmount, float buffTimer)
     {
         int tempStrengthHolder = strength;
         strength += buffAmount;
-        // strength text update
+        strengthText.text = strength.ToString();
 
         while (buffTimer > 0)
         {
@@ -185,7 +183,7 @@ public class PlayerStats : MonoBehaviour
         }
 
         strength = tempStrengthHolder;
-        // strength text update
+        strengthText.text = strength.ToString();
     }
 
     public void StrengthDebuff(int debuffAmount, float buffTimer)
@@ -194,12 +192,12 @@ public class PlayerStats : MonoBehaviour
         if (strength - debuffAmount < 1)
         {
             strength = 1;
-            // strength text update
+            strengthText.text = strength.ToString();
         }
         else
         {
             strength -= debuffAmount;
-            // strength text update
+            strengthText.text = strength.ToString();
         }
 
         while (buffTimer > 0)
@@ -208,7 +206,7 @@ public class PlayerStats : MonoBehaviour
         }
 
         strength = tempStrengthHolder;
-        // strength text update
+        strengthText.text = strength.ToString();
     }
     #endregion
 
@@ -216,12 +214,14 @@ public class PlayerStats : MonoBehaviour
     public void IncreaseAgility()
     {
         agility += 1;
+        agilityText.text = agility.ToString();
     }
 
     public void AgilityBuff(int buffAmount, float buffTimer)
     {
         int tempAgilityHolder = agility;
         agility += buffAmount;
+        agilityText.text = agility.ToString();
 
         while (buffTimer > 0)
         {
@@ -229,15 +229,22 @@ public class PlayerStats : MonoBehaviour
         }
 
         agility = tempAgilityHolder;
+        agilityText.text = agility.ToString();
     }
 
     public void AgilityDebuff(int debuffAmount, float buffTimer)
     {
         int tempAgilityHolder = agility;
         if (agility - debuffAmount < 1)
+        {
             agility = 1;
+            agilityText.text = agility.ToString();
+        }
         else
+        {
             agility -= debuffAmount;
+            agilityText.text = agility.ToString();
+        }
 
         while (buffTimer > 0)
         {
@@ -245,6 +252,7 @@ public class PlayerStats : MonoBehaviour
         }
 
         agility = tempAgilityHolder;
+        agilityText.text = agility.ToString();
     }
     #endregion
 
@@ -252,12 +260,14 @@ public class PlayerStats : MonoBehaviour
     public void IncreaseVitality()
     {
         vitality += 1;
+        vitalityText.text = vitality.ToString();
     }
 
     public void VitalityBuff(int buffAmount, float buffTimer)
     {
         int tempVitalityHolder = vitality;
         vitality += buffAmount;
+        vitalityText.text = vitality.ToString();
 
         while (buffTimer > 0)
         {
@@ -265,15 +275,22 @@ public class PlayerStats : MonoBehaviour
         }
 
         vitality = tempVitalityHolder;
+        vitalityText.text = vitality.ToString();
     }
 
     public void VitalityDebuff(int debuffAmount, float buffTimer)
     {
         int tempVitalityHolder = vitality;
         if (vitality - debuffAmount < 1)
+        {
             vitality = 1;
+            vitalityText.text = vitality.ToString();
+        }
         else
+        {
             vitality -= debuffAmount;
+            vitalityText.text = vitality.ToString();
+        }
 
         while (buffTimer > 0)
         {
@@ -281,6 +298,7 @@ public class PlayerStats : MonoBehaviour
         }
 
         vitality = tempVitalityHolder;
+        vitalityText.text = vitality.ToString();
     }
     #endregion
 
@@ -288,12 +306,14 @@ public class PlayerStats : MonoBehaviour
     public void IncreaseEndurance()
     {
         endurance += 1;
+        vitalityText.text = vitality.ToString();
     }
 
     public void EnduranceBuff(int buffAmount, float buffTimer)
     {
         int tempEnduranceHolder = endurance;
         endurance += buffAmount;
+        vitalityText.text = vitality.ToString();
 
         while (buffTimer > 0)
         {
@@ -301,15 +321,22 @@ public class PlayerStats : MonoBehaviour
         }
 
         endurance = tempEnduranceHolder;
+        vitalityText.text = vitality.ToString();
     }
 
     public void EnduranceDebuff(int debuffAmount, float buffTimer)
     {
         int tempEnduranceHolder = endurance;
         if (endurance - debuffAmount < 1)
+        {
             endurance = 1;
+            vitalityText.text = vitality.ToString();
+        }
         else
+        {
             endurance -= debuffAmount;
+            vitalityText.text = vitality.ToString();
+        }
 
         while (buffTimer > 0)
         {
@@ -317,6 +344,7 @@ public class PlayerStats : MonoBehaviour
         }
 
         endurance = tempEnduranceHolder;
+        vitalityText.text = vitality.ToString();
     }
     #endregion
 
@@ -324,12 +352,14 @@ public class PlayerStats : MonoBehaviour
     public void IncreaseIntelligence()
     {
         intelligence += 1;
+        intelligenceText.text = intelligence.ToString();
     }
 
     public void IntelligenceBuff(int buffAmount, float buffTimer)
     {
         int tempIntelligenceHolder = intelligence;
         intelligence += buffAmount;
+        intelligenceText.text = intelligence.ToString();
 
         while (buffTimer > 0)
         {
@@ -337,15 +367,22 @@ public class PlayerStats : MonoBehaviour
         }
 
         intelligence = tempIntelligenceHolder;
+        intelligenceText.text = intelligence.ToString();
     }
 
     public void IntelligenceDebuff(int debuffAmount, float buffTimer)
     {
         int tempIntelligenceHolder = intelligence;
         if (intelligence - debuffAmount < 1)
+        {
             intelligence = 1;
+            intelligenceText.text = intelligence.ToString();
+        }
         else
+        {
             intelligence -= debuffAmount;
+            intelligenceText.text = intelligence.ToString();
+        }
 
         while (buffTimer > 0)
         {
@@ -353,6 +390,7 @@ public class PlayerStats : MonoBehaviour
         }
 
         intelligence = tempIntelligenceHolder;
+        intelligenceText.text = intelligence.ToString();
     }
     #endregion
 
@@ -360,12 +398,14 @@ public class PlayerStats : MonoBehaviour
     public void IncreaseLuck()
     {
         luck += 1;
+        luckText.text = luck.ToString();
     }
 
     public void LuckBuff(int buffAmount, float buffTimer)
     {
         int tempLuckHolder = luck;
         luck += buffAmount;
+        luckText.text = luck.ToString();
 
         while (buffTimer > 0)
         {
@@ -373,15 +413,22 @@ public class PlayerStats : MonoBehaviour
         }
 
         luck = tempLuckHolder;
+        luckText.text = luck.ToString();
     }
 
     public void LuckDebuff(int debuffAmount, float buffTimer)
     {
         int tempLuckHolder = luck;
         if (luck - debuffAmount < 1)
+        {
             luck = 1;
+            luckText.text = luck.ToString();
+        }
         else
+        {
             luck -= debuffAmount;
+            luckText.text = luck.ToString();
+        }
 
         while (buffTimer > 0)
         {
@@ -389,7 +436,30 @@ public class PlayerStats : MonoBehaviour
         }
 
         luck = tempLuckHolder;
+        luckText.text = luck.ToString();
     }
     #endregion
     #endregion
+
+    public void InitializePlayer()
+    {
+        currentLvl = 1;
+
+        maxHealth = 20;
+        currentHealth = 20;
+        maxStamina = 20;
+        currentStamina = 20;
+        maxMana = 10;
+        currentMana = 10;
+
+        SP = 0;
+        strength = 1;
+        agility = 1;
+        vitality = 1;
+        endurance = 1;
+        intelligence = 1;
+        luck = 1;
+
+        playerIsInitialized = true;
+    }
 }
