@@ -15,6 +15,6 @@ public class MerchantInitializer : InteractableBase
         merchantGrid.SetInventory(MerchantItems, ItemPrefab, true);
 
         InteractionController controller = FindFirstObjectByType<InteractionController>();
-        controller.ToggleMerchantView();
+        controller.MerchantStoreView();
     }
 }

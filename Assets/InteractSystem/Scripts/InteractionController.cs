@@ -12,6 +12,7 @@ public class InteractionController : MonoBehaviour
     [Header("UI.2")]
     [SerializeField] private GameObject playerHud;
     [SerializeField] private GameObject playerGrid;
+    [SerializeField] private GameObject StatsPage;
     [SerializeField] private GameObject LootGrid;
     [SerializeField] private GameObject MerchantGrid;
 
@@ -130,13 +131,10 @@ public class InteractionController : MonoBehaviour
     {
         DeactivateHud();
         playerHud.GetComponent<CanvasGroup>().alpha = 1.0f;
-        Cursor.lockState = CursorLockMode.Locked;
-        playerController.playerCanMove = true;
-        playerController.cameraCanMove = true;
-        //activate player and enemy controllers
+        UnlockWorld();
     }
 
-    public void ToggleLootView()
+    public void LootInventoryView()
     {
         if (playerController.playerCanMove != true)
         {
@@ -147,13 +145,10 @@ public class InteractionController : MonoBehaviour
         DeactivateHud();
         playerGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
         LootGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
-        Cursor.lockState = CursorLockMode.Confined;
-        playerController.playerCanMove = false;
-        playerController.cameraCanMove = false;
-        //deactivate player and enemy controllers
+        LockWorld();
     }
 
-    public void ToggleMerchantView()
+    public void MerchantStoreView()
     {
         if (playerController.playerCanMove != true)
         {
@@ -164,13 +159,10 @@ public class InteractionController : MonoBehaviour
         DeactivateHud();
         playerGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
         MerchantGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
-        Cursor.lockState = CursorLockMode.Confined;
-        playerController.playerCanMove = false;
-        playerController.cameraCanMove = false;
-        //deactivate player and enemy controllers
+        LockWorld();
     }
 
-    public void TogglePlayerInventory()
+    public void PlayerInventoryAndStats()
     {
         if (playerController.playerCanMove != true)
         {
@@ -180,17 +172,31 @@ public class InteractionController : MonoBehaviour
 
         DeactivateHud();
         playerGrid.GetComponent<CanvasGroup>().alpha = 1.0f;
+        StatsPage.GetComponent<CanvasGroup>().alpha = 1.0f;
+        LockWorld();
+    }
+
+    private void UnlockWorld()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        playerController.playerCanMove = true;
+        playerController.cameraCanMove = true;
+        //activate player and enemy controllers
+    }
+
+    private void LockWorld()
+    {
         Cursor.lockState = CursorLockMode.Confined;
         playerController.playerCanMove = false;
         playerController.cameraCanMove = false;
         //activate player and enemy controllers
-
     }
 
     public void DeactivateHud()
     {
         playerHud.GetComponent<CanvasGroup>().alpha = 0.0f;
-        playerGrid.GetComponent<CanvasGroup>().alpha = 0.0f;   
+        playerGrid.GetComponent<CanvasGroup>().alpha = 0.0f;
+        StatsPage.GetComponent<CanvasGroup>().alpha = 0.0f;
         LootGrid.GetComponent<CanvasGroup>().alpha = 0.0f;
         MerchantGrid.GetComponent<CanvasGroup>().alpha = 0.0f;
     }

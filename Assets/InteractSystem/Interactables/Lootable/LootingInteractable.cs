@@ -18,6 +18,6 @@ public class LootingInteractable : InteractableBase
         merchantGrid.SetInventory(MerchantItems, ItemPrefab, false);
 
         InteractionController controller = FindFirstObjectByType<InteractionController>();
-        controller.ToggleLootView();
+        controller.LootInventoryView();
     }
 }
