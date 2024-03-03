@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -18,17 +19,17 @@ public class PlayerStats : MonoBehaviour
     int maxHealth;
     int currentHealth;
     TextMeshProUGUI healthText;
-    // hud health icon (should have tag)
+    Image healthFill;
 
     int maxStamina;
     int currentStamina;
     TextMeshProUGUI staminaText;
-    // hud stamina slider (should have tag)
+    Image staminaFill;
 
     int maxMana;
     int currentMana;
     TextMeshProUGUI manaText;
-    // hud mana slider (should have tag)
+    Image manaFill;
 
     int baseSP = 1;
     float spGrowth = 1.5f;
@@ -56,8 +57,15 @@ public class PlayerStats : MonoBehaviour
     private void Awake()
     {
         // I do this so I dont have to serialize every field, find a better way to get the strings
+        // getting object by name would be a good fix and prevent making a list of every object
         List<TextMeshProUGUI> uiTexts = FindObjectsByType<TextMeshProUGUI>(FindObjectsSortMode.None).ToList();
         List<Slider> uiSliders = FindObjectsByType<Slider>(FindObjectsSortMode.None).ToList();
+        List<Image> uiImages = FindObjectsByType<Image>(FindObjectsSortMode.None).ToList();
+
+        // hud 
+        healthFill = uiImages.FirstOrDefault(x => x.CompareTag("HeartFill"));
+        staminaFill = uiImages.FirstOrDefault(x => x.CompareTag("StaminaFill"));
+        manaFill = uiImages.FirstOrDefault(x => x.CompareTag("ManaFill"));
 
         // core stats
         lvlText = uiTexts.FirstOrDefault(x => x.CompareTag("LevelText"));
@@ -83,24 +91,23 @@ public class PlayerStats : MonoBehaviour
         if (!playerIsInitialized)
             InitializePlayer();
 
-        lvlText.text = "Lvl: " + currentLvl;
-        xpText.text = "Exp: " + currentXP + "/" + nextLevelXP;
-        healthText.text = currentHealth + "/" + maxHealth;
-        staminaText.text = currentStamina + "/" + maxStamina;
-        manaText.text = currentMana + "/" + maxMana;
+        SetupStatsPage();
 
-        xpSlider.maxValue = nextLevelXP;
-        xpSlider.value = currentXP;
+        UpdateHealthBar();
+        UpdateStaminaBar();
+        UpdateManaBar();
 
-        spText.text = "SP: " + SP;
-        strengthText.text = strength.ToString();
-        agilityText.text = agility.ToString();
-        vitalityText.text = vitality.ToString();
-        enduranceText.text = endurance.ToString();
-        intelligenceText.text = intelligence.ToString();
-        luckText.text = luck.ToString();
+        StartCoroutine(RegenerateStamina());
+        StartCoroutine(RegenerateMana());
     }
 
+    private void Update()
+    {
+        RegenerateStamina();
+        RegenerateMana();
+    }
+
+    #region Core Stats
     private void LevelUp()
     {
         if (currentLvl < 100)
@@ -119,27 +126,6 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    #region Core Stats
-    private void IncreaseHealthStat()
-    {
-        maxHealth += currentLvl;
-        currentHealth += currentLvl;
-    }
-
-    private void IncreaseStaminaStat()
-    {
-        int toIncrease = Mathf.RoundToInt(currentLvl * 1.35f);
-        maxStamina += toIncrease;
-        currentStamina += toIncrease;
-    }
-
-    private void IncreaseManaStat()
-    {
-        int toIncrease = Mathf.RoundToInt(currentLvl * .35f);
-        maxMana += toIncrease;
-        currentMana += toIncrease;
-    }
-
     public void GainEXP(int expGain)
     {
         if (currentLvl < 100)
@@ -156,8 +142,139 @@ public class PlayerStats : MonoBehaviour
 
         xpSlider.maxValue = nextLevelXP;
         xpSlider.value = currentXP;
-
     }
+
+    #region Health
+    public void DamagePlayer(int damageAmount)
+    {
+        currentHealth -= damageAmount;
+
+        if (currentHealth <= 0)
+        {
+            currentHealth = 0;
+
+            UpdateHealthBar();
+            // player is dead now 
+            // do stuff for the dead thingy
+        }
+
+        UpdateHealthBar();
+    }
+
+    public void HealPlayer(int healAmount)
+    {
+        if (currentHealth >= maxHealth)
+            return;
+
+        currentHealth += healAmount;
+        if (currentHealth > maxHealth)
+            currentHealth = maxHealth;
+
+        UpdateHealthBar();
+    }
+
+    private void IncreaseHealthStat()
+    {
+        maxHealth += currentLvl;
+        currentHealth += currentLvl;
+
+        UpdateHealthBar();
+    }
+
+    private void UpdateHealthBar()
+    {
+        float healthNormalized = Mathf.Clamp01(currentHealth / maxHealth);
+        healthFill.fillAmount = healthNormalized;
+    }
+    #endregion
+
+    #region Stamina
+    // true or false for if there is stamina available/ if the action should happen
+    public bool UseStamina(int staminaAmount)
+    {
+        int temp = currentStamina;
+
+        currentStamina -= staminaAmount;
+        if (currentStamina < 0)
+        {
+            currentStamina = temp;
+            return false;
+        }
+
+        return true;
+    }
+
+    // this time should be based on players endurance stat
+    private IEnumerator RegenerateStamina()
+    {
+        while (currentStamina < maxStamina)
+        {
+            yield return new WaitForSeconds(0.5f);
+            currentStamina++;
+
+            UpdateStaminaBar();
+        }
+    }
+
+    private void IncreaseStaminaStat()
+    {
+        int toIncrease = Mathf.RoundToInt(currentLvl * 1.35f);
+        maxStamina += toIncrease;
+        currentStamina += toIncrease;
+
+        UpdateStaminaBar();
+    }
+
+    private void UpdateStaminaBar()
+    {
+        float staminaNormalized = Mathf.Clamp01(currentHealth / maxHealth);
+        staminaFill.fillAmount = staminaNormalized;
+    }
+    #endregion
+
+    #region Mana
+    // true or false for if there is stamina available/ if the action should happen
+    public bool UseMana(int manaAmount)
+    {
+        int temp = currentMana;
+
+        currentMana -= manaAmount;
+        if (currentMana < 0)
+        {
+            currentMana = temp;
+            return false;
+        }
+
+        return true;
+    }
+
+    private IEnumerator RegenerateMana()
+    {
+        while (currentStamina < maxStamina)
+        {
+            // this time should be based on players int stat
+            yield return new WaitForSeconds(0.25f);
+            currentStamina++;
+
+            UpdateStaminaBar();
+        }
+    }
+
+    private void IncreaseManaStat()
+    {
+        int toIncrease = Mathf.RoundToInt(currentLvl * .35f);
+        maxMana += toIncrease;
+        currentMana += toIncrease;
+
+        UpdateHealthBar();
+    }
+
+    private void UpdateManaBar()
+    {
+        float manaNormalized = Mathf.Clamp01(currentHealth / maxHealth);
+        manaFill.fillAmount = manaNormalized;
+    }
+    #endregion
     #endregion
 
     #region SP Stats
@@ -166,284 +283,50 @@ public class PlayerStats : MonoBehaviour
         SP += Mathf.RoundToInt(baseSP * Mathf.Pow(currentLvl, spGrowth));
     }
 
-    #region Strength
-    public void IncreaseStrength()
+    public void IncreaseStat(TextMeshProUGUI textObject, ref int attribute)
     {
-        strength += 1;
-        strengthText.text = strength.ToString();
+        if (SP < 1)
+            return;
+
+        SP -= 1;
+        attribute += 1;
+        textObject.text = attribute.ToString();
     }
 
-    public void StrengthBuff(int buffAmount, float buffTimer)
+    public void StatBuff(TextMeshProUGUI textObject, ref int attribute, int buffAmount, float buffTimer)
     {
-        int tempStrengthHolder = strength;
-        strength += buffAmount;
-        strengthText.text = strength.ToString();
+        int temp = attribute;
+        attribute += buffAmount;
+        textObject.text = attribute.ToString();
 
         while (buffTimer > 0)
         {
             buffTimer -= Time.deltaTime;
         }
 
-        strength = tempStrengthHolder;
-        strengthText.text = strength.ToString();
+        attribute = temp;
+        textObject.text = attribute.ToString();
     }
 
-    public void StrengthDebuff(int debuffAmount, float buffTimer)
+    public void StatDebuff(TextMeshProUGUI textObject, ref int attribute, int debuffAmount, float debuffTimer)
     {
-        int tempStrengthHolder = strength;
-        if (strength - debuffAmount < 1)
-        {
-            strength = 1;
-            strengthText.text = strength.ToString();
-        }
+        int temp = attribute;
+        if (attribute - debuffAmount < 1)
+            attribute = 1;
         else
-        {
-            strength -= debuffAmount;
-            strengthText.text = strength.ToString();
-        }
+            attribute -= debuffAmount;
 
-        while (buffTimer > 0)
-        {
-            buffTimer -= Time.deltaTime;
-        }
+        textObject.text = attribute.ToString();
 
-        strength = tempStrengthHolder;
-        strengthText.text = strength.ToString();
+        while (debuffTimer > 0)
+            debuffTimer -= Time.deltaTime;
+
+        attribute = temp;
+        textObject.text = attribute.ToString();
     }
     #endregion
 
-    #region Agility
-    public void IncreaseAgility()
-    {
-        agility += 1;
-        agilityText.text = agility.ToString();
-    }
-
-    public void AgilityBuff(int buffAmount, float buffTimer)
-    {
-        int tempAgilityHolder = agility;
-        agility += buffAmount;
-        agilityText.text = agility.ToString();
-
-        while (buffTimer > 0)
-        {
-            buffTimer -= Time.deltaTime;
-        }
-
-        agility = tempAgilityHolder;
-        agilityText.text = agility.ToString();
-    }
-
-    public void AgilityDebuff(int debuffAmount, float buffTimer)
-    {
-        int tempAgilityHolder = agility;
-        if (agility - debuffAmount < 1)
-        {
-            agility = 1;
-            agilityText.text = agility.ToString();
-        }
-        else
-        {
-            agility -= debuffAmount;
-            agilityText.text = agility.ToString();
-        }
-
-        while (buffTimer > 0)
-        {
-            buffTimer -= Time.deltaTime;
-        }
-
-        agility = tempAgilityHolder;
-        agilityText.text = agility.ToString();
-    }
-    #endregion
-
-    #region Vitality
-    public void IncreaseVitality()
-    {
-        vitality += 1;
-        vitalityText.text = vitality.ToString();
-    }
-
-    public void VitalityBuff(int buffAmount, float buffTimer)
-    {
-        int tempVitalityHolder = vitality;
-        vitality += buffAmount;
-        vitalityText.text = vitality.ToString();
-
-        while (buffTimer > 0)
-        {
-            buffTimer -= Time.deltaTime;
-        }
-
-        vitality = tempVitalityHolder;
-        vitalityText.text = vitality.ToString();
-    }
-
-    public void VitalityDebuff(int debuffAmount, float buffTimer)
-    {
-        int tempVitalityHolder = vitality;
-        if (vitality - debuffAmount < 1)
-        {
-            vitality = 1;
-            vitalityText.text = vitality.ToString();
-        }
-        else
-        {
-            vitality -= debuffAmount;
-            vitalityText.text = vitality.ToString();
-        }
-
-        while (buffTimer > 0)
-        {
-            buffTimer -= Time.deltaTime;
-        }
-
-        vitality = tempVitalityHolder;
-        vitalityText.text = vitality.ToString();
-    }
-    #endregion
-
-    #region Endurance
-    public void IncreaseEndurance()
-    {
-        endurance += 1;
-        vitalityText.text = vitality.ToString();
-    }
-
-    public void EnduranceBuff(int buffAmount, float buffTimer)
-    {
-        int tempEnduranceHolder = endurance;
-        endurance += buffAmount;
-        vitalityText.text = vitality.ToString();
-
-        while (buffTimer > 0)
-        {
-            buffTimer -= Time.deltaTime;
-        }
-
-        endurance = tempEnduranceHolder;
-        vitalityText.text = vitality.ToString();
-    }
-
-    public void EnduranceDebuff(int debuffAmount, float buffTimer)
-    {
-        int tempEnduranceHolder = endurance;
-        if (endurance - debuffAmount < 1)
-        {
-            endurance = 1;
-            vitalityText.text = vitality.ToString();
-        }
-        else
-        {
-            endurance -= debuffAmount;
-            vitalityText.text = vitality.ToString();
-        }
-
-        while (buffTimer > 0)
-        {
-            buffTimer -= Time.deltaTime;
-        }
-
-        endurance = tempEnduranceHolder;
-        vitalityText.text = vitality.ToString();
-    }
-    #endregion
-
-    #region Intelligence
-    public void IncreaseIntelligence()
-    {
-        intelligence += 1;
-        intelligenceText.text = intelligence.ToString();
-    }
-
-    public void IntelligenceBuff(int buffAmount, float buffTimer)
-    {
-        int tempIntelligenceHolder = intelligence;
-        intelligence += buffAmount;
-        intelligenceText.text = intelligence.ToString();
-
-        while (buffTimer > 0)
-        {
-            buffTimer -= Time.deltaTime;
-        }
-
-        intelligence = tempIntelligenceHolder;
-        intelligenceText.text = intelligence.ToString();
-    }
-
-    public void IntelligenceDebuff(int debuffAmount, float buffTimer)
-    {
-        int tempIntelligenceHolder = intelligence;
-        if (intelligence - debuffAmount < 1)
-        {
-            intelligence = 1;
-            intelligenceText.text = intelligence.ToString();
-        }
-        else
-        {
-            intelligence -= debuffAmount;
-            intelligenceText.text = intelligence.ToString();
-        }
-
-        while (buffTimer > 0)
-        {
-            buffTimer -= Time.deltaTime;
-        }
-
-        intelligence = tempIntelligenceHolder;
-        intelligenceText.text = intelligence.ToString();
-    }
-    #endregion
-
-    #region Luck
-    public void IncreaseLuck()
-    {
-        luck += 1;
-        luckText.text = luck.ToString();
-    }
-
-    public void LuckBuff(int buffAmount, float buffTimer)
-    {
-        int tempLuckHolder = luck;
-        luck += buffAmount;
-        luckText.text = luck.ToString();
-
-        while (buffTimer > 0)
-        {
-            buffTimer -= Time.deltaTime;
-        }
-
-        luck = tempLuckHolder;
-        luckText.text = luck.ToString();
-    }
-
-    public void LuckDebuff(int debuffAmount, float buffTimer)
-    {
-        int tempLuckHolder = luck;
-        if (luck - debuffAmount < 1)
-        {
-            luck = 1;
-            luckText.text = luck.ToString();
-        }
-        else
-        {
-            luck -= debuffAmount;
-            luckText.text = luck.ToString();
-        }
-
-        while (buffTimer > 0)
-        {
-            buffTimer -= Time.deltaTime;
-        }
-
-        luck = tempLuckHolder;
-        luckText.text = luck.ToString();
-    }
-    #endregion
-    #endregion
-
-    public void InitializePlayer()
+    private void InitializePlayer()
     {
         currentLvl = 1;
 
@@ -463,5 +346,25 @@ public class PlayerStats : MonoBehaviour
         luck = 1;
 
         playerIsInitialized = true;
+    }
+
+    private void SetupStatsPage()
+    {
+        lvlText.text = "Lvl: " + currentLvl;
+        xpText.text = "Exp: " + currentXP + "/" + nextLevelXP;
+        healthText.text = currentHealth + "/" + maxHealth;
+        staminaText.text = currentStamina + "/" + maxStamina;
+        manaText.text = currentMana + "/" + maxMana;
+
+        xpSlider.maxValue = nextLevelXP;
+        xpSlider.value = currentXP;
+
+        spText.text = "SP: " + SP;
+        strengthText.text = strength.ToString();
+        agilityText.text = agility.ToString();
+        vitalityText.text = vitality.ToString();
+        enduranceText.text = endurance.ToString();
+        intelligenceText.text = intelligence.ToString();
+        luckText.text = luck.ToString();
     }
 }
