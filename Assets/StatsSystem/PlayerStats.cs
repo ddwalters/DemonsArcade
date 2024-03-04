@@ -16,6 +16,9 @@ public class PlayerStats : MonoBehaviour
     Slider xpSlider;
     TextMeshProUGUI xpText;
 
+    int goldAmount;
+    TextMeshProUGUI goldText;
+
     int maxHealth;
     int currentHealth;
     TextMeshProUGUI healthText;
@@ -73,6 +76,7 @@ public class PlayerStats : MonoBehaviour
         healthText = uiTexts.FirstOrDefault(x => x.CompareTag("HealthText"));
         staminaText = uiTexts.FirstOrDefault(x => x.CompareTag("StaminaText"));
         manaText = uiTexts.FirstOrDefault(x => x.CompareTag("ManaText"));
+        goldText = uiTexts.FirstOrDefault(x => x.CompareTag("GoldText"));
 
         xpSlider = uiSliders.FirstOrDefault(x => x.CompareTag("XPBar"));
 
@@ -323,6 +327,39 @@ public class PlayerStats : MonoBehaviour
 
         attribute = temp;
         textObject.text = attribute.ToString();
+    }
+    #endregion
+
+    #region gold
+    public int GetCurrentGold()
+    {
+        return goldAmount;
+    }
+
+    public void GainGold(int newGold)
+    {
+        goldAmount += newGold;
+        goldText.text = "Gold: " + goldAmount;
+    }
+
+
+    /// <summary>
+    /// Removes gold from the user if plausable.
+    /// </summary>
+    /// <param name="removeGoldAmount"></param>
+    /// <returns>True if gold has been removed, false if player lacked funds.</returns>
+    public bool RemoveGold(int removeGoldAmount)
+    {
+        int temp = goldAmount;
+
+        temp -= removeGoldAmount;
+        if (temp < 0)
+            return false;
+
+        goldAmount = temp;
+        goldText.text = "Gold: " + goldAmount;
+
+        return true;
     }
     #endregion
 

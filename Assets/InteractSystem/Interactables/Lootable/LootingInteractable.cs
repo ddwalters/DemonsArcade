@@ -6,16 +6,16 @@ using UnityEngine;
 public class LootingInteractable : InteractableBase
 {
     [SerializeField] InventoryItem ItemPrefab;
-    [SerializeField] List<InventoryItemToPlace> MerchantItems;
+    [SerializeField] List<InventoryItemToPlace> LootItems;
 
     public override void OnInteract()
     {
         base.OnInteract();
 
         List<ItemGrid> grids = FindObjectsByType<ItemGrid>(FindObjectsSortMode.None).ToList();
-        var merchantGrid = grids.FirstOrDefault(x => x.CompareTag("CrateInventory"));
+        var lootGrid = grids.FirstOrDefault(x => x.CompareTag("CrateInventory"));
 
-        merchantGrid.SetInventory(MerchantItems, ItemPrefab, false);
+        lootGrid.SetInventory(LootItems, ItemPrefab, false);
 
         InteractionController controller = FindFirstObjectByType<InteractionController>();
         controller.LootInventoryView();
