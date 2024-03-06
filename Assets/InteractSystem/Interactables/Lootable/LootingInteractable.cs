@@ -1,6 +1,5 @@
 using Inventory;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class LootingInteractable : InteractableBase
@@ -12,9 +11,7 @@ public class LootingInteractable : InteractableBase
     {
         base.OnInteract();
 
-        List<ItemGrid> grids = FindObjectsByType<ItemGrid>(FindObjectsSortMode.None).ToList();
-        var lootGrid = grids.FirstOrDefault(x => x.CompareTag("CrateInventory"));
-
+        var lootGrid = GameObject.Find("LootInventoryGrid").GetComponent<ItemGrid>();
         lootGrid.SetInventory(LootItems, ItemPrefab, false);
 
         InteractionController controller = FindFirstObjectByType<InteractionController>();

@@ -1,61 +1,14 @@
 using BayatGames.SaveGameFree;
 using BayatGames.SaveGameFree.Examples;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static BayatGames.SaveGameFree.Examples.ExampleSaveCustom;
 
 public class PlayerStats : MonoBehaviour
 {
-    public class StatsData
-    {
-        public int lvl;
-        public int nextLevelXP;
-        public int currentXP;
-        public int gold;
-        public int maxHealth;
-        public int currentHealth;
-        public int maxStamina;
-        public int currentStamina;
-        public int maxMana;
-        public int currentMana;
-        public int baseSP;
-        public float spGrowth;
-        public int SP;
-        public int strength;
-        public int agility;
-        public int vitality;
-        public int endurance;
-        public int intelligence;
-        public int luck;
-
-        public StatsData()
-        {
-            lvl = 1;
-            nextLevelXP = 500;
-
-            maxHealth = 100;
-            maxStamina = 100;
-            maxMana = 100;
-
-            SP = 0;
-            baseSP = 0;
-            spGrowth = 1.5f;
-            strength = 1;
-            agility = 1;
-            vitality = 1;
-            endurance = 1;
-            intelligence = 1;
-            luck = 1;
-        }
-
-    }
-
-    public string identifier = "gameSaveIdentifier";
-    StatsData statsData;
+    string identifier = "gameSaveIdentifier";
+    PlayerStatsData statsData;
 
     Slider xpSlider;
     Image healthFill;
@@ -77,35 +30,25 @@ public class PlayerStats : MonoBehaviour
 
     private void Awake()
     {
-        // I do this so I dont have to serialize every field, find a better way to get the strings
-        // getting object by name would be a good fix and prevent making a list of every object
-        List<TextMeshProUGUI> uiTexts = FindObjectsByType<TextMeshProUGUI>(FindObjectsSortMode.None).ToList();
-        List<Slider> uiSliders = FindObjectsByType<Slider>(FindObjectsSortMode.None).ToList();
-        List<Image> uiImages = FindObjectsByType<Image>(FindObjectsSortMode.None).ToList();
+        lvlText = GameObject.Find("PlayerLevelText").GetComponent<TextMeshProUGUI>();
+        xpText = GameObject.Find("EXPText").GetComponent<TextMeshProUGUI>();
+        goldText = GameObject.Find("PlayerGoldText").GetComponent<TextMeshProUGUI>();
+        healthText = GameObject.Find("PlayerHealthText").GetComponent<TextMeshProUGUI>();
+        staminaText = GameObject.Find("PlayerStaminaText").GetComponent<TextMeshProUGUI>();
+        manaText = GameObject.Find("PlayerManaText").GetComponent<TextMeshProUGUI>();
+        spText = GameObject.Find("PlayerSPText").GetComponent<TextMeshProUGUI>();
+        strengthText = GameObject.Find("PlayerStrengthText").GetComponent<TextMeshProUGUI>();
+        agilityText = GameObject.Find("PlayerAgilityText").GetComponent<TextMeshProUGUI>();
+        vitalityText = GameObject.Find("PlayerVitalityText").GetComponent<TextMeshProUGUI>();
+        enduranceText = GameObject.Find("PlayerEnduranceText").GetComponent<TextMeshProUGUI>();
+        intelligenceText = GameObject.Find("PlayerIntelligenceText").GetComponent<TextMeshProUGUI>();
+        luckText = GameObject.Find("PlayerLuckText").GetComponent<TextMeshProUGUI>();
 
-        // hud 
-        healthFill = uiImages.FirstOrDefault(x => x.CompareTag("HeartFill"));
-        staminaFill = uiImages.FirstOrDefault(x => x.CompareTag("StaminaFill"));
-        manaFill = uiImages.FirstOrDefault(x => x.CompareTag("ManaFill"));
+        healthFill = GameObject.Find("HeartFill").GetComponent<Image>();
+        staminaFill = GameObject.Find("StaminaFill").GetComponent<Image>();
+        manaFill = GameObject.Find("ManaFill").GetComponent<Image>();
 
-        // core stats
-        lvlText = uiTexts.FirstOrDefault(x => x.CompareTag("LevelText"));
-        xpText = uiTexts.FirstOrDefault(x => x.CompareTag("XPText"));
-        healthText = uiTexts.FirstOrDefault(x => x.CompareTag("HealthText"));
-        staminaText = uiTexts.FirstOrDefault(x => x.CompareTag("StaminaText"));
-        manaText = uiTexts.FirstOrDefault(x => x.CompareTag("ManaText"));
-        goldText = uiTexts.FirstOrDefault(x => x.CompareTag("GoldText"));
-
-        xpSlider = uiSliders.FirstOrDefault(x => x.CompareTag("XPBar"));
-
-        // SP stats
-        spText = uiTexts.FirstOrDefault(x => x.CompareTag("SPText"));
-        strengthText = uiTexts.FirstOrDefault(x => x.CompareTag("StrengthText"));
-        agilityText = uiTexts.FirstOrDefault(x => x.CompareTag("AgilityText"));
-        vitalityText = uiTexts.FirstOrDefault(x => x.CompareTag("VitalityText"));
-        enduranceText = uiTexts.FirstOrDefault(x => x.CompareTag("EnduranceText"));
-        intelligenceText = uiTexts.FirstOrDefault(x => x.CompareTag("IntelligenceText"));
-        luckText = uiTexts.FirstOrDefault(x => x.CompareTag("LuckText"));
+        xpSlider = GameObject.Find("XPBarSlider").GetComponent<Slider>();
     }
 
     private void Start()
@@ -379,20 +322,22 @@ public class PlayerStats : MonoBehaviour
 
     public void SavePlayerStats()
     {
-        SaveGame.Save(identifier, statsData, SerializerDropdown.Singleton.ActiveSerializer);
+        SaveGame.Save(identifier, statsData);
     }
 
     public void LoadPlayerStats()
     {
         if (statsData != null)
         {
-            statsData = SaveGame.Load<StatsData>(identifier);
+            statsData = SaveGame.Load<PlayerStatsData>(identifier);
+            Debug.Log("Loaded");
         }
         else
         {
             Debug.Log("Saved Data is null");
-            statsData.currentXP = 0;
+            statsData = new PlayerStatsData();
 
+            statsData.currentXP = 0;
             lvlText.text = "Lvl: " + statsData.lvl;
             xpText.text = "Exp: " + statsData.currentXP + "/" + statsData.nextLevelXP;
             healthText.text = statsData.currentHealth + "/" + statsData.maxHealth;

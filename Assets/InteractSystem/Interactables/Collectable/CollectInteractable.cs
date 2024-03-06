@@ -1,6 +1,4 @@
 using Inventory;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class CollectInteractable : InteractableBase
@@ -11,8 +9,7 @@ public class CollectInteractable : InteractableBase
     {
         base.OnInteract();
 
-        List<ItemGrid> grids = FindObjectsByType<ItemGrid>(FindObjectsSortMode.None).ToList();
-        var playerGrid = grids.FirstOrDefault(x => x.CompareTag("PlayerInventory"));
+        var playerGrid = GameObject.Find("PlayerInventoryGrid").GetComponent<ItemGrid>();
 
         if (playerGrid == null)
         {
