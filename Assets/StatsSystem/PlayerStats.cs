@@ -1,60 +1,78 @@
+using BayatGames.SaveGameFree;
+using BayatGames.SaveGameFree.Examples;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static BayatGames.SaveGameFree.Examples.ExampleSaveCustom;
 
 public class PlayerStats : MonoBehaviour
 {
-    bool playerIsInitialized;
+    public class StatsData
+    {
+        public int lvl;
+        public int nextLevelXP;
+        public int currentXP;
+        public int gold;
+        public int maxHealth;
+        public int currentHealth;
+        public int maxStamina;
+        public int currentStamina;
+        public int maxMana;
+        public int currentMana;
+        public int baseSP;
+        public float spGrowth;
+        public int SP;
+        public int strength;
+        public int agility;
+        public int vitality;
+        public int endurance;
+        public int intelligence;
+        public int luck;
 
-    int currentLvl;
-    int currentXP;
-    int nextLevelXP;
-    TextMeshProUGUI lvlText;
+        public StatsData()
+        {
+            lvl = 1;
+            nextLevelXP = 500;
+
+            maxHealth = 100;
+            maxStamina = 100;
+            maxMana = 100;
+
+            SP = 0;
+            baseSP = 0;
+            spGrowth = 1.5f;
+            strength = 1;
+            agility = 1;
+            vitality = 1;
+            endurance = 1;
+            intelligence = 1;
+            luck = 1;
+        }
+
+    }
+
+    public string identifier = "gameSaveIdentifier";
+    StatsData statsData;
+
     Slider xpSlider;
-    TextMeshProUGUI xpText;
-
-    int goldAmount;
-    TextMeshProUGUI goldText;
-
-    int maxHealth;
-    int currentHealth;
-    TextMeshProUGUI healthText;
     Image healthFill;
-
-    int maxStamina;
-    int currentStamina;
-    TextMeshProUGUI staminaText;
     Image staminaFill;
-
-    int maxMana;
-    int currentMana;
-    TextMeshProUGUI manaText;
     Image manaFill;
-
-    int baseSP = 1;
-    float spGrowth = 1.5f;
-    int SP;
+    TextMeshProUGUI lvlText;
+    TextMeshProUGUI xpText;
+    TextMeshProUGUI goldText;
+    TextMeshProUGUI healthText;
+    TextMeshProUGUI staminaText;
+    TextMeshProUGUI manaText;
     TextMeshProUGUI spText;
-
-    int strength;
     TextMeshProUGUI strengthText;
-
-    int agility;
     TextMeshProUGUI agilityText;
-
-    int vitality;
     TextMeshProUGUI vitalityText;
-
-    int endurance;
     TextMeshProUGUI enduranceText;
-
-    int intelligence;
     TextMeshProUGUI intelligenceText;
-
-    int luck;
     TextMeshProUGUI luckText;
 
     private void Awake()
@@ -92,10 +110,7 @@ public class PlayerStats : MonoBehaviour
 
     private void Start()
     {
-        if (!playerIsInitialized)
-            InitializePlayer();
-
-        SetupStatsPage();
+        LoadPlayerStats();
 
         UpdateHealthBar();
         UpdateStaminaBar();
@@ -114,15 +129,15 @@ public class PlayerStats : MonoBehaviour
     #region Core Stats
     private void LevelUp()
     {
-        if (currentLvl < 100)
+        if (statsData.lvl < 100)
         {
             Debug.Log("Max Level");
             return;
         }
 
-        if (currentLvl + 1 < 100)
+        if (statsData.lvl + 1 < 100)
         {
-            currentLvl += 1;
+            statsData.lvl += 1;
             IncreaseHealthStat();
             IncreaseStaminaStat();
             IncreaseManaStat();
@@ -132,30 +147,30 @@ public class PlayerStats : MonoBehaviour
 
     public void GainEXP(int expGain)
     {
-        if (currentLvl < 100)
+        if (statsData.lvl < 100)
             Debug.Log("Max Level No Exp Gain");
 
-        currentXP += expGain;
+        statsData.currentXP += expGain;
 
-        while (currentXP >= nextLevelXP && currentLvl < 100)
+        while (statsData.currentXP >= statsData.nextLevelXP && statsData.lvl < 100)
         {
             LevelUp();
-            currentXP -= nextLevelXP;
-            nextLevelXP *= 3;
+            statsData.currentXP -= statsData.nextLevelXP;
+            statsData.nextLevelXP *= 3;
         }
 
-        xpSlider.maxValue = nextLevelXP;
-        xpSlider.value = currentXP;
+        xpSlider.maxValue = statsData.nextLevelXP;
+        xpSlider.value = statsData.currentXP;
     }
 
     #region Health
     public void DamagePlayer(int damageAmount)
     {
-        currentHealth -= damageAmount;
+        statsData.currentHealth -= damageAmount;
 
-        if (currentHealth <= 0)
+        if (statsData.currentHealth <= 0)
         {
-            currentHealth = 0;
+            statsData.currentHealth = 0;
 
             UpdateHealthBar();
             // player is dead now 
@@ -167,27 +182,27 @@ public class PlayerStats : MonoBehaviour
 
     public void HealPlayer(int healAmount)
     {
-        if (currentHealth >= maxHealth)
+        if (statsData.currentHealth >= statsData.maxHealth)
             return;
 
-        currentHealth += healAmount;
-        if (currentHealth > maxHealth)
-            currentHealth = maxHealth;
+        statsData.currentHealth += healAmount;
+        if (statsData.currentHealth > statsData.maxHealth)
+            statsData.currentHealth = statsData.maxHealth;
 
         UpdateHealthBar();
     }
 
     private void IncreaseHealthStat()
     {
-        maxHealth += currentLvl;
-        currentHealth += currentLvl;
+        statsData.maxHealth += statsData.lvl;
+        statsData.currentHealth += statsData.lvl;
 
         UpdateHealthBar();
     }
 
     private void UpdateHealthBar()
     {
-        float healthNormalized = Mathf.Clamp01(currentHealth / maxHealth);
+        float healthNormalized = Mathf.Clamp01(statsData.currentHealth / statsData.maxHealth);
         healthFill.fillAmount = healthNormalized;
     }
     #endregion
@@ -196,12 +211,12 @@ public class PlayerStats : MonoBehaviour
     // true or false for if there is stamina available/ if the action should happen
     public bool UseStamina(int staminaAmount)
     {
-        int temp = currentStamina;
+        int temp = statsData.currentStamina;
 
-        currentStamina -= staminaAmount;
-        if (currentStamina < 0)
+        statsData.maxStamina -= staminaAmount;
+        if (statsData.currentStamina < 0)
         {
-            currentStamina = temp;
+            statsData.currentStamina = temp;
             return false;
         }
 
@@ -211,10 +226,10 @@ public class PlayerStats : MonoBehaviour
     // this time should be based on players endurance stat
     private IEnumerator RegenerateStamina()
     {
-        while (currentStamina < maxStamina)
+        while (statsData.currentStamina < statsData.maxStamina)
         {
             yield return new WaitForSeconds(0.5f);
-            currentStamina++;
+            statsData.currentStamina++;
 
             UpdateStaminaBar();
         }
@@ -222,16 +237,16 @@ public class PlayerStats : MonoBehaviour
 
     private void IncreaseStaminaStat()
     {
-        int toIncrease = Mathf.RoundToInt(currentLvl * 1.35f);
-        maxStamina += toIncrease;
-        currentStamina += toIncrease;
+        int toIncrease = Mathf.RoundToInt(statsData.lvl * 1.35f);
+        statsData.maxStamina += toIncrease;
+        statsData.currentStamina += toIncrease;
 
         UpdateStaminaBar();
     }
 
     private void UpdateStaminaBar()
     {
-        float staminaNormalized = Mathf.Clamp01(currentHealth / maxHealth);
+        float staminaNormalized = Mathf.Clamp01(statsData.currentStamina / statsData.maxStamina);
         staminaFill.fillAmount = staminaNormalized;
     }
     #endregion
@@ -240,12 +255,12 @@ public class PlayerStats : MonoBehaviour
     // true or false for if there is stamina available/ if the action should happen
     public bool UseMana(int manaAmount)
     {
-        int temp = currentMana;
+        int temp = statsData.currentMana;
 
-        currentMana -= manaAmount;
-        if (currentMana < 0)
+        statsData.currentMana -= manaAmount;
+        if (statsData.currentMana < 0)
         {
-            currentMana = temp;
+            statsData.currentMana = temp;
             return false;
         }
 
@@ -254,11 +269,11 @@ public class PlayerStats : MonoBehaviour
 
     private IEnumerator RegenerateMana()
     {
-        while (currentStamina < maxStamina)
+        while (statsData.currentMana < statsData.maxMana)
         {
             // this time should be based on players int stat
             yield return new WaitForSeconds(0.25f);
-            currentStamina++;
+            statsData.currentMana++;
 
             UpdateStaminaBar();
         }
@@ -266,16 +281,16 @@ public class PlayerStats : MonoBehaviour
 
     private void IncreaseManaStat()
     {
-        int toIncrease = Mathf.RoundToInt(currentLvl * .35f);
-        maxMana += toIncrease;
-        currentMana += toIncrease;
+        int toIncrease = Mathf.RoundToInt(statsData.lvl * .35f);
+        statsData.maxMana += toIncrease;
+        statsData.currentMana += toIncrease;
 
         UpdateHealthBar();
     }
 
     private void UpdateManaBar()
     {
-        float manaNormalized = Mathf.Clamp01(currentHealth / maxHealth);
+        float manaNormalized = Mathf.Clamp01(statsData.currentMana / statsData.maxMana);
         manaFill.fillAmount = manaNormalized;
     }
     #endregion
@@ -284,15 +299,15 @@ public class PlayerStats : MonoBehaviour
     #region SP Stats
     private void GainSP()
     {
-        SP += Mathf.RoundToInt(baseSP * Mathf.Pow(currentLvl, spGrowth));
+        statsData.SP += Mathf.RoundToInt(statsData.baseSP * Mathf.Pow(statsData.lvl, statsData.spGrowth));
     }
 
     public void IncreaseStat(TextMeshProUGUI textObject, ref int attribute)
     {
-        if (SP < 1)
+        if (statsData.SP < 1)
             return;
 
-        SP -= 1;
+        statsData.SP -= 1;
         attribute += 1;
         textObject.text = attribute.ToString();
     }
@@ -333,15 +348,14 @@ public class PlayerStats : MonoBehaviour
     #region gold
     public int GetCurrentGold()
     {
-        return goldAmount;
+        return statsData.gold;
     }
 
     public void GainGold(int newGold)
     {
-        goldAmount += newGold;
-        goldText.text = "Gold: " + goldAmount;
+        statsData.gold += newGold;
+        goldText.text = "Gold: " + statsData.gold;
     }
-
 
     /// <summary>
     /// Removes gold from the user if plausable.
@@ -350,58 +364,51 @@ public class PlayerStats : MonoBehaviour
     /// <returns>True if gold has been removed, false if player lacked funds.</returns>
     public bool RemoveGold(int removeGoldAmount)
     {
-        int temp = goldAmount;
+        int temp = statsData.gold;
 
         temp -= removeGoldAmount;
         if (temp < 0)
             return false;
 
-        goldAmount = temp;
-        goldText.text = "Gold: " + goldAmount;
+        statsData.gold = temp;
+        goldText.text = "Gold: " + statsData.gold;
 
         return true;
     }
     #endregion
 
-    private void InitializePlayer()
+    public void SavePlayerStats()
     {
-        currentLvl = 1;
-
-        maxHealth = 15;
-        currentHealth = 15;
-        maxStamina = 20;
-        currentStamina = 20;
-        maxMana = 10;
-        currentMana = 10;
-
-        SP = 0;
-        strength = 1;
-        agility = 1;
-        vitality = 1;
-        endurance = 1;
-        intelligence = 1;
-        luck = 1;
-
-        playerIsInitialized = true;
+        SaveGame.Save(identifier, statsData, SerializerDropdown.Singleton.ActiveSerializer);
     }
 
-    private void SetupStatsPage()
+    public void LoadPlayerStats()
     {
-        lvlText.text = "Lvl: " + currentLvl;
-        xpText.text = "Exp: " + currentXP + "/" + nextLevelXP;
-        healthText.text = currentHealth + "/" + maxHealth;
-        staminaText.text = currentStamina + "/" + maxStamina;
-        manaText.text = currentMana + "/" + maxMana;
+        if (statsData != null)
+        {
+            statsData = SaveGame.Load<StatsData>(identifier);
+        }
+        else
+        {
+            Debug.Log("Saved Data is null");
+            statsData.currentXP = 0;
 
-        xpSlider.maxValue = nextLevelXP;
-        xpSlider.value = currentXP;
+            lvlText.text = "Lvl: " + statsData.lvl;
+            xpText.text = "Exp: " + statsData.currentXP + "/" + statsData.nextLevelXP;
+            healthText.text = statsData.currentHealth + "/" + statsData.maxHealth;
+            staminaText.text = statsData.currentStamina + "/" + statsData.maxStamina;
+            manaText.text = statsData.currentMana + "/" + statsData.maxMana;
 
-        spText.text = "SP: " + SP;
-        strengthText.text = strength.ToString();
-        agilityText.text = agility.ToString();
-        vitalityText.text = vitality.ToString();
-        enduranceText.text = endurance.ToString();
-        intelligenceText.text = intelligence.ToString();
-        luckText.text = luck.ToString();
+            xpSlider.maxValue = statsData.nextLevelXP;
+            xpSlider.value = statsData.currentXP;
+
+            spText.text = "SP: " + statsData.SP;
+            strengthText.text = statsData.strength.ToString();
+            agilityText.text = statsData.agility.ToString();
+            vitalityText.text = statsData.vitality.ToString();
+            enduranceText.text = statsData.endurance.ToString();
+            intelligenceText.text = statsData.intelligence.ToString();
+            luckText.text = statsData.luck.ToString();
+        }
     }
 }
