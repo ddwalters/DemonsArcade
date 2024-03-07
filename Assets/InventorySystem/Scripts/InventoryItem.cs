@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Inventory
@@ -21,6 +22,7 @@ namespace Inventory
 
     public class InventoryItem : MonoBehaviour, IInventoryItemData
     {
+        public ItemStatsData ItemStats => _itemData.ItemStats;
         public int Width => _itemData.Width;
         public int Height => _itemData.Height;
         public bool[] OccupiedGrid => _itemData.OccupiedGrid;

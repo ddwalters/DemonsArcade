@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Inventory
 {
@@ -132,6 +133,8 @@ namespace Inventory
         public bool IsInventoryStoreType() => storeTypeInventory;
 
         public InventoryItem GrabItem(int x, int y) => _gridBase.GrabItem(x, y);
+
+        public InventoryItem GetHoveredItem(int x, int y) => _gridBase.GetHoveredItem(x, y);
 
         public bool CheckItemFits(InventoryItem item, int x, int y) => _gridBase.CheckItemFits(item, x, y);
 

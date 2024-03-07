@@ -26,11 +26,14 @@ public class PlayerStatsData
         nextLevelXP = 500;
 
         maxHealth = 100;
+        currentHealth = 100;
         maxStamina = 100;
+        currentStamina = 100;
         maxMana = 100;
+        currentMana = 100;
 
         SP = 0;
-        baseSP = 0;
+        baseSP = 1;
         spGrowth = 1.5f;
         strength = 1;
         agility = 1;

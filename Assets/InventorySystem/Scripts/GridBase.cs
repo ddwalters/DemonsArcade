@@ -75,6 +75,25 @@ namespace Inventory
             return item;
         }
 
+        public InventoryItem GetHoveredItem(int x, int y)
+        {
+            var item = _gridData[x, y];
+            if (item == null)
+                return item;
+
+            for (var i = 0; i < item.Height; i++)
+            {
+                var gridRow = item.GetGridRow(i);
+                for (var j = 0; j < item.Width; j++)
+                {
+                    if (gridRow[j])
+                        _gridData[item.Position.x + j, item.Position.y + i] = null;
+                }
+            }
+
+            return item;
+        }
+
         private void AssignTiles(InventoryItem item, int x, int y, bool remove = false)
         {
             if (item == null)
