@@ -68,6 +68,8 @@ namespace Inventory
             var items = _inventoryItems.GetInventoryItems() ?? new List<InventoryItemToPlace>();
             items.Add(newItem);
 
+            Debug.Log(prefab);
+            Debug.Log(_rectTransform);
             var itemObject = Instantiate(prefab, _rectTransform);
             itemObject.Initialize(newItem.ItemPreset.ItemData);
 
@@ -133,8 +135,6 @@ namespace Inventory
         public bool IsInventoryStoreType() => storeTypeInventory;
 
         public InventoryItem GrabItem(int x, int y) => _gridBase.GrabItem(x, y);
-
-        public InventoryItem GetHoveredItem(int x, int y) => _gridBase.GetHoveredItem(x, y);
 
         public bool CheckItemFits(InventoryItem item, int x, int y) => _gridBase.CheckItemFits(item, x, y);
 

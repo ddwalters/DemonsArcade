@@ -4,9 +4,6 @@ using UnityEngine;
 [Serializable]
 public class ItemStatsData
 {
-    private static ItemStatsData instance;
-
-
     [SerializeField] string name;
     [SerializeField] int damage;
     [SerializeField] int manaUsage;
@@ -52,7 +49,7 @@ public class ItemStatsData
         return name;
     }
 
-    private string CreateItemDescriptionText()
+    public string CreateItemDescriptionText()
     {
         string text = "";
 
@@ -81,14 +78,4 @@ public class ItemStatsData
 
         return text;
     }
-    
-    public static string GetItemName_Static()
-    {
-        return instance.GetItemName();
-    }
-
-    public static string GetItemDescription_Static()
-    {
-        return instance.CreateItemDescriptionText();
-    } 
 }

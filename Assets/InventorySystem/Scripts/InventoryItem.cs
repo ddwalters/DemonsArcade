@@ -20,7 +20,7 @@ namespace Inventory
         public Vector2Int Position;
     }
 
-    public class InventoryItem : MonoBehaviour, IInventoryItemData
+    public class InventoryItem : MonoBehaviour, IInventoryItemData, IPointerEnterHandler, IPointerExitHandler
     {
         public ItemStatsData ItemStats => _itemData.ItemStats;
         public int Width => _itemData.Width;
@@ -37,9 +37,17 @@ namespace Inventory
 
         private IInventoryItemData _itemData;
 
+        GridInteractableManager _gridInteractableManager;
+
+        ItemToolTip _itemToolTip;
+
         private void Awake()
         {
             RectTransform = GetComponent<RectTransform>();
+            gameObject.AddComponent<Collider2D>();
+
+            _gridInteractableManager = gameObject.GetComponentInParent<GridInteractableManager>();
+            _itemToolTip = GameObject.Find("ItemHoverToolTip").GetComponent<ItemToolTip>();
         }
 
         public void Initialize(IInventoryItemData itemData)
@@ -58,6 +66,16 @@ namespace Inventory
             }
 
             return gridRow;
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            _itemToolTip.ShowToolTip(_itemData.ItemStats.GetItemName(), _itemData.ItemStats.CreateItemDescriptionText());
+        }
+        
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            _itemToolTip.HideToolTip();
         }
 
         public void Rotate()

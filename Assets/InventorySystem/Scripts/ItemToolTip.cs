@@ -3,8 +3,6 @@ using UnityEngine;
 
 public class ItemToolTip : MonoBehaviour
 {
-    private static ItemToolTip instance;
-
     private Camera uiCamera;
 
     private TextMeshProUGUI ItemName;
@@ -27,13 +25,12 @@ public class ItemToolTip : MonoBehaviour
 
     private void Update()
     {
-        instance = this;
         Vector2 localPoint;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(transform.parent.GetComponent<RectTransform>(), Input.mousePosition, uiCamera, out localPoint);
         transform.localPosition = localPoint;
     }
 
-    private void ShowToolTip(string itemName, string itemStatsDescription)
+    public void ShowToolTip(string itemName, string itemStatsDescription)
     {
         gameObject.SetActive(true);
 
@@ -45,23 +42,8 @@ public class ItemToolTip : MonoBehaviour
         backgroundRectTransform.sizeDelta = backgorundSize;
     }
 
-    private void HideToolTip()
+    public void HideToolTip()
     {
         gameObject.SetActive(false);
-    }
-
-    public static void ShowToolTip_Static(string itemName, string itemStatsDescription)
-    {
-        instance.ShowToolTip(itemName, itemStatsDescription);
-    }
-
-    public static void HideToolTip_Static()
-    {
-        instance.HideToolTip();
-    }
-
-    public static bool GetIfToolTipHidden_Static()
-    {
-        return instance.enabled;
     }
 }

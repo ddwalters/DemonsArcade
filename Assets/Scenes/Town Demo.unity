@@ -20211,6 +20211,10 @@ PrefabInstance:
       propertyPath: unlimitedSprint
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8108553747731230688, guid: 1e8f3c2dca2fcc846acfc69087d510d0, type: 3}
+      propertyPath: m_AdditionalShaderChannelsFlag
+      value: 25
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -20472,6 +20476,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _grid: {fileID: 1570611504825574083}
+  _controller: {fileID: 0}
 --- !u!114 &4301420109291670327
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20485,6 +20490,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _grid: {fileID: 1570611505173675731}
+  _controller: {fileID: 0}
 --- !u!114 &4301420110230629813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20498,6 +20504,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _grid: {fileID: 1570611506113763409}
+  _controller: {fileID: 0}
 --- !u!4 &4408588288798163052
 Transform:
   m_ObjectHideFlags: 0

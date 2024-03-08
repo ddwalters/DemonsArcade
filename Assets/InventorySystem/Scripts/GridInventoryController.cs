@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 namespace Inventory
 {
@@ -30,6 +31,11 @@ namespace Inventory
             }
 
             ActiveGrid = null;
+        }
+
+        public ItemGrid GetActiveGrid()
+        {
+            return ActiveGrid;
         }
 
         private void Awake()
@@ -69,7 +75,6 @@ namespace Inventory
             _interactInput.Interact = false;
 
             var pos = ActiveGrid.GetTiledGridPosition(_cursorInput.CursorPosition);
-            ShowItemToolTip(pos);
 
             if (_currentlySelectedInventoryItem == null)
             {
@@ -97,25 +102,6 @@ namespace Inventory
         {
             _currentlySelectedInventoryItem = ActiveGrid.GrabItem(pos.x, pos.y);
             _currentlySelectedInventoryItemLastPosition = pos;
-        }
-
-        private void ShowItemToolTip(Vector2Int pos)
-        {
-            var item = ActiveGrid.GetHoveredItem(pos.x, pos.y);
-
-            if (item == null)
-            {
-                Debug.Log("Exited");
-
-                ItemToolTip.HideToolTip_Static();
-                return;
-            }
-
-            Debug.Log("Entered");
-            Debug.Log(ItemStatsData.GetItemName_Static());
-            Debug.Log(ItemStatsData.GetItemDescription_Static());
-            Debug.Log(item);
-            ItemToolTip.ShowToolTip_Static(ItemStatsData.GetItemName_Static(), ItemStatsData.GetItemDescription_Static());
         }
 
         private void PlaceItem(Vector2Int pos, ItemGrid gridOverride = null)

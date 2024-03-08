@@ -10,8 +10,6 @@ namespace Inventory
 
         public InventoryItem GrabItem(int x, int y);
 
-        public InventoryItem GetHoveredItem(int x, int y);
-
         public void PlaceItem(InventoryItem item, int x, int y);
     }
 }
