@@ -20,14 +20,16 @@ public class ItemToolTip : MonoBehaviour
     private void Start()
     {
         HideToolTip();
-        //ShowToolTip("Item Name", "Item stats and descriptions ect. \nnew Line stats");
     }
 
     private void Update()
     {
-        Vector2 localPoint;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(transform.parent.GetComponent<RectTransform>(), Input.mousePosition, uiCamera, out localPoint);
-        transform.localPosition = localPoint;
+        var parentCanvasRectTransform = transform.parent.GetComponent<RectTransform>();
+        Vector2 mergedFactors = new Vector2(
+            parentCanvasRectTransform.sizeDelta.x / Screen.width,
+            parentCanvasRectTransform.sizeDelta.y / Screen.height);
+
+        GetComponent<RectTransform>().anchoredPosition = Input.mousePosition * mergedFactors;
     }
 
     public void ShowToolTip(string itemName, string itemStatsDescription)
@@ -37,9 +39,9 @@ public class ItemToolTip : MonoBehaviour
         ItemName.text = itemName;
         ItemDescription.text = itemStatsDescription;
 
-        float textPaddingSize = 7f;
-        Vector2 backgorundSize = new Vector2(ItemDescription.preferredWidth + textPaddingSize * 2f, ItemDescription.preferredHeight + ItemName.preferredHeight + textPaddingSize * 2f);
-        backgroundRectTransform.sizeDelta = backgorundSize;
+        float textPaddingSize = 8f;
+        Vector2 backgroundSize = new Vector2(ItemDescription.preferredWidth + textPaddingSize, ItemDescription.preferredHeight + ItemName.preferredHeight + textPaddingSize);
+        backgroundRectTransform.sizeDelta = backgroundSize;
     }
 
     public void HideToolTip()
