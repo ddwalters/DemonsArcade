@@ -16049,6 +16049,7 @@ MonoBehaviour:
   _gridSquareSize: {x: 32, y: 32}
   _gridSize: {x: 4, y: 5}
   _rectTransform: {fileID: 512768186170951224}
+  _itemToolTip: {fileID: 1448934761}
 --- !u!114 &1570611505173675731
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16064,6 +16065,7 @@ MonoBehaviour:
   _gridSquareSize: {x: 32, y: 32}
   _gridSize: {x: 3, y: 3}
   _rectTransform: {fileID: 512768186418387496}
+  _itemToolTip: {fileID: 1448934761}
 --- !u!114 &1570611506113763409
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16079,6 +16081,7 @@ MonoBehaviour:
   _gridSquareSize: {x: 32, y: 32}
   _gridSize: {x: 4, y: 8}
   _rectTransform: {fileID: 512768185479412906}
+  _itemToolTip: {fileID: 1448934761}
 --- !u!33 &1608597630975996233
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -20476,7 +20479,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _grid: {fileID: 1570611504825574083}
-  _controller: {fileID: 0}
 --- !u!114 &4301420109291670327
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20490,7 +20492,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _grid: {fileID: 1570611505173675731}
-  _controller: {fileID: 0}
 --- !u!114 &4301420110230629813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20504,7 +20505,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _grid: {fileID: 1570611506113763409}
-  _controller: {fileID: 0}
 --- !u!4 &4408588288798163052
 Transform:
   m_ObjectHideFlags: 0
@@ -20537,6 +20537,10 @@ PrefabInstance:
     - target: {fileID: 1921668665023048516, guid: 9e6aa8b842bc669478f66d04b388d466, type: 3}
       propertyPath: m_ProvidesContacts
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2187976817747042657, guid: 9e6aa8b842bc669478f66d04b388d466, type: 3}
+      propertyPath: _statsData.name
+      value: Sword
       objectReference: {fileID: 0}
     - target: {fileID: 5093926129678243295, guid: 9e6aa8b842bc669478f66d04b388d466, type: 3}
       propertyPath: m_LocalPosition.x

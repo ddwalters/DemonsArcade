@@ -10,7 +10,6 @@ namespace Inventory
 
     public interface IGetItemData
     {
-        public ItemStatsData ItemStats { get; }
         public IInventoryItemData ItemData { get; }
     }
 }

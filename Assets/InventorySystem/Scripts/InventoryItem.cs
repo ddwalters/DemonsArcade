@@ -22,7 +22,6 @@ namespace Inventory
 
     public class InventoryItem : MonoBehaviour, IInventoryItemData, IPointerEnterHandler, IPointerExitHandler
     {
-        public ItemStatsData ItemStats => _itemData.ItemStats;
         public int Width => _itemData.Width;
         public int Height => _itemData.Height;
         public bool[] OccupiedGrid => _itemData.OccupiedGrid;
@@ -35,9 +34,9 @@ namespace Inventory
 
         [SerializeField] private Image _image;
 
-        private IInventoryItemData _itemData;
+        IInventoryItemData _itemData;
 
-        GridInteractableManager _gridInteractableManager;
+        ItemStatsData _itemStatsData;
 
         ItemToolTip _itemToolTip;
 
@@ -46,13 +45,14 @@ namespace Inventory
             RectTransform = GetComponent<RectTransform>();
             gameObject.AddComponent<Collider2D>();
 
-            _gridInteractableManager = gameObject.GetComponentInParent<GridInteractableManager>();
-            _itemToolTip = GameObject.Find("ItemHoverToolTip").GetComponent<ItemToolTip>();
+            //_itemToolTip = GameObject.Find("ItemHoverToolTip").GetComponent<ItemToolTip>();
         }
 
-        public void Initialize(IInventoryItemData itemData)
+        public void Initialize(IInventoryItemData itemData, ItemStatsData statsData, ItemToolTip itemToolTip)
         {
             _itemData = itemData;
+            _itemStatsData = statsData;
+            _itemToolTip = itemToolTip;
             RectTransform.sizeDelta = new Vector2(_itemData.Width * 32, _itemData.Height * 32);
             _image.sprite = _itemData.Sprite;
         }
@@ -70,7 +70,7 @@ namespace Inventory
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            _itemToolTip.ShowToolTip(_itemData.ItemStats.GetItemName(), _itemData.ItemStats.CreateItemDescriptionText());
+            _itemToolTip.ShowToolTip(_itemStatsData.GetItemName(), _itemStatsData.CreateItemDescriptionText());
         }
         
         public void OnPointerExit(PointerEventData eventData)

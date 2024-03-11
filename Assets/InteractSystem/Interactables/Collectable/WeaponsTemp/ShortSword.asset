@@ -12,20 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d242068b2ccd6774a8acef8546813c2c, type: 3}
   m_Name: ShortSword
   m_EditorClassIdentifier: 
-  _itemStats:
-    damage: 5
-    manaUsage: 0
-    XpPercentBoost: 0
-    maxHealthBonus: 0
-    maxStaminaBonus: 0
-    maxManaBonus: 0
-    strengthBoost: 0
-    agilityBoost: 0
-    vitalityBoost: 0
-    enduranceBoost: 0
-    intelligenceBoost: 0
-    luckBoost: 0
   _itemData:
+    _statsData:
+      name: Sword
+      damage: 0
+      manaUsage: 0
+      XpPercentBoost: 0
+      maxHealthBonus: 0
+      maxStaminaBonus: 0
+      maxManaBonus: 0
+      strengthBoost: 0
+      agilityBoost: 0
+      vitalityBoost: 0
+      enduranceBoost: 0
+      intelligenceBoost: 0
+      luckBoost: 0
     _width: 1
     _height: 2
     _occupiedGrid: 0101

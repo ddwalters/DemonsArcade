@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Inventory
 {
@@ -15,6 +14,8 @@ namespace Inventory
 
         private IGrid _gridBase;
         private IGetInventoryItems _inventoryItems;
+
+        [SerializeField] ItemToolTip _itemToolTip;
 
         private bool storeTypeInventory;
 
@@ -51,7 +52,7 @@ namespace Inventory
             foreach (var item in items)
             {
                 var itemObject = Instantiate(itemPrefab, _rectTransform);
-                itemObject.Initialize(item.ItemPreset.ItemData);
+                itemObject.Initialize(item.ItemPreset.ItemData, item.ItemPreset.StatsData, _itemToolTip);
 
                 if (CheckItemFits(itemObject, item.Position.x, item.Position.y))
                 {
@@ -68,10 +69,8 @@ namespace Inventory
             var items = _inventoryItems.GetInventoryItems() ?? new List<InventoryItemToPlace>();
             items.Add(newItem);
 
-            Debug.Log(prefab);
-            Debug.Log(_rectTransform);
             var itemObject = Instantiate(prefab, _rectTransform);
-            itemObject.Initialize(newItem.ItemPreset.ItemData);
+            itemObject.Initialize(newItem.ItemPreset.ItemData, newItem.ItemPreset.StatsData, _itemToolTip);
 
             for (int i = 0; i < _gridSize.y; i++)
             {
@@ -99,7 +98,7 @@ namespace Inventory
                 bool itemPlaced = false;
 
                 var itemObject = Instantiate(prefab, _rectTransform);
-                itemObject.Initialize(item.ItemPreset.ItemData);
+                itemObject.Initialize(item.ItemPreset.ItemData, item.ItemPreset.StatsData, _itemToolTip);
 
                 for (int i = 0; i < _gridSize.y; i++)
                 {

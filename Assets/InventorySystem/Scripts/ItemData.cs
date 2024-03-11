@@ -1,13 +1,11 @@
 using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Inventory
 {
     [Serializable]
     public class ItemData : IInventoryItemData
     {
-        public ItemStatsData ItemStats => _statsData;
         public int Width => _width;
         public int Height => _height;
         public bool[] OccupiedGrid => _occupiedGrid;
@@ -18,7 +16,6 @@ namespace Inventory
         public static Orientation[] Orientations =
             { Orientation.Up, Orientation.Right, Orientation.Down, Orientation.Left };
 
-        [SerializeField] public ItemStatsData _statsData;
 
         [SerializeField] private int _width;
 
@@ -32,9 +29,8 @@ namespace Inventory
         [SerializeField] private Orientation _orientation;
         private bool _rotatedAtLeastOnce;
 
-        public ItemData(ItemStatsData statsData, int width, int height, bool[] occupiedGrid, Sprite sprite)
+        public ItemData(int width, int height, bool[] occupiedGrid, Sprite sprite)
         {
-            _statsData = statsData;
             _width = width;
             _height = height;
             _occupiedGrid = occupiedGrid;
@@ -43,7 +39,7 @@ namespace Inventory
             _occupiedGridRotated = _occupiedGrid.Clone() as bool[];
         }
 
-        public ItemData(ItemData itemData) : this(itemData.ItemStats, itemData.Width, itemData.Height, itemData.OccupiedGrid, itemData.Sprite) { }
+        public ItemData(ItemData itemData) : this(itemData.Width, itemData.Height, itemData.OccupiedGrid, itemData.Sprite) { }
 
         public void Rotate()
         {

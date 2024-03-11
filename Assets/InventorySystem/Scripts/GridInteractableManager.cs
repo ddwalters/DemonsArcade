@@ -7,7 +7,7 @@ namespace Inventory
     {
         [SerializeField] private ItemGrid _grid;
 
-        public GridInventoryController _controller;
+        GridInventoryController _controller;
 
         public void OnPointerEnter(PointerEventData eventData)
         {

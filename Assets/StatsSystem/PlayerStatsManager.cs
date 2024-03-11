@@ -334,7 +334,6 @@ public class PlayerStats : MonoBehaviour
         }
         else
         {
-            Debug.Log("Saved Data is null");
             statsData = new PlayerStatsData();
 
             statsData.currentXP = 0;
