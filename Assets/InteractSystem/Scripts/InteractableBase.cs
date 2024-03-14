@@ -1,4 +1,3 @@
-using Inventory;
 using UnityEngine;
 
 public class InteractableBase : MonoBehaviour, IInteractable
