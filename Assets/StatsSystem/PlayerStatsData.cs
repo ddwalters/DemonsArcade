@@ -23,6 +23,7 @@ public class PlayerStatsData
     public PlayerStatsData()
     {
         lvl = 1;
+        gold = 100;
         nextLevelXP = 500;
 
         maxHealth = 100;

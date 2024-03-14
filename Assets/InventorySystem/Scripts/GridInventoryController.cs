@@ -1,5 +1,4 @@
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
 
 namespace Inventory
 {
@@ -78,19 +77,23 @@ namespace Inventory
 
             if (_currentlySelectedInventoryItem == null)
             {
-                GrabItem(pos);
+                if (ActiveGrid.IsInventoryStoreType())
+                    PurchaseItem(pos);
+                else
+                    GrabItem(pos);
+
                 _currentlySelectedInventoryItemLastGrid = ActiveGrid;
                 return;
             }
 
-            // grid shouldn't be allowed if it is a merchants inventory
-            if (!ActiveGrid.CheckItemFits(_currentlySelectedInventoryItem, pos.x, pos.y) || ActiveGrid.IsInventoryStoreType())
+            if (!ActiveGrid.CheckItemFits(_currentlySelectedInventoryItem, pos.x, pos.y))
             {
                 while (_currentlySelectedInventoryItem.Orientation != _currentlySelectedInventoryItemLastOrientation)
                 {
                     _currentlySelectedInventoryItem.Rotate();
                     Debug.Log($"New rotation: {_currentlySelectedInventoryItem.Orientation}");
                 }
+
                 PlaceItem(_currentlySelectedInventoryItemLastPosition, _currentlySelectedInventoryItemLastGrid);
                 return;
             }
@@ -102,6 +105,16 @@ namespace Inventory
         {
             _currentlySelectedInventoryItem = ActiveGrid.GrabItem(pos.x, pos.y);
             _currentlySelectedInventoryItemLastPosition = pos;
+        }
+
+        private void PurchaseItem(Vector2Int pos)
+        {
+            var purchaseItem = ActiveGrid.PurchaseItem(pos.x, pos.y);
+            if (purchaseItem != null) 
+            {
+                _currentlySelectedInventoryItem = purchaseItem;
+                _currentlySelectedInventoryItemLastPosition = pos;
+            }
         }
 
         private void PlaceItem(Vector2Int pos, ItemGrid gridOverride = null)
@@ -116,7 +129,10 @@ namespace Inventory
                     _currentlySelectedInventoryItem.Rotate();
                     if (gridOverride.CheckItemFits(_currentlySelectedInventoryItem, pos.x, pos.y))
                     {
-                        grid.PlaceItem(_currentlySelectedInventoryItem, pos.x, pos.y);
+                        if (ActiveGrid.IsInventoryStoreType())
+                            grid.SellItem(_currentlySelectedInventoryItem, pos.x, pos.y);
+                        else
+                            grid.PlaceItem(_currentlySelectedInventoryItem, pos.x, pos.y);
                         _currentlySelectedInventoryItem = null;
                         break;
                     }
@@ -125,7 +141,10 @@ namespace Inventory
                 return;
             }
 
-            grid.PlaceItem(_currentlySelectedInventoryItem, pos.x, pos.y);
+            if (ActiveGrid.IsInventoryStoreType())
+                grid.SellItem(_currentlySelectedInventoryItem, pos.x, pos.y);
+            else
+                grid.PlaceItem(_currentlySelectedInventoryItem, pos.x, pos.y);
             _currentlySelectedInventoryItem = null;
         }
     }

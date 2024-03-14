@@ -1137,7 +1137,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -50, y: 0}
+  m_AnchoredPosition: {x: 23.2, y: -63.3}
   m_SizeDelta: {x: 200, y: 100}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &300334082
@@ -2059,7 +2059,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -41.499977, y: -22.899998}
+  m_AnchoredPosition: {x: 31.700064, y: -86.2}
   m_SizeDelta: {x: 180, y: 50}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &493066849
@@ -6032,23 +6032,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1089468896}
   m_CullTransparentMesh: 1
---- !u!1 &1089798234 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 887830913874096447, guid: 1e8f3c2dca2fcc846acfc69087d510d0, type: 3}
-  m_PrefabInstance: {fileID: 4230450695486781824}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1089798245
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1089798234}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 062b3d139175ac242bc66f5871320e11, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1111197626
 GameObject:
   m_ObjectHideFlags: 0
@@ -9168,7 +9151,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -42.300003, y: -3.2000122}
+  m_AnchoredPosition: {x: 30.900034, y: -66.500015}
   m_SizeDelta: {x: 100, y: 20}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1446251388
@@ -9304,7 +9287,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 67.9, y: 17.8}
+  m_AnchoredPosition: {x: -9.5, y: 72.7}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1448934761
@@ -20139,10 +20122,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1698953411491935125}
     - target: {fileID: 2326666571443041105, guid: 1e8f3c2dca2fcc846acfc69087d510d0, type: 3}
-      propertyPath: LootView
-      value: 
-      objectReference: {fileID: 1698953411491935125}
-    - target: {fileID: 2326666571443041105, guid: 1e8f3c2dca2fcc846acfc69087d510d0, type: 3}
       propertyPath: StatsPage
       value: 
       objectReference: {fileID: 2004443079}
@@ -20158,10 +20137,6 @@ PrefabInstance:
       propertyPath: MerchantGrid
       value: 
       objectReference: {fileID: 1698953410551993623}
-    - target: {fileID: 2326666571443041105, guid: 1e8f3c2dca2fcc846acfc69087d510d0, type: 3}
-      propertyPath: playerInventory
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 3788379852880326476, guid: 1e8f3c2dca2fcc846acfc69087d510d0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 85.26
@@ -20202,29 +20177,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6229784363194925513, guid: 1e8f3c2dca2fcc846acfc69087d510d0, type: 3}
-      propertyPath: enableSprint
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6229784363194925513, guid: 1e8f3c2dca2fcc846acfc69087d510d0, type: 3}
-      propertyPath: sprintDuration
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6229784363194925513, guid: 1e8f3c2dca2fcc846acfc69087d510d0, type: 3}
-      propertyPath: unlimitedSprint
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8108553747731230688, guid: 1e8f3c2dca2fcc846acfc69087d510d0, type: 3}
-      propertyPath: m_AdditionalShaderChannelsFlag
-      value: 25
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 887830913874096447, guid: 1e8f3c2dca2fcc846acfc69087d510d0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1089798245}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1e8f3c2dca2fcc846acfc69087d510d0, type: 3}
 --- !u!23 &4273716534692954508
 MeshRenderer:

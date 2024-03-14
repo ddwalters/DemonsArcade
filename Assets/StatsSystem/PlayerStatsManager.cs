@@ -1,11 +1,10 @@
 using BayatGames.SaveGameFree;
-using BayatGames.SaveGameFree.Examples;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerStats : MonoBehaviour
+public class PlayerStatsManager : MonoBehaviour
 {
     string identifier = "gameSaveIdentifier";
     PlayerStatsData statsData;

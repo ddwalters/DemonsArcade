@@ -132,7 +132,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 100
@@ -178,6 +178,7 @@ GameObject:
   - component: {fileID: 1601678798947475302}
   - component: {fileID: 4645734452167650427}
   - component: {fileID: 5512883890150377732}
+  - component: {fileID: 1408808534223847850}
   m_Layer: 0
   m_Name: PlayerCharacter
   m_TagString: Player
@@ -373,8 +374,10 @@ MonoBehaviour:
   interactionData: {fileID: 11400000, guid: ed9d6ee0b61208f4cbb1e11b0bf16f98, type: 2}
   uiPanel: {fileID: 0}
   playerHud: {fileID: 0}
-  playerInventory: {fileID: 0}
-  LootView: {fileID: 0}
+  playerGrid: {fileID: 0}
+  StatsPage: {fileID: 0}
+  LootGrid: {fileID: 0}
+  MerchantGrid: {fileID: 0}
   rayDistance: 5
   raySphereRadius: 0.3
   interactableLayer:
@@ -418,6 +421,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6da7243995225dc41a754bd9972b3d44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1408808534223847850
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 887830913874096447}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 062b3d139175ac242bc66f5871320e11, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  statsData:
+    lvl: 1
+    nextLevelXP: 500
+    currentXP: 0
+    gold: 500
+    maxHealth: 100
+    currentHealth: 100
+    maxStamina: 100
+    currentStamina: 100
+    maxMana: 100
+    currentMana: 100
+    baseSP: 1
+    spGrowth: 1.5
+    SP: 0
+    strength: 1
+    agility: 1
+    vitality: 1
+    endurance: 1
+    intelligence: 1
+    luck: 1
 --- !u!1 &1623694767298004262
 GameObject:
   m_ObjectHideFlags: 0

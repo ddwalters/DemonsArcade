@@ -16,6 +16,7 @@ namespace Inventory
         private IGetInventoryItems _inventoryItems;
 
         [SerializeField] ItemToolTip _itemToolTip;
+        PlayerStatsManager _playerStatsManager;
 
         private bool storeTypeInventory;
 
@@ -26,6 +27,7 @@ namespace Inventory
 
         private void Start()
         {
+            _playerStatsManager = GameObject.Find("PlayerCharacter").GetComponent<PlayerStatsManager>();
             InitializeGrid(_gridSize.x, _gridSize.y);
         }
 
@@ -134,8 +136,42 @@ namespace Inventory
         public bool IsInventoryStoreType() => storeTypeInventory;
 
         public InventoryItem GrabItem(int x, int y) => _gridBase.GrabItem(x, y);
+        public InventoryItem PurchaseItem(int x, int y) 
+        {
+            var item = _gridBase.GrabItem(x, y);
+            var itemStats = item.GetItemStatsData();
+            if (_playerStatsManager.GetCurrentGold() < itemStats.GetCost())
+            {
+                Debug.Log("Not enough money");
+                return null;
+            }
 
+            // checking fit needs to be for the player grid size x and y
+            for (int i = 0; i < _gridSize.y; i++)
+            {
+                for (int j = 0; j < _gridSize.x; j++)
+                {
+                    if (CheckItemFits(item, j, i))
+                    {
+                        if (_playerStatsManager.RemoveGold(itemStats.GetCost()))
+                            return item;
+                        else
+                            return null; // gold was not removed
+                    }
+                }
+            }
+
+            return null;
+        } 
         public bool CheckItemFits(InventoryItem item, int x, int y) => _gridBase.CheckItemFits(item, x, y);
+
+        public void SellItem(InventoryItem item, int x, int y)
+        {
+            var itemStats = item.GetItemStatsData();
+            _playerStatsManager.GainGold(itemStats.GetCost());
+
+            PlaceItem(item, x, y);
+        }
 
         public void PlaceItem(InventoryItem item, int x, int y)
         {
@@ -144,36 +180,6 @@ namespace Inventory
             _gridBase.PlaceItem(item, x, y);
             var position = new Vector2(x * _gridSquareSize.x, -y * _gridSquareSize.y);
             item.RectTransform.localPosition = position;
-        }
-
-        public List<InventoryItem> GetUIItems()
-        {
-            var list = new List<InventoryItem>();
-
-            for (int i = 0; i < _gridSize.y; i++)
-            {
-                for (int j = 0; j < _gridSize.x; j++)
-                {
-                    var item = _gridBase.GetItem(i, j);
-
-                    if (!list.Contains(item) && item != null)
-                    {
-                        list.Add(item);
-                        Debug.Log(item.name);
-                    }
-                }
-            }
-
-            return list;
-        }
-
-        public void RemoveLastInventoryItem()
-        {
-            if (_inventoryItems == null)
-                return;
-
-            var items = _inventoryItems.GetInventoryItems();
-            items.RemoveAt(items.Count - 1);
         }
 
         public void RemoveInventoryItems()

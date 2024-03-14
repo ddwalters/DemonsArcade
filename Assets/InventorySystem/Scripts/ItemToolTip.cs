@@ -3,15 +3,12 @@ using UnityEngine;
 
 public class ItemToolTip : MonoBehaviour
 {
-    private Camera uiCamera;
-
     private TextMeshProUGUI ItemName;
     private TextMeshProUGUI ItemDescription;
     private RectTransform backgroundRectTransform;
 
     private void Awake()
     {
-        uiCamera = GameObject.Find("PlayerCamera").GetComponent<Camera>();
         backgroundRectTransform = transform.Find("ToolTipBackground").GetComponent<RectTransform>();
         ItemName = transform.Find("ItemNameToolTipText").GetComponent<TextMeshProUGUI>();
         ItemDescription = transform.Find("ItemDescriptionToolTipText").GetComponent<TextMeshProUGUI>();

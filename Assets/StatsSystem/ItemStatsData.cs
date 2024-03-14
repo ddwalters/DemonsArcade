@@ -5,6 +5,7 @@ using UnityEngine;
 public class ItemStatsData
 {
     [SerializeField] string name;
+    [SerializeField] int cost;
     [SerializeField] int damage;
     [SerializeField] int manaUsage;
 
@@ -44,15 +45,15 @@ public class ItemStatsData
         luckBoost = itemStats.luckBoost;
     }
 
-    public string GetItemName()
-    {
-        return name;
-    }
+    public string GetItemName() => name;
+    public int GetCost() => cost;
 
     public string CreateItemDescriptionText()
     {
         string text = "";
 
+        if (cost > 0)
+            text += "\nCost: " + cost;
         if (XpPercentBoost > 0)
             text += "\nXP Boost: " + XpPercentBoost + "%";
         if (maxHealthBonus > 0)

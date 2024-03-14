@@ -44,8 +44,6 @@ namespace Inventory
         {
             RectTransform = GetComponent<RectTransform>();
             gameObject.AddComponent<Collider2D>();
-
-            //_itemToolTip = GameObject.Find("ItemHoverToolTip").GetComponent<ItemToolTip>();
         }
 
         public void Initialize(IInventoryItemData itemData, ItemStatsData statsData, ItemToolTip itemToolTip)
@@ -83,6 +81,11 @@ namespace Inventory
             _itemData.Rotate();
             RectTransform.eulerAngles = new Vector3(0, 0, -(int)_itemData.Orientation);
             RectTransform.pivot = GetPivotFromOrientation(_itemData.Orientation);
+        }
+
+        public ItemStatsData GetItemStatsData()
+        {
+            return _itemStatsData;
         }
 
         private static Vector2 GetPivotFromOrientation(Orientation orientation)
