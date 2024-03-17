@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class ItemToolTip : MonoBehaviour
 {
@@ -36,8 +37,14 @@ public class ItemToolTip : MonoBehaviour
         ItemName.text = itemName;
         ItemDescription.text = itemStatsDescription;
 
+        Vector2 backgroundSize;
         float textPaddingSize = 8f;
-        Vector2 backgroundSize = new Vector2(ItemDescription.preferredWidth + textPaddingSize, ItemDescription.preferredHeight + ItemName.preferredHeight + textPaddingSize);
+
+        if (ItemName.preferredWidth < ItemDescription.preferredWidth)
+            backgroundSize = new Vector2(ItemDescription.preferredWidth + textPaddingSize + 8f, ItemDescription.preferredHeight + ItemName.preferredHeight + textPaddingSize + 2f);
+        else
+            backgroundSize = new Vector2(ItemName.preferredWidth + textPaddingSize + 8f, ItemDescription.preferredHeight + ItemName.preferredHeight + textPaddingSize + 2f);
+
         backgroundRectTransform.sizeDelta = backgroundSize;
     }
 
