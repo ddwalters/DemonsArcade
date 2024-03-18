@@ -19,7 +19,7 @@ public class doorwayWalls : MonoBehaviour
         {
             wall.SetActive(false);
         }
-        else if (other.CompareTag("Halldoor"))
+        else if (other.CompareTag("Doorway"))
         {
             wall.SetActive(false);
             door.SetActive(true);

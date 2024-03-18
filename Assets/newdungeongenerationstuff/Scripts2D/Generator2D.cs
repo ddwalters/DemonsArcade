@@ -150,7 +150,6 @@ public class Generator2D : MonoBehaviour
 
             if (isStartRoom == false)
             {
-                Debug.Log("start room init");
                 roomSize = new Vector2Int(3,3);
                 thisRoom = i;
             }
@@ -185,7 +184,6 @@ public class Generator2D : MonoBehaviour
             {
                 if (thisRoom == i)
                 {
-                    Debug.Log("StartRoom at: " + newRoom.bounds.position);
                     rooms.Add(newRoom);
                     isStartRoom = true;
                     PlaceStartRoom(newRoom.bounds.position, newRoom.bounds.size);
@@ -338,8 +336,6 @@ public class Generator2D : MonoBehaviour
 
     void PlaceStartRoom(Vector2Int location, Vector2Int size)
     {
-        Debug.Log("Placed start room at: " + location);
-
         GameObject go = Instantiate(startprefab, new Vector3(location.x, 0, location.y), Quaternion.identity);
 
         roomlist.Add(go);
@@ -349,8 +345,6 @@ public class Generator2D : MonoBehaviour
 
     void PlaceBossRoom(Vector2Int location, Vector2Int size)
     {
-        Debug.Log("Placed boss room at: " + location);
-
         GameObject go = Instantiate(bossprefab, new Vector3(location.x, 0, location.y), Quaternion.identity);
 
         roomlist.Add(go);
