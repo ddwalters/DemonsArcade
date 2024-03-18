@@ -11,9 +11,7 @@ namespace Inventory
         public InventoryItem GetItem(int x, int y)
         {
             if (x < 0 || y < 0 || x >= _gridSize.x || y >= _gridSize.y)
-            {
                 return null;
-            }
 
             return _gridData[x, y];
         }
@@ -39,9 +37,7 @@ namespace Inventory
             for (var i = 0; i < item.Height; i++)
             {
                 for (var j = 0; j < item.Width; j++)
-                {
                     sliceOfGrid[j, i] = _gridData[x + j, y + i];
-                }
             }
 
             for (var i = 0; i < item.Height; i++)
@@ -64,9 +60,7 @@ namespace Inventory
         {
             var item = _gridData[x, y];
             if (item == null)
-            {
                 return item;
-            }
 
             for (var i = 0; i < item.Height; i++)
             {
@@ -74,9 +68,7 @@ namespace Inventory
                 for (var j = 0; j < item.Width; j++)
                 {
                     if (gridRow[j])
-                    {
                         _gridData[item.Position.x + j, item.Position.y + i] = null;
-                    }
                 }
             }
 
@@ -86,9 +78,7 @@ namespace Inventory
         private void AssignTiles(InventoryItem item, int x, int y, bool remove = false)
         {
             if (item == null)
-            {
                 return;
-            }
 
             for (var i = 0; i < item.Height; i++)
             {
@@ -96,9 +86,7 @@ namespace Inventory
                 for (var j = 0; j < item.Width; j++)
                 {
                     if (gridRow[j])
-                    {
                         _gridData[x + j, y + i] = remove ? null : item;
-                    }
                 }
             }
         }
@@ -117,4 +105,3 @@ namespace Inventory
         }
     }
 }
-

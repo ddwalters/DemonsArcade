@@ -8,7 +8,7 @@ public interface IInteractable
 
     bool HoldInteract { get; }
 
-    bool MultipleUse { get; }
+    //bool MultipleUse { get; }
     
     bool IsInteractable { get; }
 

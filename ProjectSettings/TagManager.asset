@@ -13,10 +13,22 @@ TagManager:
   - InventoryView
   - Crate
   - PlayerInventory
-  - Ground
-  - Obstacles
-  - Doorway
-  - Halldoor
+  - MerchantInventory
+  - CrateInventory
+  - LevelText
+  - XPBar
+  - XPText
+  - HealthText
+  - StaminaText
+  - ManaText
+  - SPText
+  - StrengthText
+  - AgilityText
+  - VitalityText
+  - EnduranceText
+  - IntelligenceText
+  - LuckText
+  - StatsPage
   layers:
   - Default
   - TransparentFX
@@ -53,7 +65,4 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
-    locked: 0
-  - name: 
-    uniqueID: 3390653285
     locked: 0
