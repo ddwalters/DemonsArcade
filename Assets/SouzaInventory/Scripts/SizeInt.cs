@@ -1,4 +1,7 @@
-﻿public class SizeInt
+﻿using System;
+
+[Serializable]
+public class SizeInt
 {
     public int width;
 

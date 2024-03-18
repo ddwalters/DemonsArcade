@@ -50,10 +50,9 @@ public class Inventory : MonoBehaviour
     /// <summary>
     /// Awake is called when the script instance is being loaded.
     /// </summary>
-    [Obsolete]
     private void Awake()
     {
-        grids = GameObject.FindObjectsOfType<InventoryGrid>();
+        grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
     }
 
     /// <summary>
@@ -106,6 +105,7 @@ public class Inventory : MonoBehaviour
 
                                 newItem.indexPosition = slotPosition;
                                 newItem.inventory = this;
+                                newItem.rectTransform.localScale = new Vector2(itemData.size.width, itemData.size.width);
 
                                 for (int xx = 0; xx < itemData.size.width; xx++)
                                 {

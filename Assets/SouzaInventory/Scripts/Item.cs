@@ -59,8 +59,7 @@ public class Item : MonoBehaviour
     /// </summary>
     public SizeInt correctedSize
     {
-        get
-        { return new(!isRotated ? data.size.width : data.size.height, !isRotated ? data.size.height : data.size.width); }
+        get => new(!isRotated ? data.size.width : data.size.height, !isRotated ? data.size.height : data.size.width);
     }
 
     /// <summary>

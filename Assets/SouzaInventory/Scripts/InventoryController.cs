@@ -19,7 +19,7 @@ public class InventoryController : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (Input.GetKeyDown(KeyCode.Mouse0) && Cursor.lockState != CursorLockMode.Locked)
         {
             // Check if mouse is inside a any grid.
             if (!inventory.ReachedBoundary(inventory.GetSlotAtMouseCoords(), inventory.gridOnMouse))
@@ -28,7 +28,7 @@ public class InventoryController : MonoBehaviour
                 {
                     Item oldSelectedItem = inventory.selectedItem;
                     Item overlapItem = inventory.GetItemAtMouseCoords();
-
+        
                     if (overlapItem != null)
                     {
                         inventory.SwapItem(overlapItem, oldSelectedItem);
