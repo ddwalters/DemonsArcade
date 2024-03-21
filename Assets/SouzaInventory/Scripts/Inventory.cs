@@ -372,22 +372,16 @@ public class Inventory : MonoBehaviour
         }
 
         float scaleFactor = GetComponentInParent<Canvas>().scaleFactor;
-        print(scaleFactor);
 
         Vector2 gridPosition = new(
             (Input.mousePosition.x - gridOnMouse.rectTransform.position.x) / scaleFactor,
             (gridOnMouse.rectTransform.position.y - Input.mousePosition.y) / scaleFactor);
-        print(gridPosition);
-
-        var slotSizeX = InventorySettings.slotSize.x * InventorySettings.slotScale;
-        var slotSizeY = InventorySettings.slotSize.y * InventorySettings.slotScale;
 
         Vector2Int slotPosition = 
             new(
-                (int)(gridPosition.x / slotSizeX),
-                (int)(gridPosition.y / slotSizeY)
+                (int)(gridPosition.x / InventorySettings.slotSize.x * InventorySettings.slotScale),
+                (int)(gridPosition.y / InventorySettings.slotSize.y * InventorySettings.slotScale)
             );
-        print(slotPosition);
 
         return slotPosition;
     }
