@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 [RequireComponent(typeof(Inventory))]
@@ -19,9 +18,8 @@ public class InventoryController : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0) && Cursor.lockState != CursorLockMode.Locked)
+        if (Input.GetKeyDown(KeyCode.Mouse0) && inventory.gridOnMouse != null)
         {
-            // Check if mouse is inside a any grid.
             if (!inventory.ReachedBoundary(inventory.GetSlotAtMouseCoords(), inventory.gridOnMouse))
             {
                 if (inventory.selectedItem)
@@ -101,10 +99,10 @@ public class InventoryController : MonoBehaviour
     {
         inventory.selectedItem.rectTransform.position = new Vector3(
                 Input.mousePosition.x
-                    + ((inventory.selectedItem.correctedSize.width * InventorySettings.slotSize.x) / 2)
+                    + (inventory.selectedItem.correctedSize.width * InventorySettings.slotSize.x / 2)
                     - InventorySettings.slotSize.x / 2,
                 Input.mousePosition.y
-                    - ((inventory.selectedItem.correctedSize.height * InventorySettings.slotSize.y) / 2)
+                    - (inventory.selectedItem.correctedSize.height * InventorySettings.slotSize.y / 2)
                     + InventorySettings.slotSize.y / 2,
                 Input.mousePosition.z
             );

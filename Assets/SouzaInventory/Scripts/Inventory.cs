@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public static class InventorySettings
@@ -372,11 +371,9 @@ public class Inventory : MonoBehaviour
             return Vector2Int.zero;
         }
 
-        Vector2 gridPosition =
-            new(
-                Input.mousePosition.x - gridOnMouse.rectTransform.position.x,
-                gridOnMouse.rectTransform.position.y - Input.mousePosition.y
-            );
+        Vector2 gridPosition = new(
+            Input.mousePosition.x - gridOnMouse.rectTransform.position.x,
+            gridOnMouse.rectTransform.position.y - Input.mousePosition.y);
 
         Vector2Int slotPosition =
             new(
