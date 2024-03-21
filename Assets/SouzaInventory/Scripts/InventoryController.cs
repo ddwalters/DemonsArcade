@@ -49,11 +49,11 @@ public class InventoryController : MonoBehaviour
             RemoveItemWithMouse();
         }
 
-        // Generates a random item in the inventory
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            inventory.AddItem(inventory.itemsData[UnityEngine.Random.Range(0, inventory.itemsData.Length)]);
-        }
+        //// Generates a random item in the inventory
+        //if (Input.GetKeyDown(KeyCode.Space))
+        //{
+        //    inventory.AddItem(inventory.itemsData[UnityEngine.Random.Range(0, inventory.itemsData.Length)]);
+        //}
 
         if (inventory.selectedItem != null)
         {

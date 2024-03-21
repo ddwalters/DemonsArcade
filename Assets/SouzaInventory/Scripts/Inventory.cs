@@ -24,7 +24,7 @@ public class Inventory : MonoBehaviour
     /// List of data for each item in the game.
     /// </summary>
     [Header("Settings")]
-    public ItemData[] itemsData;
+    //public ItemData[] itemsData;
 
     /// <summary>
     /// Prefab used to instantiate new items.
@@ -46,12 +46,15 @@ public class Inventory : MonoBehaviour
     /// </summary>
     public Item selectedItem { get; private set; }
 
+    private Canvas canvas;
+
     /// <summary>
     /// Awake is called when the script instance is being loaded.
     /// </summary>
     private void Awake()
     {
         grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
+        canvas = GetComponentInParent<Canvas>();
     }
 
     /// <summary>
@@ -371,7 +374,7 @@ public class Inventory : MonoBehaviour
             return Vector2Int.zero;
         }
 
-        float scaleFactor = GetComponentInParent<Canvas>().scaleFactor;
+        float scaleFactor = canvas.scaleFactor;
 
         Vector2 gridPosition = new(
             (Input.mousePosition.x - gridOnMouse.rectTransform.position.x) / scaleFactor,
