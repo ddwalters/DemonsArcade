@@ -20,5 +20,8 @@ public class ItemData : ScriptableObject
     /// </summary>
     public Color backgroundColor;
 
+    /// <summary>
+    /// The stats for the item, editable in the inspector..
+    /// </summary>
     public ItemStatsData itemStats;
 }

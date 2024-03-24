@@ -162,7 +162,7 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         tooltip.ShowToolTip(data.itemStats.GetItemName(), data.itemStats.CreateItemDescriptionText());
     }
-
+    
     public void OnPointerExit(PointerEventData eventData)
     {
         tooltip.HideToolTip();

@@ -391,7 +391,6 @@ public class Inventory : MonoBehaviour
         return slotPosition;
     }
 
-
     /// <summary>
     /// Returns an item based on the mouse position.
     /// </summary>
@@ -419,7 +418,7 @@ public class Inventory : MonoBehaviour
     }
 
     /// <summary>
-    /// Returns the gameobject for item tooltips. Mainly for easy access from new inventory items.
+    /// Returns the ItemToolTip script from the tooltip GameObject. Mainly for easy access from new inventory items.
     /// </summary>
     /// <returns></returns>
     public ItemToolTip GetItemTooltip()

@@ -18,7 +18,7 @@ public class InventoryController : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0) && inventory.gridOnMouse != null)
+;        if (Input.GetKeyDown(KeyCode.Mouse0) && inventory.gridOnMouse != null)
         {
             if (!inventory.ReachedBoundary(inventory.GetSlotAtMouseCoords(), inventory.gridOnMouse))
             {
