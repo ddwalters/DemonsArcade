@@ -3,19 +3,9 @@ using UnityEngine;
 
 public class ItemToolTip : MonoBehaviour
 {
-    private TextMeshProUGUI ItemName;
-    private TextMeshProUGUI ItemDescription;
-    private RectTransform backgroundRectTransform;
-
-    // make the prefab on start? 
-    [SerializeField] GameObject ToolTipPrefab;
-
-    private void Awake()
-    {
-        backgroundRectTransform = transform.Find("ToolTipBackground").GetComponent<RectTransform>();
-        ItemName = transform.Find("ItemNameToolTipText").GetComponent<TextMeshProUGUI>();
-        ItemDescription = transform.Find("ItemDescriptionToolTipText").GetComponent<TextMeshProUGUI>();
-    }
+    [SerializeField] TextMeshProUGUI ItemName;
+    [SerializeField] TextMeshProUGUI ItemDescription;
+    [SerializeField] RectTransform backgroundRectTransform;
 
     private void Start()
     {

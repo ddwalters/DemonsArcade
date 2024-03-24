@@ -19,4 +19,6 @@ public class ItemData : ScriptableObject
     /// Background color of the item icon.
     /// </summary>
     public Color backgroundColor;
+
+    public ItemStatsData itemStats;
 }

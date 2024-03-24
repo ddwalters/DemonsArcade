@@ -48,6 +48,8 @@ public class Inventory : MonoBehaviour
 
     private Canvas canvas;
 
+    [SerializeField] ItemToolTip tooltip;
+
     /// <summary>
     /// Awake is called when the script instance is being loaded.
     /// </summary>
@@ -414,5 +416,14 @@ public class Inventory : MonoBehaviour
     public Item GetItemFromSlotPosition(Vector2Int slotPosition)
     {
         return gridOnMouse.items[slotPosition.x, slotPosition.y];
+    }
+
+    /// <summary>
+    /// Returns the gameobject for item tooltips. Mainly for easy access from new inventory items.
+    /// </summary>
+    /// <returns></returns>
+    public ItemToolTip GetItemTooltip()
+    {
+        return tooltip;
     }
 }

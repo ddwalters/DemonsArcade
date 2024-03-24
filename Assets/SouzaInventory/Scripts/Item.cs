@@ -1,8 +1,9 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(RectTransform))]
-public class Item : MonoBehaviour
+public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     /// <summary>
     /// Data of the item referenced in the Item script
@@ -62,12 +63,16 @@ public class Item : MonoBehaviour
         get => new(!isRotated ? data.size.width : data.size.height, !isRotated ? data.size.height : data.size.width);
     }
 
+    private ItemToolTip tooltip;
+
     /// <summary>
     /// Start is called on the frame when a script is enabled just before
     /// any of the Update methods is called the first time.
     /// </summary>
     private void Start()
     {
+        tooltip = inventory.GetItemTooltip();
+
         icon.sprite = data.icon;
         background.color = data.backgroundColor;
     }
@@ -151,5 +156,15 @@ public class Item : MonoBehaviour
                 InventorySettings.rotationAnimationSpeed * Time.deltaTime
             );
         }
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        tooltip.ShowToolTip(data.itemStats.GetItemName(), data.itemStats.CreateItemDescriptionText());
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        tooltip.HideToolTip();
     }
 }
