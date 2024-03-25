@@ -131,6 +131,9 @@ MonoBehaviour:
   background: {fileID: 81821847383495850}
   isRotated: 0
   rotateIndex: 0
+  gridLayerMask:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!225 &7159758142388666501
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -141,7 +144,7 @@ CanvasGroup:
   m_Enabled: 1
   m_Alpha: 1
   m_Interactable: 1
-  m_BlocksRaycasts: 0
+  m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
 --- !u!1 &6469552943895417919
 GameObject:

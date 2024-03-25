@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public static class InventorySettings
 {
@@ -67,6 +68,7 @@ public class Inventory : MonoBehaviour
     {
         ClearItemReferences(item);
         selectedItem = item;
+        selectedItem.GetComponent<CanvasGroup>().blocksRaycasts = false;
         selectedItem.rectTransform.SetParent(transform);
         selectedItem.rectTransform.SetAsLastSibling();
     }
@@ -226,6 +228,7 @@ public class Inventory : MonoBehaviour
 
         if (deselectItemInEnd)
         {
+            item.GetComponent<CanvasGroup>().blocksRaycasts = true;
             DeselectItem();
         }
     }
