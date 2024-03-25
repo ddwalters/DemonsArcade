@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public static class InventorySettings
 {
@@ -56,7 +55,7 @@ public class Inventory : MonoBehaviour
     /// </summary>
     private void Awake()
     {
-        grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
+        grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.InstanceID);
         canvas = GetComponentInParent<Canvas>();
     }
 

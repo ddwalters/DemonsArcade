@@ -63,11 +63,6 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         get => new(!isRotated ? data.size.width : data.size.height, !isRotated ? data.size.height : data.size.width);
     }
 
-    /// <summary>
-    /// item Prefabs Layer Mask.
-    /// </summary>
-    public LayerMask gridLayerMask;
-
     private ItemToolTip tooltip;
 
     /// <summary>
@@ -167,7 +162,7 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         tooltip.ShowToolTip(data.itemStats.GetItemName(), data.itemStats.CreateItemDescriptionText());
     }
-
+    
     public void OnPointerExit(PointerEventData eventData)
     {
         tooltip.HideToolTip();
