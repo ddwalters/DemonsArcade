@@ -303,7 +303,6 @@ public class Inventory : MonoBehaviour
     {
         if (ReachedBoundary(slotPosition, grid, width, height))
         {
-            Debug.Log("Bounds2");
             return true;
         }
 
