@@ -9,10 +9,28 @@ TagManager:
   - Room
   - Hallway
   - MainCanvas
-  - HeartFill
-  - StaminaFill
-  - ManaFill
-  - Obstacles
+  - LootView
+  - InventoryView
+  - Crate
+  - PlayerInventory
+  - MerchantInventory
+  - CrateInventory
+  - LevelText
+  - XPBar
+  - XPText
+  - HealthText
+  - StaminaText
+  - ManaText
+  - SPText
+  - StrengthText
+  - AgilityText
+  - VitalityText
+  - EnduranceText
+  - IntelligenceText
+  - LuckText
+  - StatsPage
+  - Halldoor
+  - Doorway
   layers:
   - Default
   - TransparentFX
@@ -23,7 +41,7 @@ TagManager:
   - Ground
   - Interactable
   - Obstacle
-  - InventoryGridUI
+  - 
   - 
   - 
   - 
@@ -49,7 +67,4 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
-    locked: 0
-  - name: PlayerHud
-    uniqueID: 4105254729
     locked: 0
