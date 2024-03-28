@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -25,12 +26,20 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
     /// </summary>
     public Inventory inventory { get; private set; }
 
+    /// <summary>
+    /// Main inventory manager reference.
+    /// </summary>
+    public InventoryManager inventoryManager { get; private set; }
+
+    private int? gridId;
+
     [System.Obsolete]
     private void Awake()
     {
         if (rectTransform != null)
         {
             inventory = GameObject.FindObjectOfType<Inventory>();
+            inventoryManager = GameObject.FindObjectOfType<InventoryManager>();
             InitializeGrid();
         }
         else
@@ -54,6 +63,13 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
                 gridSize.y * InventorySettings.slotSize.y
             );
         rectTransform.sizeDelta = size;
+
+        inventoryManager.AddGrid(this);
+    }
+
+    public void CloseGrid()
+    {
+        Destroy(gameObject);
     }
 
     /// <summary>

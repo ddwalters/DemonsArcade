@@ -21,6 +21,8 @@ public class InteractionController : MonoBehaviour
 
     private bool _interacting;
 
+    private bool _lootingInteracted;
+
     private float _holdTimer = 0f;
 
     private void Awake()
@@ -33,18 +35,27 @@ public class InteractionController : MonoBehaviour
         interactionInputData.InteractClicked = Input.GetKeyDown(KeyCode.E);
         interactionInputData.InteractRelease = Input.GetKeyUp(KeyCode.E);
 
-        if (Input.GetKeyDown(KeyCode.Tab))
-            Cursor.lockState = CursorLockMode.Confined;
-
-        if (Input.GetKeyUp(KeyCode.Tab))
-            Cursor.lockState = CursorLockMode.Locked;
-
         CheckForInteractable();
         CheckForInteractableInput();
     }
 
     private void CheckForInteractable()
     {
+        if (_lootingInteracted)
+        {
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                var grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
+                foreach (var grid in grids)
+                    grid.CloseGrid();
+
+                Cursor.lockState = CursorLockMode.Locked;
+                _lootingInteracted = false;
+            }
+
+            return;
+        }
+
         Ray ray = new Ray(_camera.transform.position, _camera.transform.forward);
         bool hitSomething = Physics.SphereCast(ray, raySphereRadius, out var hit, rayDistance, interactableLayer);
 
@@ -80,7 +91,7 @@ public class InteractionController : MonoBehaviour
 
     private void CheckForInteractableInput()
     {
-        if (interactionData.IsEmpty())
+        if (interactionData.IsEmpty() || _lootingInteracted)
             return;
 
         if (interactionInputData.InteractClicked)
@@ -120,5 +131,10 @@ public class InteractionController : MonoBehaviour
                 _interacting = false;
             }
         }
+    }
+
+    public void SetLootingInteracted()
+    {
+        _lootingInteracted = true;
     }
 }

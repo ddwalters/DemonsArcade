@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using static InventoryType;
 
 public static class InventorySettings
 {
@@ -21,14 +23,9 @@ public static class InventorySettings
 public class Inventory : MonoBehaviour
 {
     /// <summary>
-    /// List of data for each item in the game.
-    /// </summary>
-    [Header("Settings")]
-    //public ItemData[] itemsData;
-
-    /// <summary>
     /// Prefab used to instantiate new items.
     /// </summary>
+    [Header("Settings")]
     public Item itemPrefab;
 
     /// <summary>
@@ -42,13 +39,28 @@ public class Inventory : MonoBehaviour
     public InventoryGrid[] grids { get; private set; }
 
     /// <summary>
+    /// Prefabs of all inventoryTypes
+    /// </summary>
+    public InventoryTypeCollection inventoryType;
+
+    /// <summary>
     /// Currently selected item.
     /// </summary>
     public Item selectedItem { get; private set; }
 
+    /// <summary>
+    /// Tooltip used for info on hovering of an item.
+    /// </summary>
+    public ItemToolTip tooltip;
+
+    /// <summary>
+    /// UI Canvas used for scaling.
+    /// </summary>
     private Canvas canvas;
 
-    [SerializeField] ItemToolTip tooltip;
+    private GameObject playerGridHolder;
+
+    private GameObject worldGridHolder;
 
     /// <summary>
     /// Awake is called when the script instance is being loaded.
@@ -57,6 +69,9 @@ public class Inventory : MonoBehaviour
     {
         grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.InstanceID);
         canvas = GetComponentInParent<Canvas>();
+
+        playerGridHolder = GameObject.Find("PlayerInventory");
+        worldGridHolder = GameObject.Find("WorldInventory");
     }
 
     /// <summary>
@@ -81,10 +96,32 @@ public class Inventory : MonoBehaviour
     }
 
     /// <summary>
+    /// Generates a new 'Backpack' game object loading the given inventory items.
+    /// </summary>
+    /// <param name="type">Determines the 'type' or size of the grid.</param>
+    /// <param name="items">Items that will appear in the grid.</param>
+    /// <param name="isPlayerGrid">If true, places grid in player inventory location.</param>
+    public void OpenInventoryGrid(InvType type, Item[,] items, bool isPlayerGrid)
+    {
+        GameObject grid;
+        if (isPlayerGrid)
+            grid = Instantiate(inventoryType[type], playerGridHolder.transform);
+        else
+            grid = Instantiate(inventoryType[type], worldGridHolder.transform);
+
+        if (items == null)
+            return;
+
+        var inventoryGrid = grid.GetComponent<InventoryGrid>();
+        foreach (Item item in items)
+            AddItemGridSpecific(inventoryGrid, item.data);
+    }
+
+    /// <summary>
     /// Add an item to the inventory dynamically by looking for where the item might fit.
     /// </summary>
     /// <param name="itemData">Data of the item that will be added to the inventory.</param>
-    public void AddItem(ItemData itemData)
+    public void AddItemFirstGrid(ItemData itemData)
     {
         for (int g = 0; g < grids.Length; g++)
         {
@@ -164,6 +201,97 @@ public class Inventory : MonoBehaviour
 
                                 return;
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        Debug.Log("(Inventory) Not enough slots found to add the item!");
+    }
+
+    /// <summary>
+    /// Add an item to the inventory dynamically by looking for where the item might fit.
+    /// </summary>
+    /// <param name="grid">Grid for the item to be added to.</param>
+    /// <param name="itemData">Data of the item that will be added to the inventory.</param>
+    public void AddItemGridSpecific(InventoryGrid grid, ItemData itemData)
+    {
+        for (int y = 0; y < grid.gridSize.y; y++)
+        {
+            for (int x = 0; x < grid.gridSize.x; x++)
+            {
+                Vector2Int slotPosition = new Vector2Int(x, y);
+
+                for (int r = 0; r < 2; r++)
+                {
+                    if (r == 0)
+                    {
+                        if (!ExistsItem(slotPosition, grid, itemData.size.width, itemData.size.height))
+                        {
+                            Item newItem = Instantiate(itemPrefab);
+                            newItem.rectTransform = newItem.GetComponent<RectTransform>();
+                            newItem.rectTransform.SetParent(grid.rectTransform);
+                            newItem.rectTransform.sizeDelta = new Vector2(
+                                itemData.size.width * InventorySettings.slotSize.x,
+                                itemData.size.height * InventorySettings.slotSize.y
+                            );
+
+                            newItem.indexPosition = slotPosition;
+                            newItem.inventory = this;
+                            newItem.rectTransform.localScale = new Vector2(itemData.size.width, itemData.size.width);
+
+                            for (int xx = 0; xx < itemData.size.width; xx++)
+                            {
+                                for (int yy = 0; yy < itemData.size.height; yy++)
+                                {
+                                    int slotX = slotPosition.x + xx;
+                                    int slotY = slotPosition.y + yy;
+
+                                    grid.items[slotX, slotY] = newItem;
+                                    grid.items[slotX, slotY].data = itemData;
+                                }
+                            }
+
+                            newItem.rectTransform.localPosition = IndexToInventoryPosition(newItem);
+                            newItem.inventoryGrid = grid;
+                            return;
+                        }
+                    }
+
+                    if (r == 1)
+                    {
+                        if (!ExistsItem(slotPosition, grid, itemData.size.height, itemData.size.width))
+                        {
+                            Item newItem = Instantiate(itemPrefab);
+                            newItem.Rotate();
+
+                            newItem.rectTransform = newItem.GetComponent<RectTransform>();
+                            newItem.rectTransform.SetParent(grid.rectTransform);
+                            newItem.rectTransform.sizeDelta = new Vector2(
+                                itemData.size.width * InventorySettings.slotSize.x,
+                                itemData.size.height * InventorySettings.slotSize.y
+                            );
+
+                            newItem.indexPosition = slotPosition;
+                            newItem.inventory = this;
+
+                            for (int xx = 0; xx < itemData.size.height; xx++)
+                            {
+                                for (int yy = 0; yy < itemData.size.width; yy++)
+                                {
+                                    int slotX = slotPosition.x + xx;
+                                    int slotY = slotPosition.y + yy;
+
+                                    grid.items[slotX, slotY] = newItem;
+                                    grid.items[slotX, slotY].data = itemData;
+                                }
+                            }
+
+                            newItem.rectTransform.localPosition = IndexToInventoryPosition(newItem);
+                            newItem.inventoryGrid = grid;
+
+                            return;
                         }
                     }
                 }
@@ -383,7 +511,7 @@ public class Inventory : MonoBehaviour
             (Input.mousePosition.x - gridOnMouse.rectTransform.position.x) / scaleFactor,
             (gridOnMouse.rectTransform.position.y - Input.mousePosition.y) / scaleFactor);
 
-        Vector2Int slotPosition = 
+        Vector2Int slotPosition =
             new(
                 (int)(gridPosition.x / InventorySettings.slotSize.x * InventorySettings.slotScale),
                 (int)(gridPosition.y / InventorySettings.slotSize.y * InventorySettings.slotScale)
