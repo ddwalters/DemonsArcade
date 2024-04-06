@@ -92,7 +92,11 @@ public class InteractionController : MonoBehaviour
     private void CheckForInteractableInput()
     {
         if (interactionData.IsEmpty() || _lootingInteracted)
+        {
+            _holdTimer = 0f;
+            uiPanel.UpdateProgressBar(_holdTimer);
             return;
+        }
 
         if (interactionInputData.InteractClicked)
         {

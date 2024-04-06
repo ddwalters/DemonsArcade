@@ -4,21 +4,21 @@ public class CollectInteractable : InteractableBase
 {
     [SerializeField] ItemData itemData;
 
-    // will need to be found with tag or gotten through the child of Player gameobject under Inventory
-    [SerializeField] InventoryGrid playerGrid;
-
     Inventory inventory;
+
+    InventoryManager inventoryManager;
 
     private void Awake()
     {
-        inventory = GetComponent<Inventory>();
+        inventory = FindAnyObjectByType<Inventory>();
+        inventoryManager = FindAnyObjectByType<InventoryManager>();
     }
 
     public override void OnInteract()
     {
         base.OnInteract();
-            
-        inventory.AddItemGridSpecific(playerGrid, itemData);
+
+        inventory.AddItemInventoryList(itemData, 0);
         Destroy(gameObject);
     }
 }

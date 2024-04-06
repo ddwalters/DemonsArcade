@@ -2,58 +2,60 @@ using BayatGames.SaveGameFree;
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerStatsManager : MonoBehaviour
 {
     string identifier = "gameSaveIdentifier";
     PlayerStatsData statsData;
 
-    Slider xpSlider;
-    Image healthFill;
-    Image staminaFill;
-    Image manaFill;
-    TextMeshProUGUI lvlText;
-    TextMeshProUGUI xpText;
-    TextMeshProUGUI goldText;
-    TextMeshProUGUI healthText;
-    TextMeshProUGUI staminaText;
-    TextMeshProUGUI manaText;
-    TextMeshProUGUI spText;
-    TextMeshProUGUI strengthText;
-    TextMeshProUGUI agilityText;
-    TextMeshProUGUI vitalityText;
-    TextMeshProUGUI enduranceText;
-    TextMeshProUGUI intelligenceText;
-    TextMeshProUGUI luckText;
+    //[SerializeField] Slider xpSlider;
+    //[SerializeField] Image healthFill;
+    //[SerializeField] Image staminaFill;
+    //[SerializeField] Image manaFill;
+    //[SerializeField] TextMeshProUGUI lvlText;
+    //[SerializeField] TextMeshProUGUI xpText;
+    //[SerializeField] TextMeshProUGUI goldText;
+    //[SerializeField] TextMeshProUGUI healthText;
+    //[SerializeField] TextMeshProUGUI staminaText;
+    //[SerializeField] TextMeshProUGUI manaText;
+    //[SerializeField] TextMeshProUGUI spText;
+    //[SerializeField] TextMeshProUGUI strengthText;
+    //[SerializeField] TextMeshProUGUI agilityText;
+    //[SerializeField] TextMeshProUGUI vitalityText;
+    //[SerializeField] TextMeshProUGUI enduranceText;
+    //[SerializeField] TextMeshProUGUI intelligenceText;
+    //[SerializeField] TextMeshProUGUI luckText;
+
+    //private void Awake()
+    //{
+    //    lvlText = GameObject.Find("PlayerLevelText").GetComponent<TextMeshProUGUI>();
+    //    xpText = GameObject.Find("EXPText").GetComponent<TextMeshProUGUI>();
+    //    goldText = GameObject.Find("PlayerGoldText").GetComponent<TextMeshProUGUI>();
+    //    healthText = GameObject.Find("PlayerHealthText").GetComponent<TextMeshProUGUI>();
+    //    staminaText = GameObject.Find("PlayerStaminaText").GetComponent<TextMeshProUGUI>();
+    //    manaText = GameObject.Find("PlayerManaText").GetComponent<TextMeshProUGUI>();
+    //    spText = GameObject.Find("PlayerSPText").GetComponent<TextMeshProUGUI>();
+    //    strengthText = GameObject.Find("PlayerStrengthText").GetComponent<TextMeshProUGUI>();
+    //    agilityText = GameObject.Find("PlayerAgilityText").GetComponent<TextMeshProUGUI>();
+    //    vitalityText = GameObject.Find("PlayerVitalityText").GetComponent<TextMeshProUGUI>();
+    //    enduranceText = GameObject.Find("PlayerEnduranceText").GetComponent<TextMeshProUGUI>();
+    //    intelligenceText = GameObject.Find("PlayerIntelligenceText").GetComponent<TextMeshProUGUI>();
+    //    luckText = GameObject.Find("PlayerLuckText").GetComponent<TextMeshProUGUI>();
+    //
+    //    healthFill = GameObject.Find("HeartFill").GetComponent<Image>();
+    //    staminaFill = GameObject.Find("StaminaFill").GetComponent<Image>();
+    //    manaFill = GameObject.Find("ManaFill").GetComponent<Image>();
+    //
+    //    xpSlider = GameObject.Find("XPBarSlider").GetComponent<Slider>();
+    //}
 
     private void Awake()
     {
-        lvlText = GameObject.Find("PlayerLevelText").GetComponent<TextMeshProUGUI>();
-        xpText = GameObject.Find("EXPText").GetComponent<TextMeshProUGUI>();
-        goldText = GameObject.Find("PlayerGoldText").GetComponent<TextMeshProUGUI>();
-        healthText = GameObject.Find("PlayerHealthText").GetComponent<TextMeshProUGUI>();
-        staminaText = GameObject.Find("PlayerStaminaText").GetComponent<TextMeshProUGUI>();
-        manaText = GameObject.Find("PlayerManaText").GetComponent<TextMeshProUGUI>();
-        spText = GameObject.Find("PlayerSPText").GetComponent<TextMeshProUGUI>();
-        strengthText = GameObject.Find("PlayerStrengthText").GetComponent<TextMeshProUGUI>();
-        agilityText = GameObject.Find("PlayerAgilityText").GetComponent<TextMeshProUGUI>();
-        vitalityText = GameObject.Find("PlayerVitalityText").GetComponent<TextMeshProUGUI>();
-        enduranceText = GameObject.Find("PlayerEnduranceText").GetComponent<TextMeshProUGUI>();
-        intelligenceText = GameObject.Find("PlayerIntelligenceText").GetComponent<TextMeshProUGUI>();
-        luckText = GameObject.Find("PlayerLuckText").GetComponent<TextMeshProUGUI>();
-
-        healthFill = GameObject.Find("HeartFill").GetComponent<Image>();
-        staminaFill = GameObject.Find("StaminaFill").GetComponent<Image>();
-        manaFill = GameObject.Find("ManaFill").GetComponent<Image>();
-
-        xpSlider = GameObject.Find("XPBarSlider").GetComponent<Slider>();
+        LoadPlayerStats();
     }
 
     private void Start()
     {
-        LoadPlayerStats();
-
         UpdateHealthBar();
         UpdateStaminaBar();
         UpdateManaBar();
@@ -101,8 +103,8 @@ public class PlayerStatsManager : MonoBehaviour
             statsData.nextLevelXP *= 3;
         }
 
-        xpSlider.maxValue = statsData.nextLevelXP;
-        xpSlider.value = statsData.currentXP;
+        //xpSlider.maxValue = statsData.nextLevelXP;
+        //xpSlider.value = statsData.currentXP;
     }
 
     #region Health
@@ -145,7 +147,7 @@ public class PlayerStatsManager : MonoBehaviour
     private void UpdateHealthBar()
     {
         float healthNormalized = Mathf.Clamp01(statsData.currentHealth / statsData.maxHealth);
-        healthFill.fillAmount = healthNormalized;
+        //healthFill.fillAmount = healthNormalized;
     }
     #endregion
 
@@ -189,7 +191,7 @@ public class PlayerStatsManager : MonoBehaviour
     private void UpdateStaminaBar()
     {
         float staminaNormalized = Mathf.Clamp01(statsData.currentStamina / statsData.maxStamina);
-        staminaFill.fillAmount = staminaNormalized;
+        //staminaFill.fillAmount = staminaNormalized;
     }
     #endregion
 
@@ -233,7 +235,7 @@ public class PlayerStatsManager : MonoBehaviour
     private void UpdateManaBar()
     {
         float manaNormalized = Mathf.Clamp01(statsData.currentMana / statsData.maxMana);
-        manaFill.fillAmount = manaNormalized;
+        //manaFill.fillAmount = manaNormalized;
     }
     #endregion
     #endregion
@@ -296,7 +298,7 @@ public class PlayerStatsManager : MonoBehaviour
     public void GainGold(int newGold)
     {
         statsData.gold += newGold;
-        goldText.text = "Gold: " + statsData.gold;
+        //goldText.text = "Gold: " + statsData.gold;
     }
 
     /// <summary>
@@ -313,11 +315,16 @@ public class PlayerStatsManager : MonoBehaviour
             return false;
 
         statsData.gold = temp;
-        goldText.text = "Gold: " + statsData.gold;
+        //goldText.text = "Gold: " + statsData.gold;
 
         return true;
     }
     #endregion
+
+    public PlayerStatsData GetPlayerStats()
+    {
+        return statsData;
+    }
 
     public void SavePlayerStats()
     {
@@ -336,22 +343,22 @@ public class PlayerStatsManager : MonoBehaviour
             statsData = new PlayerStatsData();
 
             statsData.currentXP = 0;
-            lvlText.text = "Lvl: " + statsData.lvl;
-            xpText.text = "Exp: " + statsData.currentXP + "/" + statsData.nextLevelXP;
-            healthText.text = statsData.currentHealth + "/" + statsData.maxHealth;
-            staminaText.text = statsData.currentStamina + "/" + statsData.maxStamina;
-            manaText.text = statsData.currentMana + "/" + statsData.maxMana;
-
-            xpSlider.maxValue = statsData.nextLevelXP;
-            xpSlider.value = statsData.currentXP;
-
-            spText.text = "SP: " + statsData.SP;
-            strengthText.text = statsData.strength.ToString();
-            agilityText.text = statsData.agility.ToString();
-            vitalityText.text = statsData.vitality.ToString();
-            enduranceText.text = statsData.endurance.ToString();
-            intelligenceText.text = statsData.intelligence.ToString();
-            luckText.text = statsData.luck.ToString();
+            //lvlText.text = "Lvl: " + statsData.lvl;
+            //xpText.text = "Exp: " + statsData.currentXP + "/" + statsData.nextLevelXP;
+            //healthText.text = statsData.currentHealth + "/" + statsData.maxHealth;
+            //staminaText.text = statsData.currentStamina + "/" + statsData.maxStamina;
+            //manaText.text = statsData.currentMana + "/" + statsData.maxMana;
+            //
+            //xpSlider.maxValue = statsData.nextLevelXP;
+            //xpSlider.value = statsData.currentXP;
+            //
+            //spText.text = "SP: " + statsData.SP;
+            //strengthText.text = statsData.strength.ToString();
+            //agilityText.text = statsData.agility.ToString();
+            //vitalityText.text = statsData.vitality.ToString();
+            //enduranceText.text = statsData.endurance.ToString();
+            //intelligenceText.text = statsData.intelligence.ToString();
+            //luckText.text = statsData.luck.ToString();
         }
     }
 }

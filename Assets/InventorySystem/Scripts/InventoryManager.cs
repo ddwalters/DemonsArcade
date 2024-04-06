@@ -1,15 +1,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static InventoryType;
 
 public class InventoryManager : MonoBehaviour
 {
-    private Dictionary<int, InventoryGrid> gridsInformation;
+    public InventoryTypeCollection inventoryTypeCollection;
 
-    private void Start()
+    private Dictionary<int, GameObject> gridsInformation;
+
+    private void Awake()
     {
         if (gridsInformation == null)
-            gridsInformation = new Dictionary<int, InventoryGrid>();
+        {
+            var statsData = FindAnyObjectByType<PlayerStatsManager>().GetPlayerStats();
+            var newPlayerGrid = inventoryTypeCollection.AllPrefabs.FirstOrDefault(x => x.invType == statsData.inventoryType).prefab;
+        
+            gridsInformation = new Dictionary<int, GameObject>
+            {
+                { 0, newPlayerGrid }
+            };
+        }
     }
 
     /// <summary>
@@ -17,9 +28,10 @@ public class InventoryManager : MonoBehaviour
     /// </summary>
     /// <returns>The newly created id.</returns>
     /// <param name="grid">Grid to be added to the manager.</param>
-    public int AddGrid(InventoryGrid grid)
+    public int AddGrid(InvType inv)
     {
-        gridsInformation.Add(gridsInformation.Count - 1, grid);
+        var newGrid = inventoryTypeCollection.AllPrefabs.FirstOrDefault(x => x.invType == inv).prefab.GetComponent<InventoryGrid>();
+        gridsInformation.Add(gridsInformation.Count, newGrid);
 
         return gridsInformation.Count - 1;
     }
@@ -37,5 +49,10 @@ public class InventoryManager : MonoBehaviour
     public InventoryGrid GetGrid(int gridId)
     {
         return gridsInformation[gridId];
+    }
+
+    public void UpdateGrid(InventoryGrid updatedGrid, int gridId)
+    {
+        gridsInformation[gridId] = updatedGrid;
     }
 }

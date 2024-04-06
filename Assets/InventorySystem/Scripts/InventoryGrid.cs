@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -31,15 +30,12 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
     /// </summary>
     public InventoryManager inventoryManager { get; private set; }
 
-    private int? gridId;
-
-    [System.Obsolete]
     private void Awake()
     {
         if (rectTransform != null)
         {
-            inventory = GameObject.FindObjectOfType<Inventory>();
-            inventoryManager = GameObject.FindObjectOfType<InventoryManager>();
+            inventory = FindAnyObjectByType<Inventory>();
+            inventoryManager = FindAnyObjectByType<InventoryManager>();
             InitializeGrid();
         }
         else
@@ -63,8 +59,17 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
                 gridSize.y * InventorySettings.slotSize.y
             );
         rectTransform.sizeDelta = size;
+    }
 
-        inventoryManager.AddGrid(this);
+    public void InitializeFakeGrid()
+    {
+        items = new Item[gridSize.x, gridSize.y];
+    }
+
+    public void ConfigureFake(InventoryGrid newGrid)
+    {
+        items = newGrid.items;
+        gridSize = newGrid.gridSize;
     }
 
     public void CloseGrid()

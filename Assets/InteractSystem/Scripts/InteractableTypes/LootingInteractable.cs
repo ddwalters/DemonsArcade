@@ -2,18 +2,23 @@ using UnityEngine;
 
 public class LootingInteractable : InteractableBase
 {
+    [SerializeField] InventoryType.InvType invType;
+
     private Inventory inventory;
 
-    // use later when opening grids that have Items 
-    //private InventoryManager inventoryManager;
+    private InventoryManager inventoryManager;
 
     private InteractionController controller;
+
+    private int gridId;
 
     private void Awake()
     {
         inventory = FindAnyObjectByType<Inventory>();
-        //inventoryManager = FindAnyObjectByType<InventoryManager>();
+        inventoryManager = FindAnyObjectByType<InventoryManager>();
         controller = FindAnyObjectByType<InteractionController>();
+
+        gridId = inventoryManager.AddGrid(invType);
     }
 
     public override void OnInteract()
@@ -23,7 +28,7 @@ public class LootingInteractable : InteractableBase
         controller.SetLootingInteracted();
 
         Cursor.lockState = CursorLockMode.Confined;
-        inventory.OpenInventoryGrid(InventoryType.InvType.ThreeByThree, null, true);
-        inventory.OpenInventoryGrid(InventoryType.InvType.SixByThree, null, false);
+        inventory.OpenInventoryGrid(InventoryType.InvType.ThreeByThree, 0, true); // player
+        inventory.OpenInventoryGrid(InventoryType.InvType.SixByThree, gridId, false); // chest
     }
 }

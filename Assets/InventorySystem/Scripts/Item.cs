@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -73,8 +72,7 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private void Start()
     {
         tooltip = inventory.GetItemTooltip();
-
-        icon.sprite = data.icon;
+        icon.sprite = data.icon;    
         background.color = data.backgroundColor;
     }
 
@@ -147,8 +145,10 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     /// </summary>
     private void UpdateRotateAnimation()
     {
-        Quaternion targetRotation = Quaternion.Euler(rotateTarget);
+        if (rectTransform == null)
+            return;
 
+        Quaternion targetRotation = Quaternion.Euler(rotateTarget);
         if (rectTransform.localRotation != targetRotation)
         {
             rectTransform.localRotation = Quaternion.Slerp(
@@ -163,7 +163,7 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         tooltip.ShowToolTip(data.itemStats.GetItemName(), data.itemStats.CreateItemDescriptionText());
     }
-    
+
     public void OnPointerExit(PointerEventData eventData)
     {
         tooltip.HideToolTip();
