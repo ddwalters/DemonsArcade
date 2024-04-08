@@ -28,7 +28,7 @@ public class LootingInteractable : InteractableBase
         controller.SetLootingInteracted();
 
         Cursor.lockState = CursorLockMode.Confined;
-        inventory.OpenInventoryGrid(InventoryType.InvType.ThreeByThree, 0, true); // player
-        inventory.OpenInventoryGrid(InventoryType.InvType.SixByThree, gridId, false); // chest
+        inventory.OpenInventoryGrid(0, true); // player
+        inventory.OpenInventoryGrid(gridId, false); // chest
     }
 }

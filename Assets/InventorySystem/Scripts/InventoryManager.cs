@@ -30,7 +30,7 @@ public class InventoryManager : MonoBehaviour
     /// <param name="grid">Grid to be added to the manager.</param>
     public int AddGrid(InvType inv)
     {
-        var newGrid = inventoryTypeCollection.AllPrefabs.FirstOrDefault(x => x.invType == inv).prefab.GetComponent<InventoryGrid>();
+        var newGrid = inventoryTypeCollection.AllPrefabs.FirstOrDefault(x => x.invType == inv).prefab;
         gridsInformation.Add(gridsInformation.Count, newGrid);
 
         return gridsInformation.Count - 1;
@@ -46,13 +46,8 @@ public class InventoryManager : MonoBehaviour
         gridsInformation.Remove(gridId);
     }
 
-    public InventoryGrid GetGrid(int gridId)
+    public GameObject GetGrid(int gridId)
     {
         return gridsInformation[gridId];
-    }
-
-    public void UpdateGrid(InventoryGrid updatedGrid, int gridId)
-    {
-        gridsInformation[gridId] = updatedGrid;
     }
 }

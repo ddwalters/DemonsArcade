@@ -18,7 +18,7 @@ public class CollectInteractable : InteractableBase
     {
         base.OnInteract();
 
-        inventory.AddItemInventoryList(itemData, 0);
+        inventory.AddItem(itemData, 0);
         Destroy(gameObject);
     }
 }

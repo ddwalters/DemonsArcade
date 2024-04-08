@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -19,6 +20,8 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
     /// Item array.
     /// </summary>
     public Item[,] items { get; set; }
+
+    public List<Item> itemsList { get; set; } = new List<Item>{ };
 
     /// <summary>
     /// Main inventory reference.
@@ -59,17 +62,6 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
                 gridSize.y * InventorySettings.slotSize.y
             );
         rectTransform.sizeDelta = size;
-    }
-
-    public void InitializeFakeGrid()
-    {
-        items = new Item[gridSize.x, gridSize.y];
-    }
-
-    public void ConfigureFake(InventoryGrid newGrid)
-    {
-        items = newGrid.items;
-        gridSize = newGrid.gridSize;
     }
 
     public void CloseGrid()

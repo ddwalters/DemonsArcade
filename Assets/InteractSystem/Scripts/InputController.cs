@@ -17,7 +17,7 @@ public class InputController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             Cursor.lockState = CursorLockMode.Confined;
-            inventory.OpenInventoryGrid(InventoryType.InvType.ThreeByThree, 0, true);
+            inventory.OpenInventoryGrid(0, true);
         }
 
         if (Input.GetKeyUp(KeyCode.Tab))

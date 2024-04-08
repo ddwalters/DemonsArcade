@@ -4528,79 +4528,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1491288109}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!1001 &1532485199
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 5336565623497011685, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: Inventory
-      value: 
-      objectReference: {fileID: 4897096640595293092}
-    - target: {fileID: 5336565623497011685, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: inventory
-      value: 
-      objectReference: {fileID: 4897096640595293092}
-    - target: {fileID: 5336565623497011685, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: inventoryGrid
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 5336565623497011685, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: playerInventory
-      value: 
-      objectReference: {fileID: 4897096640595293092}
-    - target: {fileID: 8275763060251768674, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 26.682
-      objectReference: {fileID: 0}
-    - target: {fileID: 8275763060251768674, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.6
-      objectReference: {fileID: 0}
-    - target: {fileID: 8275763060251768674, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 10.86
-      objectReference: {fileID: 0}
-    - target: {fileID: 8275763060251768674, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8275763060251768674, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8275763060251768674, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8275763060251768674, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8275763060251768674, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8275763060251768674, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8275763060251768674, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8410456598005637963, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
-      propertyPath: m_Name
-      value: Apple (1)
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 243ae0e0e3fc1584a85af177b112f682, type: 3}
 --- !u!1 &1533176316
 GameObject:
   m_ObjectHideFlags: 0
@@ -7851,6 +7778,7 @@ MonoBehaviour:
   holdInteract: 1
   isInteractable: 1
   tooltipMessage: Loot Chest
+  invType: 0
 --- !u!114 &8373227015414292843
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8068,7 +7996,6 @@ SceneRoots:
   - {fileID: 948889837}
   - {fileID: 632206613}
   - {fileID: 8423001575130706025}
-  - {fileID: 1532485199}
   - {fileID: 2735820723309015535}
   - {fileID: 1265501167}
   - {fileID: 801551019}
