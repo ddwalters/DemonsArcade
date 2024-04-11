@@ -50,4 +50,9 @@ public class InventoryManager : MonoBehaviour
     {
         return gridsInformation[gridId];
     }
+
+    public void SetGrid(int gridId, GameObject updater)
+    {
+        gridsInformation[gridId] = updater;
+    }
 }

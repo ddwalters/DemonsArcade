@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -17,11 +18,14 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
     public RectTransform rectTransform;
 
     /// <summary>
-    /// Item array.
+    /// Item array. The matrix determining what items are where
     /// </summary>
     public Item[,] items { get; set; }
 
-    public List<Item> itemsList { get; set; } = new List<Item>{ };
+    /// <summary>
+    /// List of all items in the grid.
+    /// </summary>
+    public List<Item> itemsList { get; set; } = new List<Item> { };
 
     /// <summary>
     /// Main inventory reference.
@@ -62,6 +66,17 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
                 gridSize.y * InventorySettings.slotSize.y
             );
         rectTransform.sizeDelta = size;
+    }
+
+    public void AddToGridList(Item newItem)
+    {
+        itemsList.Add(newItem);
+    }
+
+    public void UpdateItemsMatrix(int slotX, int slotY, Item newItem, ItemData itemData)
+    {
+        items[slotX, slotY] = newItem;
+        items[slotX, slotY].data = itemData;
     }
 
     public void CloseGrid()

@@ -1,8 +1,5 @@
-using NUnit.Framework.Interfaces;
-using System;
+using Unity.VisualScripting;
 using UnityEngine;
-using static InventoryType;
-using static UnityEditor.Progress;
 
 public static class InventorySettings
 {
@@ -108,7 +105,8 @@ public class Inventory : MonoBehaviour
     /// <param name="isPlayerGrid">If true, places grid in player inventory location.</param>
     public void OpenInventoryGrid(int gridId, bool isPlayerGrid)
     {
-        var managedGrid = inventoryManager.GetGrid(gridId);
+        print(gridId + " Grid id to open");
+            var managedGrid = inventoryManager.GetGrid(gridId);
         if (managedGrid == null)
         {
             Debug.Log("No Inventory of id: " + gridId);
@@ -116,20 +114,17 @@ public class Inventory : MonoBehaviour
         }
 
         var inv = managedGrid.GetComponent<InventoryGrid>();
-        managedGrid.GetComponent<CanvasGroup>().alpha = 1; // ☻
+        managedGrid.GetComponent<CanvasGroup>().alpha = 1;
         if (isPlayerGrid)
             Instantiate(managedGrid, playerGridHolder.transform);
         else
             Instantiate(managedGrid, worldGridHolder.transform);
 
-        print("???");
-        print(inv.itemsList.Count);
-        if (inv.itemsList == null ||  inv.itemsList.Count !> 0)
+        if (inv.itemsList == null || inv.itemsList.Count! > 0)
             return;
 
         foreach (var item in inv.itemsList)
         {
-            print("???");
             print(item);
             var newItem = Instantiate(item);
             newItem.rectTransform = newItem.GetComponent<RectTransform>();
@@ -138,24 +133,24 @@ public class Inventory : MonoBehaviour
                 item.data.size.width * InventorySettings.slotSize.x,
                 item.data.size.height * InventorySettings.slotSize.y
             );
-            
+
             Vector2Int slotPosition = new Vector2Int(item.indexPosition.x, item.indexPosition.y);
             newItem.indexPosition = slotPosition;
             newItem.inventory = this;
             newItem.rectTransform.localScale = new Vector2(item.data.size.width, item.data.size.width);
-            
+
             for (int xx = 0; xx < item.data.size.width; xx++)
             {
                 for (int yy = 0; yy < item.data.size.height; yy++)
                 {
                     int slotX = slotPosition.x + xx;
                     int slotY = slotPosition.y + yy;
-            
+
                     inv.items[slotX, slotY] = newItem;
                     inv.items[slotX, slotY].data = item.data;
                 }
             }
-            
+
             newItem.rectTransform.localPosition = IndexToInventoryPosition(newItem);
             newItem.inventoryGrid = inv;
         }
@@ -168,12 +163,12 @@ public class Inventory : MonoBehaviour
     /// <param name="itemData">Data of the item that will be added to the inventory.</param>
     public void AddItem(ItemData itemData, int gridId)
     {
-        var InvGrid = inventoryManager.GetGrid(gridId);
-        InvGrid.GetComponent<CanvasGroup>().alpha = 0;
+        var prefab = inventoryManager.GetGrid(gridId);
+        prefab.GetComponent<CanvasGroup>().alpha = 0;
 
-        var tempPlayerInvGrid = Instantiate(InvGrid, playerGridHolder.transform);
+        var toExistPrefab = Instantiate(prefab, playerGridHolder.transform);
 
-        var inventory = tempPlayerInvGrid.GetComponent<InventoryGrid>();
+        var inventory = toExistPrefab.GetComponent<InventoryGrid>();
 
         for (int y = 0; y < inventory.gridSize.y; y++)
         {
@@ -194,9 +189,7 @@ public class Inventory : MonoBehaviour
                                 itemData.size.width * InventorySettings.slotSize.x,
                                 itemData.size.height * InventorySettings.slotSize.y
                             );
-
-                            newItem.indexPosition = slotPosition;
-                            newItem.inventory = this;
+                            
                             newItem.rectTransform.localScale = new Vector2(itemData.size.width, itemData.size.width);
 
                             for (int xx = 0; xx < itemData.size.width; xx++)
@@ -206,15 +199,17 @@ public class Inventory : MonoBehaviour
                                     int slotX = slotPosition.x + xx;
                                     int slotY = slotPosition.y + yy;
 
-                                    inventory.items[slotX, slotY] = newItem;
-                                    inventory.items[slotX, slotY].data = itemData;
+                                    inventory.UpdateItemsMatrix(slotX, slotY, newItem, itemData);
                                 }
                             }
 
                             newItem.rectTransform.localPosition = IndexToInventoryPosition(newItem);
                             newItem.inventoryGrid = inventory;
+                            inventory.AddToGridList(newItem);
 
-                            inventory.itemsList.Add(newItem);
+                            inventoryManager.SetGrid(gridId, toExistPrefab);
+
+                            return;
                         }
                     }
 
@@ -248,15 +243,14 @@ public class Inventory : MonoBehaviour
 
                             newItem.rectTransform.localPosition = IndexToInventoryPosition(newItem);
                             newItem.inventoryGrid = inventory;
-
                             inventory.itemsList.Add(newItem);
 
+                            return;
                         }
                     }
                 }
             }
         }
-        Destroy(tempPlayerInvGrid);
     }
 
     /// <summary>
