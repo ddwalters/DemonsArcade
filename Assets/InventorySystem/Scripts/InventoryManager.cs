@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
-    private Dictionary<int, (List<ItemData>, InventoryType)> ItemDataInformation;
+    private Dictionary<int, (List<ItemData> list, InventoryType type)> ItemDataInformation;
 
     private void Awake()
     {
@@ -12,14 +12,19 @@ public class InventoryManager : MonoBehaviour
             var statsData = FindAnyObjectByType<PlayerStatsManager>().GetPlayerStats();
             (List<ItemData>, InventoryType) newPlayerGrid = (new List<ItemData>(), statsData.inventoryType);
 
-            ItemDataInformation = new Dictionary<int, (List<ItemData>, InventoryType)>
+            ItemDataInformation = new Dictionary<int, (List<ItemData> list, InventoryType type)>
             {
                 { 0, newPlayerGrid }
             };
         }
     }
 
-    public int AddItems(InventoryType inv)
+    /// <summary>
+    /// Adds a new inventory item list to the management system
+    /// </summary>
+    /// <param name="inv">Inventory size using enum type</param>
+    /// <returns>Grid id</returns>
+    public int AddNewItemList(InventoryType inv)
     {
         ItemDataInformation.Add(ItemDataInformation.Count, (new List<ItemData>(), inv));
 
@@ -31,13 +36,13 @@ public class InventoryManager : MonoBehaviour
         ItemDataInformation.Remove(itemsId);
     }
 
-    public (List<ItemData>, InventoryType) GetItems(int itemsId)
+    public (List<ItemData> list, InventoryType type) GetItems(int itemsId)
     {
         return ItemDataInformation[itemsId];
     }
 
-    public void SetItems(int itemsId, List<ItemData> data, InventoryType type)
+    public void AddItem(int itemsId, ItemData data)
     {
-        ItemDataInformation[itemsId] = (data, type);
+        ItemDataInformation[itemsId].list.Add(data);
     }
 }

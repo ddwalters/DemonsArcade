@@ -10,6 +10,16 @@ public class ItemData : ScriptableObject
     public SizeInt size = new(0, 0);
 
     /// <summary>
+    /// First grid position the item is found in a matrix.
+    /// </summary>
+    public Vector2Int slotPosition;
+
+    /// <summary>
+    /// Indicates whether the item is rotated. True being rotated.
+    /// </summary>
+    public bool isRotated;
+
+    /// <summary>
     /// Item icon.
     /// </summary>
     [Header("Visual")]

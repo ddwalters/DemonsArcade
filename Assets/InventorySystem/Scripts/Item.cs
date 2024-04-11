@@ -138,6 +138,9 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
                 isRotated = true;
                 break;
         }
+
+        // Might want to store rotation solely on the item data @DW
+        data.isRotated = isRotated;
     }
 
     /// <summary>

@@ -19,7 +19,7 @@ public class InventoryTypeCollection : ScriptableObject
     }
 
     private Dictionary<InventoryType, GameObject> dict;
-    public InventoryPrefab[] AllPrefabs;
+    public List<InventoryPrefab> AllPrefabs;
     public GameObject this[InventoryType type]
     {
         get

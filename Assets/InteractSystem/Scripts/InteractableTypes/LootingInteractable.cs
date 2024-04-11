@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class LootingInteractable : InteractableBase
 {
-    [SerializeField] InventoryType.InvType invType;
+    [SerializeField] InventoryType invType;
 
     private Inventory inventory;
 
@@ -18,7 +18,7 @@ public class LootingInteractable : InteractableBase
         inventoryManager = FindAnyObjectByType<InventoryManager>();
         controller = FindAnyObjectByType<InteractionController>();
 
-        gridId = inventoryManager.AddGrid(invType);
+        gridId = inventoryManager.AddNewItemList(invType);
     }
 
     public override void OnInteract()
@@ -28,7 +28,7 @@ public class LootingInteractable : InteractableBase
         controller.SetLootingInteracted();
 
         Cursor.lockState = CursorLockMode.Confined;
-        inventory.OpenInventoryGrid(0, true); // player
-        inventory.OpenInventoryGrid(gridId, false); // chest
+        inventory.CreateGrid(0, true);
+        inventory.CreateGrid(gridId, false);
     }
 }

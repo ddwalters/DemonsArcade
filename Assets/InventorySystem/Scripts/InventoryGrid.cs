@@ -23,11 +23,6 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
     public Item[,] items { get; set; }
 
     /// <summary>
-    /// List of all items in the grid.
-    /// </summary>
-    public List<Item> itemsList { get; set; } = new List<Item> { };
-
-    /// <summary>
     /// Main inventory reference.
     /// </summary>
     public Inventory inventory { get; private set; }
@@ -66,11 +61,6 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
                 gridSize.y * InventorySettings.slotSize.y
             );
         rectTransform.sizeDelta = size;
-    }
-
-    public void AddToGridList(Item newItem)
-    {
-        itemsList.Add(newItem);
     }
 
     public void UpdateItemsMatrix(int slotX, int slotY, Item newItem, ItemData itemData)

@@ -6,19 +6,16 @@ public class CollectInteractable : InteractableBase
 
     Inventory inventory;
 
-    InventoryManager inventoryManager;
-
     private void Awake()
     {
         inventory = FindAnyObjectByType<Inventory>();
-        inventoryManager = FindAnyObjectByType<InventoryManager>();
     }
 
     public override void OnInteract()
     {
         base.OnInteract();
 
-        inventory.AddItem(itemData, 0);
-        Destroy(gameObject);
+        if (inventory.AddItem(0, itemData))
+            Destroy(gameObject);
     }
 }
