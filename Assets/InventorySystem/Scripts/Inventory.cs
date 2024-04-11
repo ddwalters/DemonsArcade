@@ -190,6 +190,7 @@ public class Inventory : MonoBehaviour
         // Add items to grid
         foreach (var itemData in items.list)
         {
+            // checking for rotation will need to happen @DW
             Item newItem = Instantiate(itemPrefab);
             newItem.rectTransform = newItem.GetComponent<RectTransform>();
             newItem.rectTransform.SetParent(inventory.rectTransform);
@@ -197,6 +198,9 @@ public class Inventory : MonoBehaviour
                 itemData.size.width * InventorySettings.slotSize.x,
                 itemData.size.height * InventorySettings.slotSize.y
             );
+
+            newItem.indexPosition = new Vector2Int(itemData.slotPosition.x, itemData.slotPosition.y);
+            newItem.inventory = this;
             newItem.rectTransform.localScale = new Vector2(itemData.size.width, itemData.size.width);
 
             for (int xx = 0; xx < itemData.size.width; xx++)
