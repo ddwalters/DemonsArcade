@@ -1,58 +1,43 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
-using static InventoryType;
 
 public class InventoryManager : MonoBehaviour
 {
-    public InventoryTypeCollection inventoryTypeCollection;
-
-    private Dictionary<int, GameObject> gridsInformation;
+    private Dictionary<int, (List<ItemData>, InventoryType)> ItemDataInformation;
 
     private void Awake()
     {
-        if (gridsInformation == null)
+        if (ItemDataInformation == null)
         {
             var statsData = FindAnyObjectByType<PlayerStatsManager>().GetPlayerStats();
-            var newPlayerGrid = inventoryTypeCollection.AllPrefabs.FirstOrDefault(x => x.invType == statsData.inventoryType).prefab;
-        
-            gridsInformation = new Dictionary<int, GameObject>
+            (List<ItemData>, InventoryType) newPlayerGrid = (new List<ItemData>(), statsData.inventoryType);
+
+            ItemDataInformation = new Dictionary<int, (List<ItemData>, InventoryType)>
             {
                 { 0, newPlayerGrid }
             };
         }
     }
 
-    /// <summary>
-    /// Adds item to manager.
-    /// </summary>
-    /// <returns>The newly created id.</returns>
-    /// <param name="grid">Grid to be added to the manager.</param>
-    public int AddGrid(InvType inv)
+    public int AddItems(InventoryType inv)
     {
-        var newGrid = inventoryTypeCollection.AllPrefabs.FirstOrDefault(x => x.invType == inv).prefab;
-        gridsInformation.Add(gridsInformation.Count, newGrid);
+        ItemDataInformation.Add(ItemDataInformation.Count, (new List<ItemData>(), inv));
 
-        return gridsInformation.Count - 1;
+        return ItemDataInformation.Count - 1;
     }
 
-    /// <summary>
-    /// Removes grid from manager.
-    /// </summary>
-    /// <returns>The newly created id.</returns>
-    /// <param name="grid">Id of the grid being removed.</param>
-    public void RemoveGrid(int gridId)
+    public void RemoveItems(int itemsId)
     {
-        gridsInformation.Remove(gridId);
+        ItemDataInformation.Remove(itemsId);
     }
 
-    public GameObject GetGrid(int gridId)
+    public (List<ItemData>, InventoryType) GetItems(int itemsId)
     {
-        return gridsInformation[gridId];
+        return ItemDataInformation[itemsId];
     }
 
-    public void SetGrid(int gridId, GameObject updater)
+    public void SetItems(int itemsId, List<ItemData> data, InventoryType type)
     {
-        gridsInformation[gridId] = updater;
+        ItemDataInformation[itemsId] = (data, type);
     }
 }

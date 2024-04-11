@@ -2,13 +2,10 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 
-public class InventoryType
+public enum InventoryType
 {
-    public enum InvType
-    {
-        ThreeByThree,
-        SixByThree
-    }
+    ThreeByThree,
+    SixByThree
 }
 
 [CreateAssetMenu(fileName = "InvTypeCollection", menuName = "Inventory/InvTypeCollection")]
@@ -18,12 +15,12 @@ public class InventoryTypeCollection : ScriptableObject
     public class InventoryPrefab
     {
         public GameObject prefab;
-        public InventoryType.InvType invType;
+        public InventoryType invType;
     }
 
-    private Dictionary<InventoryType.InvType, GameObject> dict;
+    private Dictionary<InventoryType, GameObject> dict;
     public InventoryPrefab[] AllPrefabs;
-    public GameObject this[InventoryType.InvType type]
+    public GameObject this[InventoryType type]
     {
         get
         {
@@ -37,7 +34,7 @@ public class InventoryTypeCollection : ScriptableObject
         if (dict != null)
             return;
 
-        dict = new Dictionary<InventoryType.InvType, GameObject>();
+        dict = new Dictionary<InventoryType, GameObject>();
         foreach (var inventory in AllPrefabs)
         {
             dict[inventory.invType] = inventory.prefab;
