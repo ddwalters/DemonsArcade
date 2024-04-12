@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public static class InventorySettings
 {
@@ -106,7 +105,7 @@ public class Inventory : MonoBehaviour
     /// <param name="checkItem">Item used for checking overlaps</param>
     /// <param name="previousItems">All items that grid already contains</param>
     /// <returns>True if no items overlap</returns>
-    private bool CheckItemSpot(Vector2Int gridSize, ItemData checkItem, List<ItemData> previousItems, bool isRotated)
+    private (bool available, Vector2Int? slotPosition) CheckItemSpot(Vector2Int gridSize, Vector2 slotPosition, ItemData checkItem, List<ItemData> previousItems, bool isRotated)
     {
         int[,] matrix = new int[gridSize.x, gridSize.y];
 
@@ -114,11 +113,11 @@ public class Inventory : MonoBehaviour
             for (int j = 0; j < matrix.GetLength(1); j++)
                 matrix[i, j] = 0;
 
-        var width = isRotated ? checkItem.size.height : checkItem.size.width;
-        var height = isRotated ? checkItem.size.width : checkItem.size.height;
+        var width = slotPosition.x + (isRotated ? checkItem.size.height : checkItem.size.width);
+        var height = slotPosition.y + (isRotated ? checkItem.size.width : checkItem.size.height);
 
-        for (int i = 0; i < width; i++)
-            for (int j = 0; j < height; j++)
+        for (int i = (int)slotPosition.x; i < width - 1; i++)
+            for (int j = (int)slotPosition.y; j < height - 1; j++)
                 matrix[checkItem.slotPosition.x + i, checkItem.slotPosition.y + j] = 1;
 
         foreach (ItemData item in previousItems)
@@ -131,12 +130,12 @@ public class Inventory : MonoBehaviour
                     var slotY = item.slotPosition.y + j;
 
                     if (matrix[slotX, slotY] == 1)
-                        return false;
+                        return (false, null);
                 }
             }
         }
 
-        return true;
+        return (true, new Vector2Int((int)width - 1, (int)height - 1));
     }
 
     /// <summary>
@@ -161,11 +160,15 @@ public class Inventory : MonoBehaviour
                     return true;
                 }
 
-                Vector2Int slotPosition = new Vector2Int(x, y);
-                if (CheckItemSpot(inventoryGrid.gridSize, itemData, currentItems.list, itemData.isRotated))
+                (bool available, Vector2Int? slotPosition) position = CheckItemSpot(inventoryGrid.gridSize, new Vector2Int(x, y), itemData, currentItems.list, itemData.isRotated);
+                if (position.available)
                 {
+                    itemData.slotPosition = (Vector2Int)position.slotPosition;
                     inventoryManager.AddItem(gridId, itemData);
                     Debug.Log(inventoryManager.GetItems(gridId).list.Count);
+
+                    foreach (var item in inventoryManager.GetItems(gridId).list)
+                        Debug.Log(item.slotPosition);
 
                     return true;
                 }
@@ -190,7 +193,6 @@ public class Inventory : MonoBehaviour
         // Add items to grid
         foreach (var itemData in items.list)
         {
-            // checking for rotation will need to happen @DW
             Item newItem = Instantiate(itemPrefab);
             newItem.rectTransform = newItem.GetComponent<RectTransform>();
             newItem.rectTransform.SetParent(inventory.rectTransform);
