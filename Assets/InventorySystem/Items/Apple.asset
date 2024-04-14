@@ -12,15 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1892a430949a40439f65e637e99670e, type: 3}
   m_Name: Apple
   m_EditorClassIdentifier: 
+  Id: 0
   size:
     width: 1
     height: 1
+  slotPosition: {x: 0, y: 1}
+  isRotated: 1
   icon: {fileID: 21300000, guid: da7129ed6a246f048a49d8d97de2d2d4, type: 3}
   backgroundColor: {r: 0, g: 0, b: 0, a: 0}
   itemStats:
     name: Apple
-    cost: 5
-    damage: 9999
+    cost: 3
+    damage: 0
     manaUsage: 0
     XpPercentBoost: 0
     maxHealthBonus: 0

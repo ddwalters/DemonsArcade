@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
@@ -29,6 +30,14 @@ public class InventoryManager : MonoBehaviour
         ItemDataInformation.Add(ItemDataInformation.Count, (new List<ItemData>(), inv));
 
         return ItemDataInformation.Count - 1;
+    }
+
+    public void UpdateItemData(int itemsId, ItemData data)
+    {
+        var list = ItemDataInformation[itemsId].list;
+        var item = list.FindIndex(x => x.Id == data.Id);
+
+        list[item] = data;
     }
 
     public void RemoveItems(int itemsId)

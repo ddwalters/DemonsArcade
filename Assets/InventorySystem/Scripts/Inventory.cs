@@ -105,7 +105,7 @@ public class Inventory : MonoBehaviour
     /// <param name="checkItem">Item used for checking overlaps</param>
     /// <param name="previousItems">All items that grid already contains</param>
     /// <returns>True if no items overlap</returns>
-    private (bool available, Vector2Int? slotPosition) CheckItemSpot(Vector2Int gridSize, Vector2 slotPosition, ItemData checkItem, List<ItemData> previousItems, bool isRotated)
+    private (bool available, Vector2Int? slotPosition) CheckItemSpot(Vector2Int gridSize, Vector2Int slotPosition, ItemData checkItem, List<ItemData> previousItems, bool isRotated)
     {
         int[,] matrix = new int[gridSize.x, gridSize.y];
 
@@ -116,8 +116,12 @@ public class Inventory : MonoBehaviour
         var width = slotPosition.x + (isRotated ? checkItem.size.height : checkItem.size.width);
         var height = slotPosition.y + (isRotated ? checkItem.size.width : checkItem.size.height);
 
-        for (int i = (int)slotPosition.x; i < width - 1; i++)
-            for (int j = (int)slotPosition.y; j < height - 1; j++)
+        // checks if item will go out of bounds
+        if (slotPosition.x + width - 1 > matrix.GetLength(0) - 1 || slotPosition.y + height - 1 > matrix.GetLength(1) - 1)
+            return (false, null);
+
+        for (int i = slotPosition.x; i < width; i++)
+            for (int j = slotPosition.y; j < height; j++)
                 matrix[checkItem.slotPosition.x + i, checkItem.slotPosition.y + j] = 1;
 
         foreach (ItemData item in previousItems)
@@ -135,7 +139,7 @@ public class Inventory : MonoBehaviour
             }
         }
 
-        return (true, new Vector2Int((int)width - 1, (int)height - 1));
+        return (true, new Vector2Int((int)slotPosition.x, (int)slotPosition.y));
     }
 
     /// <summary>
@@ -154,21 +158,22 @@ public class Inventory : MonoBehaviour
                 var currentItems = inventoryManager.GetItems(gridId);
                 if (currentItems.list.Count == 0)
                 {
+                    itemData.slotPosition = new Vector2Int(x, y);
                     inventoryManager.AddItem(gridId, itemData);
-                    Debug.Log(inventoryManager.GetItems(gridId).list.Count);
-
                     return true;
                 }
 
                 (bool available, Vector2Int? slotPosition) position = CheckItemSpot(inventoryGrid.gridSize, new Vector2Int(x, y), itemData, currentItems.list, itemData.isRotated);
+                if (!position.available)
+                {
+                    itemData.isRotated = true;
+                    position = CheckItemSpot(inventoryGrid.gridSize, new Vector2Int(x, y), itemData, currentItems.list, itemData.isRotated);
+                }
+
                 if (position.available)
                 {
-                    itemData.slotPosition = (Vector2Int)position.slotPosition;
+                    itemData.slotPosition = new Vector2Int(x, y);
                     inventoryManager.AddItem(gridId, itemData);
-                    Debug.Log(inventoryManager.GetItems(gridId).list.Count);
-
-                    foreach (var item in inventoryManager.GetItems(gridId).list)
-                        Debug.Log(item.slotPosition);
 
                     return true;
                 }
@@ -182,6 +187,7 @@ public class Inventory : MonoBehaviour
     {
         // Create grid
         var prefab = inventoryType.AllPrefabs.FirstOrDefault(x => x.invType == inventoryManager.GetItems(gridId).type).prefab;
+        prefab.GetComponent<InventoryGrid>().id = gridId;  // bit weird but ok.
         var inventory = Instantiate(prefab, isPlayerGrid ? playerGridHolder.transform : worldGridHolder.transform).GetComponent<InventoryGrid>();
 
         // Get Items if any
@@ -257,6 +263,7 @@ public class Inventory : MonoBehaviour
         }
 
         item.indexPosition = slotPosition;
+        item.data.slotPosition = slotPosition;
         item.rectTransform.SetParent(gridOnMouse.rectTransform);
 
         for (int x = 0; x < item.correctedSize.width; x++)
@@ -272,6 +279,8 @@ public class Inventory : MonoBehaviour
 
         item.rectTransform.localPosition = IndexToInventoryPosition(item);
         item.inventoryGrid = gridOnMouse;
+
+        inventoryManager.UpdateItemData(gridOnMouse.id, item.data);
 
         if (deselectItemInEnd)
         {

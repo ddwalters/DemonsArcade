@@ -1,11 +1,11 @@
-using JetBrains.Annotations;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(RectTransform))]
 public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
 {
+    public int id;
+
     /// <summary>
     /// Size of slots that the grid will have 1X1
     /// </summary>

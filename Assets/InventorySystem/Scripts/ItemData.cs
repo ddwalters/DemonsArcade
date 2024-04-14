@@ -3,6 +3,8 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ItemData", menuName = "Inventory/ItemData")]
 public class ItemData : ScriptableObject
 {
+    public int Id;
+
     /// <summary>
     /// Size in width and height of the item.
     /// </summary>
