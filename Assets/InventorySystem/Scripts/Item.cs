@@ -5,10 +5,7 @@ using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform))]
 public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    /// <summary>
-    /// Data of the item referenced in the Item script
-    /// </summary>
-    public ItemData data;
+    public ItemSaveData saveData;
 
     /// <summary>
     /// Image element responsible for showing the item icon.
@@ -60,7 +57,7 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     /// </summary>
     public SizeInt correctedSize
     {
-        get => new(!isRotated ? data.size.width : data.size.height, !isRotated ? data.size.height : data.size.width);
+        get => new(!isRotated ? saveData.data.size.width : saveData.data.size.height, !isRotated ? saveData.data.size.height : saveData.data.size.width);
     }
 
     private ItemToolTip tooltip;
@@ -72,8 +69,8 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private void Start()
     {
         tooltip = inventory.GetItemTooltip();
-        icon.sprite = data.icon;    
-        background.color = data.backgroundColor;
+        icon.sprite = saveData.data.icon;    
+        background.color = saveData.data.backgroundColor;
     }
 
     /// <summary>
@@ -83,6 +80,11 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private void LateUpdate()
     {
         UpdateRotateAnimation();
+    }
+
+    public void StartRotate()
+    {
+        UpdateRotation();
     }
 
     /// <summary>
@@ -140,7 +142,8 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         }
 
         // Might want to store rotation solely on the item data @DW
-        data.isRotated = isRotated;
+        saveData.isRotated = isRotated;
+        saveData.rotateIndex = rotateIndex;
     }
 
     /// <summary>
@@ -164,7 +167,7 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        tooltip.ShowToolTip(data.itemStats.GetItemName(), data.itemStats.CreateItemDescriptionText());
+        tooltip.ShowToolTip(saveData.data.itemStats.GetItemName(), saveData.data.itemStats.CreateItemDescriptionText());
     }
 
     public void OnPointerExit(PointerEventData eventData)

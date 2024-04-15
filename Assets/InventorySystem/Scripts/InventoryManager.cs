@@ -1,19 +1,18 @@
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
-    private Dictionary<int, (List<ItemData> list, InventoryType type)> ItemDataInformation;
+    private Dictionary<int, (List<ItemSaveData> list, InventoryType type)> ItemDataInformation;
 
     private void Awake()
     {
         if (ItemDataInformation == null)
         {
             var statsData = FindAnyObjectByType<PlayerStatsManager>().GetPlayerStats();
-            (List<ItemData>, InventoryType) newPlayerGrid = (new List<ItemData>(), statsData.inventoryType);
+            (List<ItemSaveData>, InventoryType) newPlayerGrid = (new List<ItemSaveData>(), statsData.inventoryType);
 
-            ItemDataInformation = new Dictionary<int, (List<ItemData> list, InventoryType type)>
+            ItemDataInformation = new Dictionary<int, (List<ItemSaveData> list, InventoryType type)>
             {
                 { 0, newPlayerGrid }
             };
@@ -27,12 +26,12 @@ public class InventoryManager : MonoBehaviour
     /// <returns>Grid id</returns>
     public int AddNewItemList(InventoryType inv)
     {
-        ItemDataInformation.Add(ItemDataInformation.Count, (new List<ItemData>(), inv));
+        ItemDataInformation.Add(ItemDataInformation.Count, (new List<ItemSaveData>(), inv));
 
         return ItemDataInformation.Count - 1;
     }
 
-    public void UpdateItemData(int itemsId, ItemData data)
+    public void UpdateItemData(int itemsId, ItemSaveData data)
     {
         var list = ItemDataInformation[itemsId].list;
         var item = list.FindIndex(x => x.Id == data.Id);
@@ -45,12 +44,12 @@ public class InventoryManager : MonoBehaviour
         ItemDataInformation.Remove(itemsId);
     }
 
-    public (List<ItemData> list, InventoryType type) GetItems(int itemsId)
+    public (List<ItemSaveData> list, InventoryType type) GetItems(int itemsId)
     {
         return ItemDataInformation[itemsId];
     }
 
-    public void AddItem(int itemsId, ItemData data)
+    public void AddItem(int itemsId, ItemSaveData data)
     {
         ItemDataInformation[itemsId].list.Add(data);
     }

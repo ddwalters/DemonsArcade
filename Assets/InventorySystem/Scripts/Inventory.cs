@@ -105,7 +105,7 @@ public class Inventory : MonoBehaviour
     /// <param name="checkItem">Item used for checking overlaps</param>
     /// <param name="previousItems">All items that grid already contains</param>
     /// <returns>True if no items overlap</returns>
-    private (bool available, Vector2Int? slotPosition) CheckItemSpot(Vector2Int gridSize, Vector2Int slotPosition, ItemData checkItem, List<ItemData> previousItems, bool isRotated)
+    private (bool available, Vector2Int? slotPosition) CheckItemSpot(Vector2Int gridSize, Vector2Int slotPosition, ItemSaveData checkItem, List<ItemSaveData> previousItems, bool isRotated)
     {
         int[,] matrix = new int[gridSize.x, gridSize.y];
 
@@ -113,8 +113,8 @@ public class Inventory : MonoBehaviour
             for (int j = 0; j < matrix.GetLength(1); j++)
                 matrix[i, j] = 0;
 
-        var width = slotPosition.x + (isRotated ? checkItem.size.height : checkItem.size.width);
-        var height = slotPosition.y + (isRotated ? checkItem.size.width : checkItem.size.height);
+        var width = slotPosition.x + (isRotated ? checkItem.data.size.height : checkItem.data.size.width);
+        var height = slotPosition.y + (isRotated ? checkItem.data.size.width : checkItem.data.size.height);
 
         // checks if item will go out of bounds
         if (slotPosition.x + width - 1 > matrix.GetLength(0) - 1 || slotPosition.y + height - 1 > matrix.GetLength(1) - 1)
@@ -124,11 +124,11 @@ public class Inventory : MonoBehaviour
             for (int j = slotPosition.y; j < height; j++)
                 matrix[checkItem.slotPosition.x + i, checkItem.slotPosition.y + j] = 1;
 
-        foreach (ItemData item in previousItems)
+        foreach (ItemSaveData item in previousItems)
         {
-            for (int i = 0; i < item.size.width; i++)
+            for (int i = 0; i < item.data.size.width; i++)
             {
-                for (int j = 0; j < item.size.height; j++)
+                for (int j = 0; j < item.data.size.height; j++)
                 {
                     var slotX = item.slotPosition.x + i;
                     var slotY = item.slotPosition.y + j;
@@ -139,17 +139,27 @@ public class Inventory : MonoBehaviour
             }
         }
 
-        return (true, new Vector2Int((int)slotPosition.x, (int)slotPosition.y));
+        return (true, new Vector2Int(slotPosition.x, slotPosition.y));
     }
 
     /// <summary>
-    /// 
+    /// Adds an item to a specific grid list in the inventory manager.
     /// </summary>
     /// <param name="gridId"></param>
     /// <param name="itemData"></param>
     /// <returns>False if no item was added</returns>
     public bool AddItem(int gridId, ItemData itemData)
     {
+        if (itemData == null)
+        {
+            Debug.Log("No Data");
+            return false;
+        }
+
+        GameObject saveObject = new GameObject();
+        var itemSaveData = saveObject.AddComponent<ItemSaveData>();
+        itemSaveData.data = itemData;
+
         var inventoryGrid = inventoryType.AllPrefabs.FirstOrDefault(x => x.invType == inventoryManager.GetItems(gridId).type).prefab.GetComponent<InventoryGrid>();
         for (int y = 0; y < inventoryGrid.gridSize.y; y++)
         {
@@ -158,27 +168,38 @@ public class Inventory : MonoBehaviour
                 var currentItems = inventoryManager.GetItems(gridId);
                 if (currentItems.list.Count == 0)
                 {
-                    itemData.slotPosition = new Vector2Int(x, y);
-                    inventoryManager.AddItem(gridId, itemData);
+                    itemSaveData.slotPosition = new Vector2Int(x, y);
+                    inventoryManager.AddItem(gridId, itemSaveData);
+                    Destroy(saveObject);
+
                     return true;
                 }
 
-                (bool available, Vector2Int? slotPosition) position = CheckItemSpot(inventoryGrid.gridSize, new Vector2Int(x, y), itemData, currentItems.list, itemData.isRotated);
+                (bool available, Vector2Int? slotPosition) position = CheckItemSpot(inventoryGrid.gridSize, new Vector2Int(x, y), itemSaveData, currentItems.list, itemSaveData.isRotated);
                 if (!position.available)
                 {
-                    itemData.isRotated = true;
-                    position = CheckItemSpot(inventoryGrid.gridSize, new Vector2Int(x, y), itemData, currentItems.list, itemData.isRotated);
+                    itemSaveData.isRotated = true;
+                    itemSaveData.rotateIndex = 1;
+                    position = CheckItemSpot(inventoryGrid.gridSize, new Vector2Int(x, y), itemSaveData, currentItems.list, itemSaveData.isRotated);
+                    if (!position.available)
+                    {
+                        itemSaveData.isRotated = false;
+                        itemSaveData.rotateIndex = 0;
+                    }
                 }
 
                 if (position.available)
                 {
-                    itemData.slotPosition = new Vector2Int(x, y);
-                    inventoryManager.AddItem(gridId, itemData);
+                    itemSaveData.slotPosition = new Vector2Int(x, y);
+                    inventoryManager.AddItem(gridId, itemSaveData);
+                    Destroy(saveObject);
 
                     return true;
                 }
             }
         }
+        Destroy(saveObject);
+
         Debug.Log("Failed to add");
         return false;
     }
@@ -203,17 +224,20 @@ public class Inventory : MonoBehaviour
             newItem.rectTransform = newItem.GetComponent<RectTransform>();
             newItem.rectTransform.SetParent(inventory.rectTransform);
             newItem.rectTransform.sizeDelta = new Vector2(
-                itemData.size.width * InventorySettings.slotSize.x,
-                itemData.size.height * InventorySettings.slotSize.y
+                itemData.data.size.width * InventorySettings.slotSize.x,
+                itemData.data.size.height * InventorySettings.slotSize.y
             );
 
+            newItem.saveData = itemData;
             newItem.indexPosition = new Vector2Int(itemData.slotPosition.x, itemData.slotPosition.y);
             newItem.inventory = this;
-            newItem.rectTransform.localScale = new Vector2(itemData.size.width, itemData.size.width);
+            newItem.rectTransform.localScale = new Vector2(itemData.data.size.width, itemData.data.size.width);
+            newItem.rotateIndex = itemData.rotateIndex;
+            newItem.StartRotate(); // gives fun rotation animation when opening inv (Do we want this?)
 
-            for (int xx = 0; xx < itemData.size.width; xx++)
+            for (int xx = 0; xx < itemData.data.size.width; xx++)
             {
-                for (int yy = 0; yy < itemData.size.height; yy++)
+                for (int yy = 0; yy < itemData.data.size.height; yy++)
                 {
                     int slotX = itemData.slotPosition.x + xx;
                     int slotY = itemData.slotPosition.y + yy;
@@ -263,7 +287,7 @@ public class Inventory : MonoBehaviour
         }
 
         item.indexPosition = slotPosition;
-        item.data.slotPosition = slotPosition;
+        item.saveData.slotPosition = slotPosition;
         item.rectTransform.SetParent(gridOnMouse.rectTransform);
 
         for (int x = 0; x < item.correctedSize.width; x++)
@@ -280,7 +304,7 @@ public class Inventory : MonoBehaviour
         item.rectTransform.localPosition = IndexToInventoryPosition(item);
         item.inventoryGrid = gridOnMouse;
 
-        inventoryManager.UpdateItemData(gridOnMouse.id, item.data);
+        inventoryManager.UpdateItemData(gridOnMouse.id, item.saveData);
 
         if (deselectItemInEnd)
         {

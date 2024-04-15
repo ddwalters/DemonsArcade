@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class CollectInteractable : InteractableBase
+public class ItemInteractable : InteractableBase
 {
     [SerializeField] ItemData itemData;
 

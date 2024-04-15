@@ -63,10 +63,10 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
         rectTransform.sizeDelta = size;
     }
 
-    public void UpdateItemsMatrix(int slotX, int slotY, Item newItem, ItemData itemData)
+    public void UpdateItemsMatrix(int slotX, int slotY, Item newItem, ItemSaveData itemData)
     {
         items[slotX, slotY] = newItem;
-        items[slotX, slotY].data = itemData;
+        items[slotX, slotY].saveData = itemData;
     }
 
     public void CloseGrid()

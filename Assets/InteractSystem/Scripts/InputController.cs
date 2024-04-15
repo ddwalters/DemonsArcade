@@ -2,14 +2,13 @@ using UnityEngine;
 
 public class InputController : MonoBehaviour
 {
-    private Inventory inventory;
+    [SerializeField] ItemToolTip itemToolTip;
 
-    private InventoryManager inventoryManager;
+    private Inventory inventory;
 
     private void Awake()
     {
         inventory = FindAnyObjectByType<Inventory>();
-        inventoryManager = FindAnyObjectByType<InventoryManager>();
     }
 
     private void Update()
@@ -27,6 +26,7 @@ public class InputController : MonoBehaviour
             foreach (var grid in grids)
                 grid.CloseGrid();
 
+            itemToolTip.HideToolTip();
             Cursor.lockState = CursorLockMode.Locked;
         }
     }
