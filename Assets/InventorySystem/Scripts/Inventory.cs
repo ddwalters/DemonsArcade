@@ -1,3 +1,4 @@
+using NUnit.Framework.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -117,8 +118,8 @@ public class Inventory : MonoBehaviour
         var height = slotPosition.y + (isRotated ? checkItem.data.size.width : checkItem.data.size.height);
 
         // checks if item will go out of bounds
-        if (slotPosition.x + width - 1 > matrix.GetLength(0) - 1 || slotPosition.y + height - 1 > matrix.GetLength(1) - 1)
-            return (false, null);
+        if (width > matrix.GetLength(0) || height > matrix.GetLength(1))
+                return (false, null);
 
         for (int i = slotPosition.x; i < width; i++)
             for (int j = slotPosition.y; j < height; j++)
@@ -126,13 +127,13 @@ public class Inventory : MonoBehaviour
 
         foreach (ItemSaveData item in previousItems)
         {
-            for (int i = 0; i < item.data.size.width; i++)
+            for (int xx = 0; xx < item.data.size.width; xx++)
             {
-                for (int j = 0; j < item.data.size.height; j++)
+                for (int yy = 0; yy < item.data.size.height; yy++)
                 {
-                    var slotX = item.slotPosition.x + i;
-                    var slotY = item.slotPosition.y + j;
-
+                    var slotX = item.isRotated ? item.slotPosition.x + yy : item.slotPosition.x + xx;
+                    var slotY = item.isRotated ? item.slotPosition.y + xx : item.slotPosition.y + yy;
+            
                     if (matrix[slotX, slotY] == 1)
                         return (false, null);
                 }
@@ -239,8 +240,8 @@ public class Inventory : MonoBehaviour
             {
                 for (int yy = 0; yy < itemData.data.size.height; yy++)
                 {
-                    int slotX = itemData.slotPosition.x + xx;
-                    int slotY = itemData.slotPosition.y + yy;
+                    int slotX = itemData.isRotated ? itemData.slotPosition.y + xx : itemData.slotPosition.x + xx;
+                    int slotY = itemData.isRotated ? itemData.slotPosition.x + yy : itemData.slotPosition.y + yy;
 
                     inventory.UpdateItemsMatrix(slotX, slotY, newItem, itemData);
                 }
