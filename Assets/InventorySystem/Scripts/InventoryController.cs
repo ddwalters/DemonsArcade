@@ -5,12 +5,15 @@ public class InventoryController : MonoBehaviour
 {
     public Inventory inventory { get; private set; }
 
+    private ItemToolTip itemToolTip;
+
     /// <summary>
     /// Awake is called when the script instance is being loaded.
     /// </summary>
     private void Awake()
     {
         inventory = GetComponent<Inventory>();
+        itemToolTip = inventory.GetItemTooltip();
     }
 
     /// <summary>
@@ -18,6 +21,26 @@ public class InventoryController : MonoBehaviour
     /// </summary>
     private void Update()
     {
+        // open player grid
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            Cursor.lockState = CursorLockMode.Confined;
+            inventory.CreateGrid(0, true);
+        }
+
+
+        // close player grid
+        if (Input.GetKeyUp(KeyCode.Tab))
+        {
+            var grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
+
+            foreach (var grid in grids)
+                grid.CloseGrid();
+
+            itemToolTip.HideToolTip();
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+
 ;        if (Input.GetKeyDown(KeyCode.Mouse0) && inventory.gridOnMouse != null)
         {
             if (!inventory.ReachedBoundary(inventory.GetSlotAtMouseCoords(), inventory.gridOnMouse))
@@ -49,6 +72,7 @@ public class InventoryController : MonoBehaviour
             RemoveItemWithMouse();
         }
 
+        // move and rotate item
         if (inventory.selectedItem != null)
         {
             MoveSelectedItemToMouse();

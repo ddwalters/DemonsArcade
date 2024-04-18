@@ -61,9 +61,20 @@ public class Inventory : MonoBehaviour
     /// </summary>
     private Canvas canvas;
 
+    /// <summary>
+    /// Player grid location in ui
+    /// </summary>
     private GameObject playerGridHolder;
 
+    /// <summary>
+    /// General grid location in ui
+    /// </summary>
     private GameObject worldGridHolder;
+
+    /// <summary>
+    /// Location used for holding Inventory item during movement
+    /// </summary>
+    private GameObject heldItemHolder;
 
     /// <summary>
     /// Awake is called when the script instance is being loaded.
@@ -76,6 +87,7 @@ public class Inventory : MonoBehaviour
 
         playerGridHolder = GameObject.Find("PlayerInventory");
         worldGridHolder = GameObject.Find("WorldInventory");
+        heldItemHolder = GameObject.Find("HeldItemHolder");
     }
 
     /// <summary>
@@ -501,6 +513,16 @@ public class Inventory : MonoBehaviour
     public Item GetItemFromSlotPosition(Vector2Int slotPosition)
     {
         return gridOnMouse.items[slotPosition.x, slotPosition.y];
+    }
+
+    /// <summary>
+    /// Removes item currently being held by the player when closing the grid.
+    /// Prevents lingering item after grid closes.
+    /// </summary>
+    public void ClosingGrid()
+    {
+        // not a good route to go. Difficult with how mouse is tracked
+        // Destroy(heldItemHolder.transform.GetChild(0));
     }
 
     /// <summary>

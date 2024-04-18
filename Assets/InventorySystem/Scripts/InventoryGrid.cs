@@ -71,6 +71,7 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
 
     public void CloseGrid()
     {
+        inventory.ClosingGrid();
         Destroy(gameObject);
     }
 
