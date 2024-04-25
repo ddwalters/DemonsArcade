@@ -1,15 +1,13 @@
-using NUnit.Framework.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public static class InventorySettings
 {
     /// <summary>
     /// Size that each slot has.
     /// </summary>
-    public static readonly Vector2Int slotSize = new(96, 96);
+    public static readonly Vector2Int slotSize = new(72, 72);
 
     /// <summary>
     /// Slot scale for external changes. Do not touch.
@@ -132,7 +130,7 @@ public class Inventory : MonoBehaviour
 
         // checks if item will go out of bounds
         if (width > matrix.GetLength(0) || height > matrix.GetLength(1))
-                return (false, null);
+            return (false, null);
 
         for (int i = slotPosition.x; i < width; i++)
             for (int j = slotPosition.y; j < height; j++)
@@ -146,7 +144,7 @@ public class Inventory : MonoBehaviour
                 {
                     var slotX = item.isRotated ? item.slotPosition.x + yy : item.slotPosition.x + xx;
                     var slotY = item.isRotated ? item.slotPosition.y + xx : item.slotPosition.y + yy;
-            
+
                     if (matrix[slotX, slotY] == 1)
                         return (false, null);
                 }
@@ -226,8 +224,12 @@ public class Inventory : MonoBehaviour
         var inventory = Instantiate(prefab, isPlayerGrid ? playerGridHolder.transform : worldGridHolder.transform).GetComponent<InventoryGrid>();
 
         if (inventory.id != 0)
-        { 
-            inventory.gameObject.transform.GetChild(0).gameObject.SetActive(false);
+        {
+            // doesn't include main grid for use in other areas
+            for (int i = 0; i < inventory.transform.childCount - 1; i++)
+            {
+                inventory.gameObject.transform.GetChild(i).gameObject.SetActive(false);
+            }
         }
 
         // Get Items if any
@@ -528,7 +530,7 @@ public class Inventory : MonoBehaviour
     public void ClosingGrid()
     {
         // not a good route to go. Difficult with how mouse is tracked
-        // Destroy(heldItemHolder.transform.GetChild(0));
+        //Destroy(heldItemHolder.transform.GetChild(0));
     }
 
     /// <summary>
