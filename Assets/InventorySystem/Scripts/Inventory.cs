@@ -2,6 +2,7 @@ using NUnit.Framework.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public static class InventorySettings
 {
@@ -223,6 +224,11 @@ public class Inventory : MonoBehaviour
         var prefab = inventoryType.AllPrefabs.FirstOrDefault(x => x.invType == inventoryManager.GetItems(gridId).type).prefab;
         prefab.GetComponent<InventoryGrid>().id = gridId;  // bit weird but ok.
         var inventory = Instantiate(prefab, isPlayerGrid ? playerGridHolder.transform : worldGridHolder.transform).GetComponent<InventoryGrid>();
+
+        if (inventory.id != 0)
+        { 
+            inventory.gameObject.transform.GetChild(0).gameObject.SetActive(false);
+        }
 
         // Get Items if any
         var items = inventoryManager.GetItems(gridId);
