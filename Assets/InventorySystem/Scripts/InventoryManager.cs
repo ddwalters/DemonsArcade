@@ -11,10 +11,24 @@ public class InventoryManager : MonoBehaviour
         {
             var statsData = FindAnyObjectByType<PlayerStatsManager>().GetPlayerStats();
             (List<ItemSaveData>, InventoryType) newPlayerGrid = (new List<ItemSaveData>(), statsData.inventoryType);
+            (List<ItemSaveData>, InventoryType) HeadSlot = (new List<ItemSaveData>(), InventoryType.OneByOneMinimal);
+            (List<ItemSaveData>, InventoryType) ChestSlot = (new List<ItemSaveData>(), InventoryType.OneByOneMinimal);
+            (List<ItemSaveData>, InventoryType) LegSlot = (new List<ItemSaveData>(), InventoryType.OneByOneMinimal);
+            (List<ItemSaveData>, InventoryType) BootSlot = (new List<ItemSaveData>(), InventoryType.OneByOneMinimal);
+            (List<ItemSaveData>, InventoryType) NecklaceSlot = (new List<ItemSaveData>(), InventoryType.OneByOneMinimal);
+            (List<ItemSaveData>, InventoryType) RightHandSlot = (new List<ItemSaveData>(), InventoryType.OneByOneMinimal);
+            (List<ItemSaveData>, InventoryType) LeftHandSlot = (new List<ItemSaveData>(), InventoryType.OneByOneMinimal);
 
             ItemDataInformation = new Dictionary<int, (List<ItemSaveData> list, InventoryType type)>
             {
-                { 0, newPlayerGrid }
+                { 0, newPlayerGrid },
+                { 1, HeadSlot },
+                { 2, ChestSlot },
+                { 3, LegSlot },
+                { 4, BootSlot },
+                { 5, NecklaceSlot },
+                { 6, RightHandSlot },
+                { 7, LeftHandSlot }
             };
         }
     }

@@ -23,7 +23,7 @@ public class PlayerStatsData
 
     public PlayerStatsData()
     {
-        inventoryType = InventoryType.ThreeByThree;
+        inventoryType = InventoryType.FourByFourFull;
 
         lvl = 1;
         gold = 100;

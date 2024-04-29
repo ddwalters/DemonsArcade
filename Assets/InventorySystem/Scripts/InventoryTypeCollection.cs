@@ -4,8 +4,11 @@ using System.Collections.Generic;
 
 public enum InventoryType
 {
-    ThreeByThree,
-    SixByThree
+    // minimal: Doesn't include player layout
+    // full: Includes full player layout
+    OneByOneMinimal,
+    FourByFourFull,
+    SixByThreeMinimal
 }
 
 [CreateAssetMenu(fileName = "InvTypeCollection", menuName = "Inventory/InvTypeCollection")]
