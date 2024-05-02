@@ -237,9 +237,6 @@ public class Inventory : MonoBehaviour
         
         var items = inventoryManager.GetItems(gridId).list;
 
-        if (items.Count == 0)
-            return;
-
         foreach (var itemData in items)
         {
             Item newItem = Instantiate(itemPrefab);
@@ -283,7 +280,7 @@ public class Inventory : MonoBehaviour
                 var items2 = inventoryManager.GetItems(i).list;
 
                 if (items2.Count == 0)
-                    return;
+                    continue;
 
                 var inventoryGrid2 = inventoryGrids[i];
                 foreach (var itemData in items2)
