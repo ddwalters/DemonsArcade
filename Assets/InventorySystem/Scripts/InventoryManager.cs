@@ -45,9 +45,9 @@ public class InventoryManager : MonoBehaviour
         return ItemDataInformation.Count - 1;
     }
 
-    public void UpdateItemData(int itemsId, ItemSaveData data)
+    public void UpdateItemData(int gridId, ItemSaveData data)
     {
-        var list = ItemDataInformation[itemsId].list;
+        var list = ItemDataInformation[gridId].list;
         var item = list.FindIndex(x => x.Id == data.Id);
 
         list[item] = data;
@@ -63,8 +63,11 @@ public class InventoryManager : MonoBehaviour
         return ItemDataInformation[itemsId];
     }
 
-    public void AddItem(int itemsId, ItemSaveData data)
+    public void AddItem(int gridId, ItemSaveData data)
     {
-        ItemDataInformation[itemsId].list.Add(data);
+        var list = ItemDataInformation[gridId].list;
+
+        data.Id = list.Count - 1;
+        list.Add(data);
     }
 }
