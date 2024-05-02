@@ -38,7 +38,7 @@ public class InventoryManager : MonoBehaviour
     /// </summary>
     /// <param name="inv">Inventory size using enum type</param>
     /// <returns>Grid id</returns>
-    public int AddNewItemList(InventoryType inv)
+    public int AddNewGridList(InventoryType inv)
     {
         ItemDataInformation.Add(ItemDataInformation.Count, (new List<ItemSaveData>(), inv));
 
@@ -53,9 +53,9 @@ public class InventoryManager : MonoBehaviour
         list[item] = data;
     }
 
-    public void RemoveItems(int itemsId)
+    public void RemoveGrid(int gridId)
     {
-        ItemDataInformation.Remove(itemsId);
+        ItemDataInformation.Remove(gridId);
     }
 
     public (List<ItemSaveData> list, InventoryType type) GetItems(int itemsId)
@@ -67,7 +67,15 @@ public class InventoryManager : MonoBehaviour
     {
         var list = ItemDataInformation[gridId].list;
 
-        data.Id = list.Count - 1;
+        data.Id = list.Count;
         list.Add(data);
+    }
+
+    public void RemoveItem(int gridId, int itemId)
+    {
+        ItemDataInformation[gridId].list.RemoveAt(itemId);
+
+        for (int i = itemId; i < ItemDataInformation[gridId].list.Count; i++)
+            ItemDataInformation[gridId].list[i].Id = i;
     }
 }

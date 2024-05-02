@@ -218,32 +218,33 @@ public class Inventory : MonoBehaviour
 
     public void CreateGrid(int gridId, bool isPlayerGrid)
     {
-        // Create grid
         var prefab = inventoryType.AllPrefabs.FirstOrDefault(x => x.invType == inventoryManager.GetItems(gridId).type).prefab;
-        prefab.GetComponent<InventoryGrid>().id = gridId;  // bit weird but ok.
-        var inventory = Instantiate(prefab, isPlayerGrid ? playerGridHolder.transform : worldGridHolder.transform).GetComponent<InventoryGrid>();
+        prefab.GetComponent<InventoryGrid>().id = gridId;
+        var backpack = Instantiate(prefab, isPlayerGrid ? playerGridHolder.transform : worldGridHolder.transform);
 
-        if (inventory.id != 0)
+        #region Main Grid
+        var inventoryGrid = backpack.GetComponent<InventoryGrid>();
+
+        // removes grid decoration and item slots
+        // doesn't remove main grid for use in other areas
+        if(!isPlayerGrid)
         {
-            // doesn't include main grid for use in other areas
-            for (int i = 0; i < inventory.transform.childCount - 1; i++)
+            for (int i = 0; i < inventoryGrid.transform.childCount - 1; i++)
             {
-                inventory.gameObject.transform.GetChild(i).gameObject.SetActive(false);
+                inventoryGrid.gameObject.transform.GetChild(i).gameObject.SetActive(false);
             }
         }
+        
+        var items = inventoryManager.GetItems(gridId).list;
 
-        // Get Items if any
-        var items = inventoryManager.GetItems(gridId);
-
-        if (items.list.Count == 0)
+        if (items.Count == 0)
             return;
 
-        // Add items to grid
-        foreach (var itemData in items.list)
+        foreach (var itemData in items)
         {
             Item newItem = Instantiate(itemPrefab);
             newItem.rectTransform = newItem.GetComponent<RectTransform>();
-            newItem.rectTransform.SetParent(inventory.rectTransform);
+            newItem.rectTransform.SetParent(inventoryGrid.rectTransform);
             newItem.rectTransform.sizeDelta = new Vector2(
                 itemData.data.size.width * InventorySettings.slotSize.x,
                 itemData.data.size.height * InventorySettings.slotSize.y
@@ -263,13 +264,62 @@ public class Inventory : MonoBehaviour
                     int slotX = itemData.isRotated ? itemData.slotPosition.y + xx : itemData.slotPosition.x + xx;
                     int slotY = itemData.isRotated ? itemData.slotPosition.x + yy : itemData.slotPosition.y + yy;
 
-                    inventory.UpdateItemsMatrix(slotX, slotY, newItem, itemData);
+                    inventoryGrid.UpdateItemsMatrix(slotX, slotY, newItem, itemData);
                 }
             }
 
             newItem.rectTransform.localPosition = IndexToInventoryPosition(newItem);
-            newItem.inventoryGrid = inventory;
+            newItem.inventoryGrid = inventoryGrid;
         }
+        #endregion
+
+        #region Slot Grids
+        if (isPlayerGrid)
+        {
+            var inventoryGrids = backpack.GetComponentsInChildren<InventoryGrid>();
+
+            for (int i = 7; i > 0; i--)
+            {
+                var items2 = inventoryManager.GetItems(i).list;
+
+                if (items2.Count == 0)
+                    return;
+
+                var inventoryGrid2 = inventoryGrids[i];
+                foreach (var itemData in items2)
+                {
+                    Item newItem = Instantiate(itemPrefab);
+                    newItem.rectTransform = newItem.GetComponent<RectTransform>();
+                    newItem.rectTransform.SetParent(inventoryGrid2.rectTransform);
+                    newItem.rectTransform.sizeDelta = new Vector2(
+                        itemData.data.size.width * InventorySettings.slotSize.x,
+                        itemData.data.size.height * InventorySettings.slotSize.y
+                    );
+
+                    newItem.saveData = itemData;
+                    newItem.indexPosition = new Vector2Int(itemData.slotPosition.x, itemData.slotPosition.y);
+                    newItem.inventory = this;
+                    newItem.rectTransform.localScale = new Vector2(itemData.data.size.width, itemData.data.size.width);
+                    newItem.rotateIndex = itemData.rotateIndex;
+                    newItem.StartRotate(); // gives fun rotation animation when opening inv (Do we want this?)
+
+                    for (int xx = 0; xx < itemData.data.size.width; xx++)
+                    {
+                        for (int yy = 0; yy < itemData.data.size.height; yy++)
+                        {
+                            int slotX = itemData.isRotated ? itemData.slotPosition.y + xx : itemData.slotPosition.x + xx;
+                            int slotY = itemData.isRotated ? itemData.slotPosition.x + yy : itemData.slotPosition.y + yy;
+
+                            inventoryGrid2.UpdateItemsMatrix(slotX, slotY, newItem, itemData);
+                        }
+                    }
+
+                    newItem.rectTransform.localPosition = IndexToInventoryPosition(newItem);
+                    newItem.inventoryGrid = inventoryGrid2;
+                }
+            }
+        }
+        #endregion
     }
 
     /// <summary>
@@ -323,9 +373,17 @@ public class Inventory : MonoBehaviour
         }
 
         item.rectTransform.localPosition = IndexToInventoryPosition(item);
+
+        var previousGrid = item.inventoryGrid;
         item.inventoryGrid = gridOnMouse;
 
-        inventoryManager.UpdateItemData(gridOnMouse.id, item.saveData);
+        if(previousGrid == item.inventoryGrid)
+            inventoryManager.UpdateItemData(gridOnMouse.id, item.saveData);
+        else
+        {
+            gridOnMouse.inventory.AddItem(gridOnMouse.id, item.saveData.data);
+            inventoryManager.RemoveItem(previousGrid.id, item.saveData.Id);
+        }
 
         if (deselectItemInEnd)
         {

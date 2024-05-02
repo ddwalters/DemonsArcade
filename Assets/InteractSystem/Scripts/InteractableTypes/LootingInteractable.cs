@@ -18,7 +18,7 @@ public class LootingInteractable : InteractableBase
         inventoryManager = FindAnyObjectByType<InventoryManager>();
         controller = FindAnyObjectByType<InteractionController>();
 
-        gridId = inventoryManager.AddNewItemList(invType);
+        gridId = inventoryManager.AddNewGridList(invType);
     }
 
     public override void OnInteract()
