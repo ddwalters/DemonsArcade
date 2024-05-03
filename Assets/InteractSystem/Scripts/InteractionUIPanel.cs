@@ -1,11 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
 public class InteractionUIPanel : MonoBehaviour
 {
+    private bool isReset;
+
     [SerializeField] private Image progressBar;
 
     [SerializeField] private TextMeshProUGUI tooltipText;
@@ -13,18 +13,21 @@ public class InteractionUIPanel : MonoBehaviour
     public void SetToolTip(string tooltip)
     {
         tooltipText.SetText(tooltip);
+        isReset = false;
     }
 
     public void UpdateProgressBar(float fillAmount)
     {
         progressBar.fillAmount = fillAmount;
+        isReset = false;
     }
 
     public void ResetUI()
     {
-        progressBar.fillAmount = 0;
-
-        //allocates new empty string every frame, there should be a good way to only do this once.
-        tooltipText.SetText("");
+        if (!isReset)
+        {
+            progressBar.fillAmount = 0;
+            tooltipText.SetText("");
+        }
     }
 }
