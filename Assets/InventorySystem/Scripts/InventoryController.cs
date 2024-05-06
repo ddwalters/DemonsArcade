@@ -21,16 +21,13 @@ public class InventoryController : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        // open player grid
         if (Input.GetKeyDown(KeyCode.Tab))
         {
             Cursor.lockState = CursorLockMode.Confined;
             inventory.CreateGrid(0, true);
         }
 
-
-        // close player grid
-        if (Input.GetKeyUp(KeyCode.Tab))
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
             var grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
 
@@ -41,7 +38,7 @@ public class InventoryController : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
         }
 
-;        if (Input.GetKeyDown(KeyCode.Mouse0) && inventory.gridOnMouse != null)
+        if (Input.GetKeyDown(KeyCode.Mouse0) && inventory.gridOnMouse != null)
         {
             if (!inventory.ReachedBoundary(inventory.GetSlotAtMouseCoords(), inventory.gridOnMouse))
             {
@@ -49,7 +46,7 @@ public class InventoryController : MonoBehaviour
                 {
                     Item oldSelectedItem = inventory.selectedItem;
                     Item overlapItem = inventory.GetItemAtMouseCoords();
-        
+
                     if (overlapItem != null)
                     {
                         inventory.SwapItem(overlapItem, oldSelectedItem);

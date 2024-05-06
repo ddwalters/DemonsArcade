@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5481263554512080566}
   - component: {fileID: 9181323282242626799}
   - component: {fileID: 2354973662633754572}
+  - component: {fileID: 1039354978681633192}
   m_Layer: 7
   m_Name: Merchant
   m_TagString: Untagged
@@ -107,3 +108,21 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1039354978681633192
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6362958262990081241}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db54f35bb8910ef41af2a0688d9222d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  holdDuration: 1
+  holdInteract: 1
+  isInteractable: 1
+  tooltipMessage: '''E'' Shop'
+  invType: 1
+  items: []

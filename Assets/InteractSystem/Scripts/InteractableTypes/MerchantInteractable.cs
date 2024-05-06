@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LootingInteractable : InteractableBase
+public class MerchantInteractable : InteractableBase
 {
-    [SerializeField] InventoryType invType;
-
     [SerializeField] List<ItemData> items;
 
     private Inventory inventory;
@@ -24,7 +22,7 @@ public class LootingInteractable : InteractableBase
 
     private void Start()
     {
-        gridId = inventoryManager.AddNewGridList(invType);
+        gridId = inventoryManager.AddNewGridList(InventoryType.FourByFourFull);
 
         foreach (var itemData in items)
         {
