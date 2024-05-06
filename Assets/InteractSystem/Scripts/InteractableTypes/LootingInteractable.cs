@@ -10,14 +10,17 @@ public class LootingInteractable : InteractableBase
 
     private InteractionController controller;
 
-    private int gridId;
+    public int gridId;
 
     private void Awake()
     {
         inventory = FindAnyObjectByType<Inventory>();
         inventoryManager = FindAnyObjectByType<InventoryManager>();
         controller = FindAnyObjectByType<InteractionController>();
+    }
 
+    private void Start()
+    {
         gridId = inventoryManager.AddNewGridList(invType);
     }
 
