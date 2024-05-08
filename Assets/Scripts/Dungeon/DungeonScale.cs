@@ -7,6 +7,8 @@ public class DungeonScale : MonoBehaviour
     public int scale;
     public float delay;
 
+    public GameObject Player;
+
     void Start()
     {
         StartCoroutine(Scale());
@@ -16,5 +18,9 @@ public class DungeonScale : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
         gameObject.transform.localScale = new Vector3(scale, scale, scale);
+
+        GameObject SpawnPoint = GameObject.Find("_SpawnPoint");
+
+        Player.transform.position = SpawnPoint.transform.position;
     }
 }
