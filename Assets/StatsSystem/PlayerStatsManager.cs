@@ -2,6 +2,7 @@ using BayatGames.SaveGameFree;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerStatsManager : MonoBehaviour
 {
@@ -9,9 +10,9 @@ public class PlayerStatsManager : MonoBehaviour
     PlayerStatsData statsData;
 
     //[SerializeField] Slider xpSlider;
-    //[SerializeField] Image healthFill;
-    //[SerializeField] Image staminaFill;
-    //[SerializeField] Image manaFill;
+    [SerializeField] Image healthFill;
+    [SerializeField] Image staminaFill;
+    [SerializeField] Image manaFill;
     //[SerializeField] TextMeshProUGUI lvlText;
     //[SerializeField] TextMeshProUGUI xpText;
     //[SerializeField] TextMeshProUGUI goldText;
@@ -26,8 +27,8 @@ public class PlayerStatsManager : MonoBehaviour
     //[SerializeField] TextMeshProUGUI intelligenceText;
     //[SerializeField] TextMeshProUGUI luckText;
 
-    //private void Awake()
-    //{
+    private void Awake()
+    {
     //    lvlText = GameObject.Find("PlayerLevelText").GetComponent<TextMeshProUGUI>();
     //    xpText = GameObject.Find("EXPText").GetComponent<TextMeshProUGUI>();
     //    goldText = GameObject.Find("PlayerGoldText").GetComponent<TextMeshProUGUI>();
@@ -42,12 +43,12 @@ public class PlayerStatsManager : MonoBehaviour
     //    intelligenceText = GameObject.Find("PlayerIntelligenceText").GetComponent<TextMeshProUGUI>();
     //    luckText = GameObject.Find("PlayerLuckText").GetComponent<TextMeshProUGUI>();
     //
-    //    healthFill = GameObject.Find("HeartFill").GetComponent<Image>();
-    //    staminaFill = GameObject.Find("StaminaFill").GetComponent<Image>();
-    //    manaFill = GameObject.Find("ManaFill").GetComponent<Image>();
+        healthFill = GameObject.Find("HeartFill").GetComponent<Image>();
+        staminaFill = GameObject.Find("StaminaFill").GetComponent<Image>();
+        manaFill = GameObject.Find("ManaFill").GetComponent<Image>();
     //
     //    xpSlider = GameObject.Find("XPBarSlider").GetComponent<Slider>();
-    //}
+    }
 
     private void Start()
     {
@@ -145,7 +146,7 @@ public class PlayerStatsManager : MonoBehaviour
     private void UpdateHealthBar()
     {
         float healthNormalized = Mathf.Clamp01(statsData.currentHealth / statsData.maxHealth);
-        //healthFill.fillAmount = healthNormalized;
+        healthFill.fillAmount = healthNormalized;
     }
     #endregion
 
@@ -194,7 +195,7 @@ public class PlayerStatsManager : MonoBehaviour
     private void UpdateStaminaBar()
     {
         float staminaNormalized = Mathf.Clamp01(statsData.currentStamina / statsData.maxStamina);
-        //staminaFill.fillAmount = staminaNormalized;
+        staminaFill.fillAmount = staminaNormalized;
     }
     #endregion
 
@@ -238,7 +239,7 @@ public class PlayerStatsManager : MonoBehaviour
     private void UpdateManaBar()
     {
         float manaNormalized = Mathf.Clamp01(statsData.currentMana / statsData.maxMana);
-        //manaFill.fillAmount = manaNormalized;
+        manaFill.fillAmount = manaNormalized;
     }
     #endregion
     #endregion

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    private PlayerStatsManager statsManager;
     private Vector3 PlayerMovementInput;
     private float xRot;
 
@@ -18,6 +19,7 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
+        statsManager = GetComponent<PlayerStatsManager>();
         cam = gameObject.GetComponentInChildren<Camera>();
         rb = gameObject.GetComponent<Rigidbody>();
 
@@ -54,7 +56,7 @@ public class PlayerController : MonoBehaviour
     {
         bool isSprinting = false;
 
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (Input.GetKeyDown(KeyCode.LeftShift) && statsManager.GetStamina() > 0)
         {
             isSprinting = true;
             cam.fieldOfView = 90;
@@ -66,8 +68,9 @@ public class PlayerController : MonoBehaviour
         }
 
         Vector3 MoveVector = transform.TransformDirection(PlayerMovementInput) * Speed;
-        if (isSprinting)
+        if (isSprinting && statsManager.GetStamina() > 0)
         {
+            statsManager.UseStamina(1);
             MoveVector = MoveVector * 1.35f;
         }
         rb.velocity = new Vector3(MoveVector.x, rb.velocity.y, MoveVector.z);
