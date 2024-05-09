@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class SkeletonAI : MonoBehaviour
+public class SlimeAI : MonoBehaviour
 {
     public GameObject target;
     private NavMeshAgent navMeshAgent;
