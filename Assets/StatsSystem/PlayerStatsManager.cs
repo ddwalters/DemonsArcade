@@ -49,13 +49,11 @@ public class PlayerStatsManager : MonoBehaviour
     //    xpSlider = GameObject.Find("XPBarSlider").GetComponent<Slider>();
     //}
 
-    private void Awake()
-    {
-        LoadPlayerStats();
-    }
-
     private void Start()
     {
+        if (statsData == null)
+            LoadPlayerStats();
+
         UpdateHealthBar();
         UpdateStaminaBar();
         UpdateManaBar();
@@ -323,6 +321,9 @@ public class PlayerStatsManager : MonoBehaviour
 
     public PlayerStatsData GetPlayerStats()
     {
+        if (statsData == null)
+            LoadPlayerStats();
+
         return statsData;
     }
 

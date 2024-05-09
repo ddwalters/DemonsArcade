@@ -250,9 +250,9 @@ public class Inventory : MonoBehaviour
             newItem.saveData = itemData;
             newItem.indexPosition = new Vector2Int(itemData.slotPosition.x, itemData.slotPosition.y);
             newItem.inventory = this;
-            newItem.rectTransform.localScale = new Vector2(itemData.data.size.width, itemData.data.size.width);
+            newItem.rectTransform.localScale = new Vector2(1, 1);
             newItem.rotateIndex = itemData.rotateIndex;
-            newItem.StartRotate(); // gives fun rotation animation when opening inv (Do we want this?)
+            newItem.StartRotate(); // gives fun rotation animation when opening inv (Do we want this? no)
 
             for (int xx = 0; xx < itemData.data.size.width; xx++)
             {

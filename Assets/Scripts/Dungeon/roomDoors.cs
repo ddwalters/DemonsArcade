@@ -5,11 +5,11 @@ using UnityEngine;
 public class roomDoors : MonoBehaviour
 {
     public GameObject wall;
-    public Collider collider;
+    public Collider collide;
 
     void Start()
     {
-        collider = gameObject.GetComponent<Collider>();
+        collide = gameObject.GetComponent<Collider>();
     }
 
     private void OnTriggerStay(Collider other)

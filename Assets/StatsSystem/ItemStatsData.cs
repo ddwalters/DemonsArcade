@@ -7,7 +7,11 @@ public class ItemStatsData
     [SerializeField] string name;
     [SerializeField] int cost;
     [SerializeField] int damage;
+    [SerializeField] int attackSpeed;
     [SerializeField] int manaUsage;
+
+    [SerializeField] GameObject prefab;
+    [SerializeField] WeaponType weaponType;
 
     [Header("Level Growth Modifiers")]
     [SerializeField] float XpPercentBoost;
@@ -47,6 +51,8 @@ public class ItemStatsData
 
     public string GetItemName() => name;
     public int GetCost() => cost;
+    public WeaponType GetWeaponType() => weaponType;
+    public GameObject GetPrefab() => prefab;
 
     public string CreateItemDescriptionText()
     {

@@ -10,23 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d1892a430949a40439f65e637e99670e, type: 3}
-  m_Name: ShortSword
+  m_Name: Shield
   m_EditorClassIdentifier: 
   size:
-    width: 1
+    width: 2
     height: 2
-  icon: {fileID: 21300000, guid: 8f28955d92038974a9b04aafaeea79b0, type: 3}
+  icon: {fileID: 21300000, guid: 256205b9c6ca12c45ab7762da8a65631, type: 3}
   backgroundColor: {r: 0, g: 0, b: 0, a: 0}
   itemStats:
-    name: ShortSword
-    cost: 50
-    damage: 15
+    name: Shield
+    cost: 10
+    damage: 5
     attackSpeed: 0
     manaUsage: 0
-    prefab: {fileID: 3444773679952034118, guid: 0817e0d32d415ae42857c092f4e211d4, type: 3}
-    weaponType: 0
+    prefab: {fileID: 6852793413966900171, guid: fc39817381963c24598280898e6b4e8a, type: 3}
+    weaponType: 3
     XpPercentBoost: 0
-    maxHealthBonus: 5
+    maxHealthBonus: 0
     maxStaminaBonus: 0
     maxManaBonus: 0
     strengthBoost: 0
