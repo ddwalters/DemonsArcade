@@ -6,11 +6,11 @@ public class doorwayWalls : MonoBehaviour
 {
     public GameObject wall;
     public GameObject door;
-    public Collider collider;
+    public Collider collide;
 
     void Start()
     {
-        collider = gameObject.GetComponent<Collider>();
+        collide = gameObject.GetComponent<Collider>();
     }
 
     private void OnTriggerStay(Collider other)
