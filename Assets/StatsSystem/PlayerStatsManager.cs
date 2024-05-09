@@ -165,6 +165,11 @@ public class PlayerStatsManager : MonoBehaviour
         return true;
     }
 
+    public int GetStamina()
+    {
+        return statsData.currentStamina;
+    }
+
     // this time should be based on players endurance stat
     private IEnumerator RegenerateStamina()
     {
