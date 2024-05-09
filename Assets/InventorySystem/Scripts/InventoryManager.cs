@@ -1,9 +1,17 @@
+using NUnit.Framework.Interfaces;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
     private Dictionary<int, (List<ItemSaveData> list, InventoryType type)> ItemDataInformation;
+
+    [SerializeField] ItemData HelmetItemPrefab;
+    [SerializeField] ItemData ChestpieceItemPrefab;
+    [SerializeField] ItemData LeggingsItemPrefab;
+    [SerializeField] ItemData BootsItemPrefab;
+    [SerializeField] ItemData NecklaceItemPrefab;
+    [SerializeField] ItemData WeaponItemPrefab;
 
     private void Awake()
     {
@@ -66,6 +74,40 @@ public class InventoryManager : MonoBehaviour
     public void AddItem(int gridId, ItemSaveData data)
     {
         var list = ItemDataInformation[gridId].list;
+
+        var weaponType = data.data.itemStats.GetWeaponType();
+
+        GameObject saveObject = new GameObject();
+        var itemSaveData = saveObject.AddComponent<ItemSaveData>();
+        itemSaveData = data;
+
+        switch (gridId)
+        {
+            case 1:
+                if (weaponType == WeaponType.Helmet)
+                {
+                    // add itemstats onto HelmetItemPrefab so tooltip shows correct Info
+                    // save previousItemData as data on the prefab
+                    // the itemdata on the prefab should be correct dont change it.
+                    // set isSlot type to true on prefab
+
+                }
+                break;
+            case 2:
+                break;
+            case 3:
+                break;
+            case 4:
+                break;
+            case 5:
+                break;
+            case 6:
+                break;
+            case 7:
+                break;
+            default: break;
+        }
+        Destroy(saveObject);
 
         data.Id = list.Count;
         list.Add(data);
