@@ -6,12 +6,12 @@ public class InventoryManager : MonoBehaviour
 {
     private Dictionary<int, (List<ItemSaveData> list, InventoryType type)> ItemDataInformation;
 
-    [SerializeField] ItemData HelmetItemPrefab;
-    [SerializeField] ItemData ChestpieceItemPrefab;
-    [SerializeField] ItemData LeggingsItemPrefab;
-    [SerializeField] ItemData BootsItemPrefab;
-    [SerializeField] ItemData NecklaceItemPrefab;
-    [SerializeField] ItemData WeaponItemPrefab;
+    [SerializeField] ItemData fakeHelmetData;
+    [SerializeField] ItemData fakeChestpieceData;
+    [SerializeField] ItemData fakeLeggingsData;
+    [SerializeField] ItemData fakeBootsData;
+    [SerializeField] ItemData fakeNecklaceData;
+    [SerializeField] ItemData fakeWeaponData;
 
     private void Awake()
     {
