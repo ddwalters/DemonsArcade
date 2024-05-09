@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class WeaponsHandler : MonoBehaviour
 {
+    [SerializeField] GameObject hitCone;
+    Mesh hitMesh;
+
     [Header("Main Hand")]
     private bool _hasMainHandWeapon;
     [SerializeField] GameObject mainHandShortSwordLocation;
