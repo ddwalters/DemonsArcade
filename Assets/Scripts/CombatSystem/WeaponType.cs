@@ -3,5 +3,11 @@ public enum WeaponType
     ShortSword,
     Axe,
     Shield,
-    Staff
+    Staff,
+    Helmet,
+    Chestpiece,
+    Leggings,
+    Boots,
+    Necklace,
+    NonWeapon
 }

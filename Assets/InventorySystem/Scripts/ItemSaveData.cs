@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using UnityEngine;
 
 public class ItemSaveData : MonoBehaviour
@@ -9,6 +10,17 @@ public class ItemSaveData : MonoBehaviour
     /// </summary>
     [SerializeField]
     public ItemData data;
+
+    /// <summary>
+    /// The previous item data is used to store what the item was prior to becoming a slot item.
+    /// </summary>
+    [CanBeNull]
+    public ItemData PreviousItemData;
+
+    /// <summary>
+    /// Indicates if item has changed to fit slot inventory.
+    /// </summary>
+    public bool isSlotType;
 
     /// <summary>
     /// First grid position the item is found in a matrix.

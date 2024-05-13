@@ -1,9 +1,17 @@
+using NUnit.Framework.Interfaces;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
     private Dictionary<int, (List<ItemSaveData> list, InventoryType type)> ItemDataInformation;
+
+    [SerializeField] ItemData fakeHelmetData;
+    [SerializeField] ItemData fakeChestpieceData;
+    [SerializeField] ItemData fakeLeggingsData;
+    [SerializeField] ItemData fakeBootsData;
+    [SerializeField] ItemData fakeNecklaceData;
+    [SerializeField] ItemData fakeWeaponData;
 
     private void Awake()
     {
@@ -67,9 +75,106 @@ public class InventoryManager : MonoBehaviour
     {
         var list = ItemDataInformation[gridId].list;
 
-        data.Id = list.Count;
-        list.Add(data);
+        ItemSaveData itemSaveData;
+        switch (gridId)
+        {
+            case 1:
+                itemSaveData = CreateSlotSaveData(WeaponType.Helmet, fakeHelmetData, data);
+                break;
+            case 2:
+                itemSaveData = CreateSlotSaveData(WeaponType.Chestpiece, fakeChestpieceData, data);
+                break;
+            case 3:
+                itemSaveData = CreateSlotSaveData(WeaponType.Leggings, fakeLeggingsData, data);
+                break;
+            case 4:
+                itemSaveData = CreateSlotSaveData(WeaponType.Boots, fakeBootsData, data);
+                break;
+            case 5:
+                itemSaveData = CreateSlotSaveData(WeaponType.Necklace, fakeNecklaceData, data);
+                break;
+            case 6:
+                itemSaveData = CreateSlotSaveData(fakeWeaponData, data);
+                break;
+            case 7:
+                itemSaveData = CreateSlotSaveData(fakeWeaponData, data);
+                break;
+            default: 
+                itemSaveData = null;
+                data.isSlotType = false;
+                break;
+        }
+
+        if (itemSaveData == null)
+        {
+            data.Id = list.Count;
+            list.Add(data);
+        }
+        else
+        {
+            itemSaveData.Id = list.Count;
+            list.Add(itemSaveData);
+        }
     }
+
+    #region Slot Save Data Creation
+    private ItemSaveData CreateSlotSaveData(WeaponType typeToCheck, ItemData slotData, ItemSaveData data)
+    {
+        if (data.isSlotType == true)
+        {
+            Debug.Log("Item already in a slot");
+            return null;
+        }
+
+        GameObject saveObject = new GameObject();
+        var itemSaveData = saveObject.AddComponent<ItemSaveData>();
+
+        WeaponType weaponType;
+        if (data.PreviousItemData != null)
+            weaponType = data.PreviousItemData.itemStats.GetWeaponType();
+        else
+            weaponType = data.data.itemStats.GetWeaponType();
+
+        if (weaponType == typeToCheck)
+        {
+            itemSaveData.data = slotData;
+            itemSaveData.isSlotType = true;
+            itemSaveData.PreviousItemData = data.data;
+        }
+        else
+        {
+            itemSaveData = null;
+        }
+
+        return itemSaveData;
+    }
+
+    private ItemSaveData CreateSlotSaveData(ItemData slotData, ItemSaveData data)
+    {
+        GameObject saveObject = new GameObject();
+        var itemSaveData = saveObject.AddComponent<ItemSaveData>();
+
+        WeaponType weaponType;
+        if (data.PreviousItemData != null)
+            weaponType = data.PreviousItemData.itemStats.GetWeaponType();
+        else
+            weaponType = data.data.itemStats.GetWeaponType();
+
+        // needs to check if a two handed weapon is taking the other hand slot.
+        if (weaponType == WeaponType.Axe || weaponType == WeaponType.Shield || weaponType == WeaponType.ShortSword || weaponType == WeaponType.Staff)
+        {
+            itemSaveData.data = slotData;
+            itemSaveData.isSlotType = true;
+            itemSaveData.PreviousItemData = data.data;
+        }
+        else
+        {
+            itemSaveData = null;
+        }
+
+        return itemSaveData;
+    }
+    #endregion
 
     public void RemoveItem(int gridId, int itemId)
     {

@@ -222,7 +222,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: -1507956901, guid: 8e946726742caa141ac5319fae334e86, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0c9f68d564c1569449d0263385453280, type: 3}
   m_Type: 2
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -231,7 +231,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 0.33
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1001 &1061331651792201553
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -333,6 +333,10 @@ PrefabInstance:
       value: 72
       objectReference: {fileID: 0}
     - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 0c9f68d564c1569449d0263385453280, type: 3}
+    - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_PixelsPerUnitMultiplier
       value: 0.33
       objectReference: {fileID: 0}
@@ -421,11 +425,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1606438791459435318, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -88.100006
+      value: -84.6
       objectReference: {fileID: 0}
     - target: {fileID: 1606438791459435318, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -211.2
+      value: -210
       objectReference: {fileID: 0}
     - target: {fileID: 1606438791459435318, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -453,11 +457,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_Type
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 0c9f68d564c1569449d0263385453280, type: 3}
+    - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_PixelsPerUnitMultiplier
-      value: 0.33
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6130360889768105236, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: id
@@ -544,11 +552,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1606438791459435318, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -226.1
+      value: -201
       objectReference: {fileID: 0}
     - target: {fileID: 1606438791459435318, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -207.2
+      value: -210
       objectReference: {fileID: 0}
     - target: {fileID: 1606438791459435318, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -574,6 +582,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 72
       objectReference: {fileID: 0}
+    - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 0c9f68d564c1569449d0263385453280, type: 3}
     - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_PixelsPerUnitMultiplier
       value: 0.33
@@ -694,6 +706,10 @@ PrefabInstance:
       value: 72
       objectReference: {fileID: 0}
     - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 0c9f68d564c1569449d0263385453280, type: 3}
+    - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_PixelsPerUnitMultiplier
       value: 0.33
       objectReference: {fileID: 0}
@@ -782,11 +798,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1606438791459435318, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -5.100006
+      value: -12.7
       objectReference: {fileID: 0}
     - target: {fileID: 1606438791459435318, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -210.2
+      value: -210
       objectReference: {fileID: 0}
     - target: {fileID: 1606438791459435318, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -812,6 +828,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 72
       objectReference: {fileID: 0}
+    - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 0c9f68d564c1569449d0263385453280, type: 3}
     - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_PixelsPerUnitMultiplier
       value: 0.33
@@ -932,6 +952,10 @@ PrefabInstance:
       value: 72
       objectReference: {fileID: 0}
     - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 0c9f68d564c1569449d0263385453280, type: 3}
+    - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_PixelsPerUnitMultiplier
       value: 0.33
       objectReference: {fileID: 0}
@@ -1050,6 +1074,10 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 72
       objectReference: {fileID: 0}
+    - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 0c9f68d564c1569449d0263385453280, type: 3}
     - target: {fileID: 5352849344169073853, guid: ef0208269bfaf514abf52d08b5fbde8e, type: 3}
       propertyPath: m_PixelsPerUnitMultiplier
       value: 0.33
