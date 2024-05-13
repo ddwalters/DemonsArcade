@@ -43,28 +43,26 @@ public class WeaponsHandler : MonoBehaviour
         if (!_hasMainHandWeapon) return;
 
         if (mainHandShortSwordLocation.transform.childCount > 0)
-            Destroy(mainHandShortSwordLocation.transform.GetChild(0));
+            Destroy(mainHandShortSwordLocation.transform.GetChild(0).gameObject);
 
         if (mainHandAxeLocation.transform.childCount > 0)
-            Destroy(mainHandAxeLocation.transform.GetChild(0));
+            Destroy(mainHandAxeLocation.transform.GetChild(0).gameObject);
 
         if (mainHandSheildLocation.transform.childCount > 0)
-            Destroy(mainHandSheildLocation.transform.GetChild(0));
+            Destroy(mainHandSheildLocation.transform.GetChild(0).gameObject);
 
         if (mainHandStaffLocation.transform.childCount > 0)
-            Destroy(mainHandStaffLocation.transform.GetChild(0));
+            Destroy(mainHandStaffLocation.transform.GetChild(0).gameObject);
 
         _hasMainHandWeapon = false;
     }
 
-    private void CreateWeapon(ItemStatsData itemStats, GameObject prefab)
+    private void CreateWeapon(ItemStatsData itemStats, GameObject prefabLocation)
     {
         GameObject weapon;
-
         weapon = Instantiate(itemStats.GetPrefab());
         Destroy(weapon.GetComponent<Rigidbody>());
-        weapon.transform.SetParent(prefab.transform);
-        weapon.transform.position = new Vector3(0, 0, 0);
-        weapon.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
+        weapon.transform.SetParent(prefabLocation.transform);
+        weapon.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
     }
 }

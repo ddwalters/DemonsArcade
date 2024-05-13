@@ -53,6 +53,8 @@ public class Inventory : MonoBehaviour
     /// </summary>
     public ItemToolTip tooltip;
 
+    public WeaponsHandler weaponsHandler;
+
     private InventoryManager inventoryManager;
 
     /// <summary>
@@ -455,9 +457,18 @@ public class Inventory : MonoBehaviour
 
             bool success;
             if (item.saveData.PreviousItemData == null)
+            {
+                // adding to slot
                 success = gridOnMouse.inventory.AddItem(gridOnMouse.id, item.saveData);
+            }
             else
+            {
+                // removing from slot
                 success = gridOnMouse.inventory.AddItem(gridOnMouse.id, item.saveData.PreviousItemData);
+
+                if (success)
+                    weaponsHandler.RemoveItemFromPlayerMainHand();
+            }
 
             if (success)
                 inventoryManager.RemoveItem(storedItemGridId, item.saveData.Id);
