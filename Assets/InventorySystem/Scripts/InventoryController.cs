@@ -48,13 +48,9 @@ public class InventoryController : MonoBehaviour
                     Item overlapItem = inventory.GetItemAtMouseCoords();
 
                     if (overlapItem != null)
-                    {
                         inventory.SwapItem(overlapItem, oldSelectedItem);
-                    }
                     else
-                    {
                         inventory.MoveItem(oldSelectedItem);
-                    }
                 }
                 else
                 {
@@ -75,9 +71,7 @@ public class InventoryController : MonoBehaviour
             MoveSelectedItemToMouse();
 
             if (Input.GetKeyDown(KeyCode.R))
-            {
                 inventory.selectedItem.Rotate();
-            }
         }
     }
 
@@ -89,9 +83,7 @@ public class InventoryController : MonoBehaviour
         Item item = inventory.GetItemAtMouseCoords();
 
         if (item != null)
-        {
             inventory.SelectItem(item);
-        }
     }
 
     /// <summary>
@@ -102,9 +94,7 @@ public class InventoryController : MonoBehaviour
         Item item = inventory.GetItemAtMouseCoords();
 
         if (item != null)
-        {
             inventory.RemoveItem(item);
-        }
     }
 
     /// <summary>

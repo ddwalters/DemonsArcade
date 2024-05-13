@@ -172,7 +172,7 @@ public class Inventory : MonoBehaviour
         var itemSaveData = saveObject.AddComponent<ItemSaveData>();
         itemSaveData.data = itemData;
 
-        var inventoryGrid = inventoryType.AllPrefabs.FirstOrDefault(x => x.invType == inventoryManager.GetItems(gridId).type).prefab.GetComponent<InventoryGrid>();
+        var inventoryGrid = inventoryType.AllPrefabs.FirstOrDefault(x => x.invType == inventoryManager.GetItems(gridId).type).prefab.transform.GetChild(8).GetComponent<InventoryGrid>();
         for (int y = 0; y < inventoryGrid.gridSize.y; y++)
         {
             for (int x = 0; x < inventoryGrid.gridSize.x; x++)
@@ -253,11 +253,11 @@ public class Inventory : MonoBehaviour
     public void CreateGrid(int gridId, bool isPlayerGrid)
     {
         var prefab = inventoryType.AllPrefabs.FirstOrDefault(x => x.invType == inventoryManager.GetItems(gridId).type).prefab;
-        prefab.GetComponentInChildren<InventoryGrid>().id = gridId;
+        prefab.transform.GetChild(8).GetComponent<InventoryGrid>().id = gridId;
         var backpack = Instantiate(prefab, isPlayerGrid ? playerGridHolder.transform : worldGridHolder.transform);
 
         #region Main Grid
-        var inventoryGrid = backpack.GetComponent<InventoryGrid>();
+        var inventoryGrid = backpack.transform.GetChild(8).GetComponent<InventoryGrid>();
 
         // removes grid decoration and item slots
         // doesn't remove main grid for use in other areas
@@ -322,7 +322,7 @@ public class Inventory : MonoBehaviour
                 if (items2.Count == 0)
                     continue;
 
-                var inventoryGrid2 = inventoryGrids[i];
+                var inventoryGrid2 = inventoryGrids[Mathf.Abs(i - 7)];
                 foreach (var itemSaveData in items2)
                 {
                     Item newItem = Instantiate(itemPrefab);
@@ -465,7 +465,7 @@ public class Inventory : MonoBehaviour
 
         // updates grid
         if (isSlotGrid)
-            gridOnMouse.transform.parent.GetComponent<InventoryGrid>().CloseGrid();
+            gridOnMouse.GetComponent<InventoryGrid>().CloseGrid();
         else
             gridOnMouse.CloseGrid();
 
