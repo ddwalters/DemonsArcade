@@ -464,7 +464,11 @@ public class Inventory : MonoBehaviour
         }
 
         // updates grid
-        gridOnMouse.CloseGrid();
+        if (isSlotGrid)
+            gridOnMouse.transform.parent.GetComponent<InventoryGrid>().CloseGrid();
+        else
+            gridOnMouse.CloseGrid();
+
         if (isSlotGrid || gridOnMouse.id == 0)
             CreateGrid(0, true);
         else
