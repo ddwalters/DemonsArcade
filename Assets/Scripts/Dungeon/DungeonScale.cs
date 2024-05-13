@@ -21,6 +21,12 @@ public class DungeonScale : MonoBehaviour
 
         GameObject SpawnPoint = GameObject.Find("_SpawnPoint");
 
+        BakeRuntime[] bakeRuntime = GetComponentsInChildren<BakeRuntime>();
+        foreach (BakeRuntime bake in bakeRuntime)
+        {
+            bake.Bake();
+        }
+
         Player.transform.position = SpawnPoint.transform.position;
     }
 }

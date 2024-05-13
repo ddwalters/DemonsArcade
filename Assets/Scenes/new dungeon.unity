@@ -130,6 +130,7 @@ GameObject:
   m_Component:
   - component: {fileID: 109559230}
   - component: {fileID: 109559231}
+  - component: {fileID: 109559232}
   m_Layer: 0
   m_Name: DUNGEON
   m_TagString: Untagged
@@ -166,6 +167,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scale: 5
   delay: 0.5
+  Player: {fileID: 0}
+--- !u!114 &109559232
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 109559229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fef2202c5ef2894ea1861678ca1a8d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  monsterPrefabs:
+  - {fileID: 4654797727340962881, guid: 029b5304be5606440938f66c9261cf09, type: 3}
+  - {fileID: 7287308620526909530, guid: 3ea55f09a32078f4e993bdae7ee8d120, type: 3}
 --- !u!1 &496040337
 GameObject:
   m_ObjectHideFlags: 0
