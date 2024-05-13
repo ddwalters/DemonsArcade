@@ -5,6 +5,7 @@ using UnityEngine;
 public class InventoryManager : MonoBehaviour
 {
     private Dictionary<int, (List<ItemSaveData> list, InventoryType type)> ItemDataInformation;
+    [SerializeField] WeaponsHandler weaponHandler;
 
     [SerializeField] ItemData fakeHelmetData;
     [SerializeField] ItemData fakeChestpieceData;
@@ -95,9 +96,13 @@ public class InventoryManager : MonoBehaviour
                 break;
             case 6:
                 itemSaveData = CreateSlotSaveData(fakeWeaponData, data);
+                if (itemSaveData != null)
+                    weaponHandler.AddItemToPlayerMainHand(data.data.itemStats);
                 break;
             case 7:
                 itemSaveData = CreateSlotSaveData(fakeWeaponData, data);
+                if (itemSaveData != null)
+                    weaponHandler.AddItemToPlayerMainHand(data.data.itemStats);
                 break;
             default: 
                 itemSaveData = null;

@@ -12,34 +12,28 @@ public class WeaponsHandler : MonoBehaviour
     [SerializeField] GameObject mainHandSheildLocation;
     [SerializeField] GameObject mainHandStaffLocation;
 
-    //[Header("Off Hand")]
-    //private bool _hasOffHandWeapon;
-    //[SerializeField] GameObject offHandShortSwordLocation;
-    //[SerializeField] GameObject offHandAxeLocation;
-    //[SerializeField] GameObject offHandSheildLocation;
-    //[SerializeField] GameObject offHandStaffLocation;
-
     public void AddItemToPlayerMainHand(ItemStatsData itemStats)
     {
         if (_hasMainHandWeapon) return;
 
-        var weapon = Instantiate(itemStats.GetPrefab());
-
-        // add item to select location
         switch (itemStats.GetWeaponType())
         {
             case WeaponType.ShortSword:
-                weapon.transform.SetParent(mainHandShortSwordLocation.transform);
+                CreateWeapon(itemStats, mainHandShortSwordLocation);
                 break;
             case WeaponType.Axe:
-                weapon.transform.SetParent(mainHandAxeLocation.transform);
+                CreateWeapon(itemStats, mainHandAxeLocation);
                 break;
             case WeaponType.Shield:
-                weapon.transform.SetParent(mainHandSheildLocation.transform);
+                CreateWeapon(itemStats, mainHandSheildLocation);
                 break;
             case WeaponType.Staff:
-                weapon.transform.SetParent(mainHandStaffLocation.transform);
+                CreateWeapon(itemStats, mainHandStaffLocation);
                 break;
+            default:
+                Debug.Log("Not a weapon.");
+                return;
+
         }
 
         _hasMainHandWeapon = true;
@@ -63,48 +57,14 @@ public class WeaponsHandler : MonoBehaviour
         _hasMainHandWeapon = false;
     }
 
-    //public void AddItemToPlayerOffHand(ItemStatsData itemStats)
-    //{
-    //    if (_hasOffHandWeapon) return;
-    //
-    //    var weapon = Instantiate(itemStats.GetPrefab());
-    //
-    //    // add item to select location
-    //    switch (itemStats.GetWeaponType())
-    //    {
-    //        case WeaponType.ShortSword:
-    //            weapon.transform.SetParent(offHandShortSwordLocation.transform);
-    //            break;
-    //        case WeaponType.Axe:
-    //            weapon.transform.SetParent(offHandAxeLocation.transform);
-    //            break;
-    //        case WeaponType.Shield:
-    //            weapon.transform.SetParent(offHandSheildLocation.transform);
-    //            break;
-    //        case WeaponType.Staff:
-    //            weapon.transform.SetParent(offHandStaffLocation.transform);
-    //            break;
-    //    }
-    //
-    //    _hasOffHandWeapon = true;
-    //}
+    private void CreateWeapon(ItemStatsData itemStats, GameObject prefab)
+    {
+        GameObject weapon;
 
-    //public void RemoveItemFromPlayerOffHand()
-    //{
-    //    if (!_hasOffHandWeapon) return;
-    //
-    //    if (offHandShortSwordLocation.transform.childCount > 0)
-    //        Destroy(offHandShortSwordLocation.transform.GetChild(0));
-    //
-    //    if (offHandAxeLocation.transform.childCount > 0)
-    //        Destroy(offHandAxeLocation.transform.GetChild(0));
-    //
-    //    if (offHandSheildLocation.transform.childCount > 0)
-    //        Destroy(offHandSheildLocation.transform.GetChild(0));
-    //
-    //    if (offHandStaffLocation.transform.childCount > 0)
-    //        Destroy(offHandStaffLocation.transform.GetChild(0));
-    //
-    //    _hasOffHandWeapon = false;
-    //}
+        weapon = Instantiate(itemStats.GetPrefab());
+        Destroy(weapon.GetComponent<Rigidbody>());
+        weapon.transform.SetParent(prefab.transform);
+        weapon.transform.position = new Vector3(0, 0, 0);
+        weapon.transform.rotation = new Quaternion(0f, 0f, 0f, 0f);
+    }
 }
