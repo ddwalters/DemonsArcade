@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028352, g: 0.22571376, b: 0.30692244, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -7973,6 +7973,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22f464e447a2f324ea277c6afa860b50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fakeHelmetData: {fileID: 11400000, guid: f6df0a7a3d049d94c82751e14c5587ba, type: 2}
+  fakeChestpieceData: {fileID: 11400000, guid: 913fa0ccbb30af744b00163b6588ea35, type: 2}
+  fakeLeggingsData: {fileID: 11400000, guid: f54448847877b4c4b88831b82a15e8d4, type: 2}
+  fakeBootsData: {fileID: 11400000, guid: bb0cc8868c089e948a2983759102a53d, type: 2}
+  fakeNecklaceData: {fileID: 11400000, guid: 83d8afdee50daa343a916962dfea52d1, type: 2}
+  fakeWeaponData: {fileID: 11400000, guid: dd491ac729206494ea20b564e12cea43, type: 2}
 --- !u!23 &1501161026648979887
 MeshRenderer:
   m_ObjectHideFlags: 0
