@@ -216,10 +216,44 @@ public class Inventory : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Adds an item to a specific slot grid list in the inventory manager.
+    /// </summary>
+    /// <param name="gridId"></param>
+    /// <param name="itemData"></param>
+    /// <returns>False if no item was added</returns>
+    public bool AddItem(int gridId, ItemSaveData itemSaveData)
+    {
+        if (itemSaveData.data == null)
+        {
+            Debug.Log("No Data");
+            return false;
+        }
+
+        var currentItems = inventoryManager.GetItems(gridId);
+        if (currentItems.list.Count == 0)
+        {
+            // Checks if item was already in a slot grid
+            if (itemSaveData.isSlotType)
+                return false;
+
+            itemSaveData.slotPosition = new Vector2Int(0, 0);
+
+            inventoryManager.AddItem(gridId, itemSaveData);
+            return true;
+        }
+        else
+        {
+            //item in slot
+            Debug.Log("Failed to add");
+            return false;
+        }
+    }
+
     public void CreateGrid(int gridId, bool isPlayerGrid)
     {
         var prefab = inventoryType.AllPrefabs.FirstOrDefault(x => x.invType == inventoryManager.GetItems(gridId).type).prefab;
-        prefab.GetComponent<InventoryGrid>().id = gridId;
+        prefab.GetComponentInChildren<InventoryGrid>().id = gridId;
         var backpack = Instantiate(prefab, isPlayerGrid ? playerGridHolder.transform : worldGridHolder.transform);
 
         #region Main Grid
@@ -227,41 +261,47 @@ public class Inventory : MonoBehaviour
 
         // removes grid decoration and item slots
         // doesn't remove main grid for use in other areas
-        if(!isPlayerGrid)
+        if (!isPlayerGrid)
         {
             for (int i = 0; i < inventoryGrid.transform.childCount - 1; i++)
             {
                 inventoryGrid.gameObject.transform.GetChild(i).gameObject.SetActive(false);
             }
         }
-        
+
         var items = inventoryManager.GetItems(gridId).list;
 
-        foreach (var itemData in items)
+        foreach (var itemSaveData in items)
         {
+            ItemData selectItemData;
+            if (itemSaveData.PreviousItemData != null)
+                selectItemData = itemSaveData.PreviousItemData;
+            else
+                selectItemData = itemSaveData.data;
+
             Item newItem = Instantiate(itemPrefab);
             newItem.rectTransform = newItem.GetComponent<RectTransform>();
             newItem.rectTransform.SetParent(inventoryGrid.rectTransform);
             newItem.rectTransform.sizeDelta = new Vector2(
-                itemData.data.size.width * InventorySettings.slotSize.x,
-                itemData.data.size.height * InventorySettings.slotSize.y
+                selectItemData.size.width * InventorySettings.slotSize.x,
+                selectItemData.size.height * InventorySettings.slotSize.y
             );
 
-            newItem.saveData = itemData;
-            newItem.indexPosition = new Vector2Int(itemData.slotPosition.x, itemData.slotPosition.y);
+            newItem.saveData = itemSaveData;
+            newItem.indexPosition = new Vector2Int(itemSaveData.slotPosition.x, itemSaveData.slotPosition.y);
             newItem.inventory = this;
             newItem.rectTransform.localScale = new Vector2(1, 1);
-            newItem.rotateIndex = itemData.rotateIndex;
+            newItem.rotateIndex = itemSaveData.rotateIndex;
             newItem.StartRotate(); // gives fun rotation animation when opening inv (Do we want this? no)
 
-            for (int xx = 0; xx < itemData.data.size.width; xx++)
+            for (int xx = 0; xx < selectItemData.size.width; xx++)
             {
-                for (int yy = 0; yy < itemData.data.size.height; yy++)
+                for (int yy = 0; yy < selectItemData.size.height; yy++)
                 {
-                    int slotX = itemData.isRotated ? itemData.slotPosition.y + xx : itemData.slotPosition.x + xx;
-                    int slotY = itemData.isRotated ? itemData.slotPosition.x + yy : itemData.slotPosition.y + yy;
+                    int slotX = itemSaveData.isRotated ? itemSaveData.slotPosition.y + xx : itemSaveData.slotPosition.x + xx;
+                    int slotY = itemSaveData.isRotated ? itemSaveData.slotPosition.x + yy : itemSaveData.slotPosition.y + yy;
 
-                    inventoryGrid.UpdateItemsMatrix(slotX, slotY, newItem, itemData);
+                    inventoryGrid.UpdateItemsMatrix(slotX, slotY, newItem, itemSaveData);
                 }
             }
 
@@ -283,31 +323,31 @@ public class Inventory : MonoBehaviour
                     continue;
 
                 var inventoryGrid2 = inventoryGrids[i];
-                foreach (var itemData in items2)
+                foreach (var itemSaveData in items2)
                 {
                     Item newItem = Instantiate(itemPrefab);
                     newItem.rectTransform = newItem.GetComponent<RectTransform>();
                     newItem.rectTransform.SetParent(inventoryGrid2.rectTransform);
                     newItem.rectTransform.sizeDelta = new Vector2(
-                        itemData.data.size.width * InventorySettings.slotSize.x,
-                        itemData.data.size.height * InventorySettings.slotSize.y
+                        itemSaveData.data.size.width * InventorySettings.slotSize.x,
+                        itemSaveData.data.size.height * InventorySettings.slotSize.y
                     );
 
-                    newItem.saveData = itemData;
-                    newItem.indexPosition = new Vector2Int(itemData.slotPosition.x, itemData.slotPosition.y);
+                    newItem.saveData = itemSaveData;
+                    newItem.indexPosition = new Vector2Int(itemSaveData.slotPosition.x, itemSaveData.slotPosition.y);
                     newItem.inventory = this;
-                    newItem.rectTransform.localScale = new Vector2(itemData.data.size.width, itemData.data.size.width);
-                    newItem.rotateIndex = itemData.rotateIndex;
+                    newItem.rectTransform.localScale = new Vector2(itemSaveData.data.size.width, itemSaveData.data.size.width);
+                    newItem.rotateIndex = itemSaveData.rotateIndex;
                     newItem.StartRotate(); // gives fun rotation animation when opening inv (Do we want this?)
 
-                    for (int xx = 0; xx < itemData.data.size.width; xx++)
+                    for (int xx = 0; xx < itemSaveData.data.size.width; xx++)
                     {
-                        for (int yy = 0; yy < itemData.data.size.height; yy++)
+                        for (int yy = 0; yy < itemSaveData.data.size.height; yy++)
                         {
-                            int slotX = itemData.isRotated ? itemData.slotPosition.y + xx : itemData.slotPosition.x + xx;
-                            int slotY = itemData.isRotated ? itemData.slotPosition.x + yy : itemData.slotPosition.y + yy;
+                            int slotX = itemSaveData.isRotated ? itemSaveData.slotPosition.y + xx : itemSaveData.slotPosition.x + xx;
+                            int slotY = itemSaveData.isRotated ? itemSaveData.slotPosition.x + yy : itemSaveData.slotPosition.y + yy;
 
-                            inventoryGrid2.UpdateItemsMatrix(slotX, slotY, newItem, itemData);
+                            inventoryGrid2.UpdateItemsMatrix(slotX, slotY, newItem, itemSaveData);
                         }
                     }
 
@@ -353,34 +393,82 @@ public class Inventory : MonoBehaviour
             Debug.Log("Item");
             return;
         }
-
-        item.indexPosition = slotPosition;
-        item.saveData.slotPosition = slotPosition;
-        item.rectTransform.SetParent(gridOnMouse.rectTransform);
-
-        for (int x = 0; x < item.correctedSize.width; x++)
+        
+        bool isSlotGrid = false;
+        for (int i = 1; i < 8; i++)
         {
-            for (int y = 0; y < item.correctedSize.height; y++)
-            {
-                int slotX = item.indexPosition.x + x;
-                int slotY = item.indexPosition.y + y;
+            if (gridOnMouse.id == i)
+                isSlotGrid = true;
 
-                gridOnMouse.items[slotX, slotY] = item;
-            }
+            if (isSlotGrid && item.saveData.isSlotType) return;
         }
 
-        item.rectTransform.localPosition = IndexToInventoryPosition(item);
+        if (gridOnMouse == item.inventoryGrid && !isSlotGrid)
+        {
+            item.indexPosition = slotPosition;
+            item.saveData.slotPosition = slotPosition;
+            item.rectTransform.SetParent(gridOnMouse.rectTransform);
 
-        var previousGrid = item.inventoryGrid;
-        item.inventoryGrid = gridOnMouse;
+            if (!isSlotGrid)
+            {
+                for (int x = 0; x < item.correctedSize.width; x++)
+                {
+                    for (int y = 0; y < item.correctedSize.height; y++)
+                    {
+                        int slotX = item.indexPosition.x + x;
+                        int slotY = item.indexPosition.y + y;
 
-        if(previousGrid == item.inventoryGrid)
+                        gridOnMouse.items[slotX, slotY] = item;
+                    }
+                }
+            }
+
+            item.rectTransform.localPosition = IndexToInventoryPosition(item);
+            item.inventoryGrid = gridOnMouse;
+
             inventoryManager.UpdateItemData(gridOnMouse.id, item.saveData);
+        }
         else
         {
-            gridOnMouse.inventory.AddItem(gridOnMouse.id, item.saveData.data);
-            inventoryManager.RemoveItem(previousGrid.id, item.saveData.Id);
+            int storedItemGridId = item.inventoryGrid.id;
+
+            item.indexPosition = slotPosition;
+            item.saveData.slotPosition = slotPosition;
+            item.rectTransform.SetParent(gridOnMouse.rectTransform);
+
+            if (!isSlotGrid)
+            {
+                for (int x = 0; x < item.correctedSize.width; x++)
+                {
+                    for (int y = 0; y < item.correctedSize.height; y++)
+                    {
+                        int slotX = item.indexPosition.x + x;
+                        int slotY = item.indexPosition.y + y;
+
+                        gridOnMouse.items[slotX, slotY] = item;
+                    }
+                }
+            }
+
+            item.rectTransform.localPosition = IndexToInventoryPosition(item);
+            item.inventoryGrid = gridOnMouse;
+
+            bool success;
+            if (item.saveData.PreviousItemData == null)
+                success = gridOnMouse.inventory.AddItem(gridOnMouse.id, item.saveData);
+            else
+                success = gridOnMouse.inventory.AddItem(gridOnMouse.id, item.saveData.PreviousItemData);
+
+            if (success)
+                inventoryManager.RemoveItem(storedItemGridId, item.saveData.Id);
         }
+
+        // updates grid
+        gridOnMouse.CloseGrid();
+        if (isSlotGrid || gridOnMouse.id == 0)
+            CreateGrid(0, true);
+        else
+            CreateGrid(gridOnMouse.id, false);
 
         if (deselectItemInEnd)
         {
@@ -458,13 +546,15 @@ public class Inventory : MonoBehaviour
     /// <returns></returns>
     public bool ExistsItem(Vector2Int slotPosition, InventoryGrid grid, int width = 1, int height = 1)
     {
-        if (grid.items == null)
-            return false;
-
-        if (ReachedBoundary(slotPosition, grid, width, height))
+        bool isSlotGrid = false;
+        for (int i = 1; i < 8; i++)
         {
-            return true;
+            if (gridOnMouse.id == i)
+                isSlotGrid = true;
         }
+
+        if (grid.items == null || ReachedBoundary(slotPosition, grid, width, height) || isSlotGrid)
+            return false;
 
         for (int x = 0; x < width; x++)
         {
@@ -493,6 +583,13 @@ public class Inventory : MonoBehaviour
     /// <returns></returns>
     public bool ReachedBoundary(Vector2Int slotPosition, InventoryGrid gridReference, int width = 1, int height = 1)
     {
+        // If its a slot grid we ignore this due to it's unique property of using a placeholder item
+        for (int i = 1; i < 8; i++)
+        {
+            if (gridOnMouse.id == i)
+                return false;
+        }
+
         if (slotPosition.x + width > gridReference.gridSize.x || slotPosition.x < 0)
         {
             return true;
@@ -562,6 +659,12 @@ public class Inventory : MonoBehaviour
 
         if (!ReachedBoundary(slotPosition, gridOnMouse))
         {
+            for (int i = 1; i < 8; i++)
+            {
+                if (gridOnMouse.id == i)
+                    return GetItemFromSlotPosition(new Vector2Int(0, 0));
+            }
+
             return GetItemFromSlotPosition(slotPosition);
         }
 

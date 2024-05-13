@@ -12,7 +12,7 @@ public class ItemSaveData : MonoBehaviour
     public ItemData data;
 
     /// <summary>
-    /// The previous item data is used to store the item data, sizing, ect. when changing it to a slot type
+    /// The previous item data is used to store what the item was prior to becoming a slot item.
     /// </summary>
     [CanBeNull]
     public ItemData PreviousItemData;

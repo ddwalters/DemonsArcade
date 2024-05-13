@@ -30,12 +30,12 @@ public class InventoryController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             var grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
+            Cursor.lockState = CursorLockMode.Locked;
 
             foreach (var grid in grids)
                 grid.CloseGrid();
 
             itemToolTip.HideToolTip();
-            Cursor.lockState = CursorLockMode.Locked;
         }
 
         if (Input.GetKeyDown(KeyCode.Mouse0) && inventory.gridOnMouse != null)
