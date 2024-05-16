@@ -136,7 +136,7 @@ public class WeaponsHandler : MonoBehaviour
                     sword.SwordAttack(weaponStats, enemyStats);
                     break;
                 case WeaponType.Axe:
-                    sword.SwordAttack(weaponStats, enemyStats);
+                    axe.AxeAttack(weaponStats, enemyStats);
                     break;
             }
 
