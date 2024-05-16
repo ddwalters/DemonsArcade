@@ -72,54 +72,55 @@ public class InventoryManager : MonoBehaviour
         return ItemDataInformation[itemsId];
     }
 
-    public void AddItem(int gridId, ItemSaveData data)
+    public bool AddItem(int gridId, ItemSaveData data, bool isSlot)
     {
         var list = ItemDataInformation[gridId].list;
 
-        ItemSaveData itemSaveData;
-        switch (gridId)
+        if (isSlot)
         {
-            case 1:
-                itemSaveData = CreateSlotSaveData(WeaponType.Helmet, fakeHelmetData, data);
-                break;
-            case 2:
-                itemSaveData = CreateSlotSaveData(WeaponType.Chestpiece, fakeChestpieceData, data);
-                break;
-            case 3:
-                itemSaveData = CreateSlotSaveData(WeaponType.Leggings, fakeLeggingsData, data);
-                break;
-            case 4:
-                itemSaveData = CreateSlotSaveData(WeaponType.Boots, fakeBootsData, data);
-                break;
-            case 5:
-                itemSaveData = CreateSlotSaveData(WeaponType.Necklace, fakeNecklaceData, data);
-                break;
-            case 6:
-                itemSaveData = CreateSlotSaveData(fakeWeaponData, data);
-                if (itemSaveData != null)
-                    weaponHandler.AddItemToPlayerMainHand(data.data.itemStats);
-                break;
-            case 7:
-                itemSaveData = CreateSlotSaveData(fakeWeaponData, data);
-                if (itemSaveData != null)
-                    weaponHandler.AddItemToPlayerMainHand(data.data.itemStats);
-                break;
-            default: 
-                itemSaveData = null;
-                data.isSlotType = false;
-                break;
-        }
+            ItemSaveData itemSaveData;
+            switch (gridId)
+            {
+                case 1:
+                        itemSaveData = CreateSlotSaveData(WeaponType.Helmet, fakeHelmetData, data);
+                    break;
+                case 2:
+                        itemSaveData = CreateSlotSaveData(WeaponType.Chestpiece, fakeChestpieceData, data);
+                    break;
+                case 3:
+                        itemSaveData = CreateSlotSaveData(WeaponType.Leggings, fakeLeggingsData, data);
+                    break;
+                case 4:
+                        itemSaveData = CreateSlotSaveData(WeaponType.Boots, fakeBootsData, data);
+                    break;
+                case 5:
+                        itemSaveData = CreateSlotSaveData(WeaponType.Necklace, fakeNecklaceData, data);
+                    break;
+                case 6:
+                    itemSaveData = CreateSlotSaveData(fakeWeaponData, data);
+                    if (itemSaveData != null)
+                        weaponHandler.AddItemToPlayerMainHand(data.data.itemStats);
+                    break;
+                case 7:
+                    itemSaveData = CreateSlotSaveData(fakeWeaponData, data);
+                    if (itemSaveData != null)
+                        weaponHandler.AddItemToPlayerMainHand(data.data.itemStats);
+                    break;
+                default:
+                    return false;
+            }
 
-        if (itemSaveData == null)
-        {
-            data.Id = list.Count;
-            list.Add(data);
-        }
-        else
-        {
+            if (itemSaveData == null)
+                return false;
+
             itemSaveData.Id = list.Count;
             list.Add(itemSaveData);
+            return true;
         }
+        
+        data.Id = list.Count;
+        list.Add(data);
+        return true;
     }
 
     #region Slot Save Data Creation

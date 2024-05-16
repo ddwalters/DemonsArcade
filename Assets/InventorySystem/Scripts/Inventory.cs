@@ -183,9 +183,10 @@ public class Inventory : MonoBehaviour
                 if (currentItems.list.Count == 0)
                 {
                     itemSaveData.slotPosition = new Vector2Int(x, y);
-                    inventoryManager.AddItem(gridId, itemSaveData);
-                    Destroy(saveObject);
+                    if (!inventoryManager.AddItem(gridId, itemSaveData, IsSlotgrid(gridId)))
+                        return false;
 
+                    Destroy(saveObject);
                     return true;
                 }
 
@@ -205,9 +206,10 @@ public class Inventory : MonoBehaviour
                 if (position.available)
                 {
                     itemSaveData.slotPosition = new Vector2Int(x, y);
-                    inventoryManager.AddItem(gridId, itemSaveData);
-                    Destroy(saveObject);
+                    if (!inventoryManager.AddItem(gridId, itemSaveData, IsSlotgrid(gridId)))
+                        return false;
 
+                    Destroy(saveObject);
                     return true;
                 }
             }
@@ -241,15 +243,14 @@ public class Inventory : MonoBehaviour
 
             itemSaveData.slotPosition = new Vector2Int(0, 0);
 
-            inventoryManager.AddItem(gridId, itemSaveData);
+            if (!inventoryManager.AddItem(gridId, itemSaveData, IsSlotgrid(gridId)))
+                return false;
             return true;
         }
-        else
-        {
-            //item in slot
-            Debug.Log("Failed to add");
-            return false;
-        }
+
+        //item in slot
+        Debug.Log("Failed to add");
+        return false;
     }
 
     public void CreateGrid(int gridId, bool isPlayerGrid)
@@ -265,9 +266,10 @@ public class Inventory : MonoBehaviour
         // doesn't remove main grid for use in other areas
         if (!isPlayerGrid)
         {
-            for (int i = 0; i < inventoryGrid.transform.childCount - 1; i++)
+            var parentGameObject = inventoryGrid.transform.parent.gameObject;
+            for (int i = 0; i < parentGameObject.transform.childCount - 1; i++)
             {
-                inventoryGrid.gameObject.transform.GetChild(i).gameObject.SetActive(false);
+                parentGameObject.transform.GetChild(i).gameObject.SetActive(false);
             }
         }
 
@@ -396,17 +398,14 @@ public class Inventory : MonoBehaviour
             return;
         }
         
-        bool isSlotGrid = false;
-        for (int i = 1; i < 8; i++)
-        {
-            if (gridOnMouse.id == i)
-                isSlotGrid = true;
+        bool isSlotGrid = IsSlotgrid(gridOnMouse.id);
 
-            if (isSlotGrid && item.saveData.isSlotType) return;
-        }
+        // if item is already in a slot we dont allow moving it
+        if (isSlotGrid && item.saveData.isSlotType) return;
 
-        if (gridOnMouse == item.inventoryGrid && !isSlotGrid)
+        if (gridOnMouse == item.inventoryGrid)
         {
+            //adding item to same grid
             item.indexPosition = slotPosition;
             item.saveData.slotPosition = slotPosition;
             item.rectTransform.SetParent(gridOnMouse.rectTransform);
@@ -430,56 +429,71 @@ public class Inventory : MonoBehaviour
 
             inventoryManager.UpdateItemData(gridOnMouse.id, item.saveData);
         }
+        else if (isSlotGrid)
+        {
+            // adding item to slot grid
+            int storedItemGridId = item.inventoryGrid.id;
+
+            item.indexPosition = slotPosition;
+            item.saveData.slotPosition = slotPosition;
+            item.rectTransform.SetParent(gridOnMouse.rectTransform);
+            item.rectTransform.localPosition = IndexToInventoryPosition(item);
+            item.inventoryGrid = gridOnMouse;
+
+            if (gridOnMouse.inventory.AddItem(gridOnMouse.id, item.saveData))
+                inventoryManager.RemoveItem(storedItemGridId, item.saveData.Id);
+        }
         else
         {
+            // adding item to different grid
             int storedItemGridId = item.inventoryGrid.id;
 
             item.indexPosition = slotPosition;
             item.saveData.slotPosition = slotPosition;
             item.rectTransform.SetParent(gridOnMouse.rectTransform);
 
-            if (!isSlotGrid)
+            for (int x = 0; x < item.correctedSize.width; x++)
             {
-                for (int x = 0; x < item.correctedSize.width; x++)
+                for (int y = 0; y < item.correctedSize.height; y++)
                 {
-                    for (int y = 0; y < item.correctedSize.height; y++)
-                    {
-                        int slotX = item.indexPosition.x + x;
-                        int slotY = item.indexPosition.y + y;
+                    int slotX = item.indexPosition.x + x;
+                    int slotY = item.indexPosition.y + y;
 
-                        gridOnMouse.items[slotX, slotY] = item;
-                    }
+                    gridOnMouse.items[slotX, slotY] = item;
                 }
             }
 
             item.rectTransform.localPosition = IndexToInventoryPosition(item);
             item.inventoryGrid = gridOnMouse;
 
+            // adding to grid
             bool success;
-            if (item.saveData.PreviousItemData == null)
+            if (!item.saveData.isSlotType)
             {
-                // adding to slot
-                success = gridOnMouse.inventory.AddItem(gridOnMouse.id, item.saveData);
+                // moving between normal grids
+                success = gridOnMouse.inventory.AddItem(gridOnMouse.id, item.saveData.data);
             }
             else
             {
-                // removing from slot
+                // moving to a grid from a slot
                 success = gridOnMouse.inventory.AddItem(gridOnMouse.id, item.saveData.PreviousItemData);
 
                 if (success)
                     weaponsHandler.RemoveItemFromPlayerMainHand();
             }
 
+            // removed item from previous grid
             if (success)
                 inventoryManager.RemoveItem(storedItemGridId, item.saveData.Id);
         }
 
-        // updates grid
+        // deletes grid
         if (isSlotGrid)
             gridOnMouse.GetComponent<InventoryGrid>().CloseGrid();
         else
             gridOnMouse.CloseGrid();
 
+        // re-creates grids
         if (isSlotGrid || gridOnMouse.id == 0)
             CreateGrid(0, true);
         else
@@ -704,6 +718,14 @@ public class Inventory : MonoBehaviour
     {
         // not a good route to go. Difficult with how mouse is tracked
         //Destroy(heldItemHolder.transform.GetChild(0));
+    }
+
+    private bool IsSlotgrid(int gridId)
+    {
+        if (gridId == 1 || gridId == 2 || gridId == 3 || gridId == 4 || gridId == 5 || gridId == 6 || gridId == 7)
+            return true;
+        else 
+            return false;
     }
 
     /// <summary>
