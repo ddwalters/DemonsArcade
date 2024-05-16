@@ -8208,10 +8208,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Skeleton Unarmed
       objectReference: {fileID: 0}
-    - target: {fileID: 4654797727340962881, guid: 029b5304be5606440938f66c9261cf09, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 8202517161587574856, guid: 029b5304be5606440938f66c9261cf09, type: 3}
       propertyPath: m_LocalPosition.x
       value: 47
@@ -8494,7 +8490,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8069223294212210961, guid: 360db6f632e4938428bdf368e8fc353c, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -9.499756
+      value: -9.499817
       objectReference: {fileID: 0}
     - target: {fileID: 8069223294212210961, guid: 360db6f632e4938428bdf368e8fc353c, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -8568,7 +8564,7 @@ GameObject:
   - component: {fileID: 5905899867264183375}
   m_Layer: 0
   m_Name: StaminaFill
-  m_TagString: StaminaFill
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -8664,7 +8660,7 @@ GameObject:
   - component: {fileID: 7750385286331689996}
   m_Layer: 0
   m_Name: ManaFill
-  m_TagString: ManaFill
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -8792,7 +8788,7 @@ GameObject:
   - component: {fileID: 6263852025490669059}
   m_Layer: 0
   m_Name: HeartFill
-  m_TagString: HeartFill
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -8935,6 +8931,10 @@ PrefabInstance:
       propertyPath: playerBackpack
       value: 
       objectReference: {fileID: 8819744195505866099}
+    - target: {fileID: 1872426586686101173, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: inventoryManager
+      value: 
+      objectReference: {fileID: 1056720348097897953}
     - target: {fileID: 2199924824673124817, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
       propertyPath: m_Name
       value: player

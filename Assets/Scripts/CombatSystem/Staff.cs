@@ -4,12 +4,8 @@ using UnityEngine;
 
 public class Staff : MonoBehaviour
 {
-    ItemStatsData currentItemStats;
-
     [SerializeField] Animation anim;
-
-    [SerializeField] GameObject attackCone;
-    private void StaffAttack()
+    private void StaffAttack(ItemStatsData itemStats, EnemyStats enemyStats)
     {
         //player anim
         //do damage to players in range, or shoot thingy if hit do damage

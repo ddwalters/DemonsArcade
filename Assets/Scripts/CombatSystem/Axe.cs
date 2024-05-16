@@ -4,14 +4,11 @@ using UnityEngine;
 
 public class Axe : MonoBehaviour
 {
-    ItemStatsData currentItemStats;
-
     [SerializeField] Animation anim;
 
-    [SerializeField] GameObject attackCone;
-    private void AxeAttack()
+    private void AxeAttack(ItemStatsData itemStats, EnemyStats enemyStats)
     {
-        //player anim
-        //do damage to players in range, or shoot thingy if hit do damage
+        anim.Play();
+        StartCoroutine(enemyStats.DamageMonster(itemStats.GetDamage()));
     }
 }

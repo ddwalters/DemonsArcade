@@ -60,10 +60,10 @@ public class InventoryController : MonoBehaviour
         }
 
         // Remove an item from the inventory
-        if (Input.GetKeyDown(KeyCode.Mouse1))
-        {
-            RemoveItemWithMouse();
-        }
+        //if (Input.GetKeyDown(KeyCode.Mouse1))
+        //{
+        //    RemoveItemWithMouse();
+        //}
 
         // move and rotate item
         if (inventory.selectedItem != null)
