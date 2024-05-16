@@ -100,7 +100,6 @@ public class SkeletonAI : MonoBehaviour
             if (playerHP != null)
             {
                 playerHP.DamagePlayer(Damage);
-                Debug.Log("Hit player for: " + Damage);
             }
         }
         hurtCone.enabled = false;

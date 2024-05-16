@@ -5,9 +5,9 @@ using UnityEngine;
 public class ItemStatsData
 {
     [SerializeField] string name;
-    [SerializeField] int damage;
+    [SerializeField] float damage;
     [SerializeField] int value;
-    [SerializeField] int attackSpeed;
+    [SerializeField] float weaponCoolDownTime;
     [SerializeField] int manaUsage;
 
     [SerializeField] GameObject prefab;
@@ -21,6 +21,8 @@ public class ItemStatsData
     }
 
     public string GetItemName() => name;
+    public float GetDamage() => damage;
+    public float GetCoolDownTime() => weaponCoolDownTime;
     public int GetValue() => value;
     public WeaponType GetWeaponType() => weaponType;
     public GameObject GetPrefab() => prefab;

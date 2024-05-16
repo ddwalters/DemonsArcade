@@ -1,17 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Sword : MonoBehaviour
 {
-    ItemStatsData currentItemStats;
-
     [SerializeField] Animation anim;
 
-    [SerializeField] GameObject attackCone;
-    private void SwordAttack()
+    public void SwordAttack(ItemStatsData itemStats, EnemyStats enemyStats)
     {
-        //player anim
-        //do damage to players in range, or shoot thingy if hit do damage
+        anim.Play();
+        StartCoroutine(enemyStats.DamageMonster(itemStats.GetDamage()));
     }
 }

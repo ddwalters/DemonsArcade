@@ -1,20 +1,51 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class EnemyStats : MonoBehaviour
 {
-    public int health;
+    [SerializeField] float health;
+    private float currentHealth;
+    [SerializeField] Image healthBarSprite;
 
-    private void Awake()
+    public bool inRange;
+
+    private float lerpDuration;
+
+    private void Start()
     {
-        Invoke("death", 2f);   
+        currentHealth = health;
     }
 
     public void death()
     {
         Encounter encounter = GetComponentInParent<Encounter>();
+        //encounter.currentMonsters--; // TODO: DW This isn't working @BL
         Destroy(gameObject);
-        encounter.currentMonsters--;
+    }
+
+    public IEnumerator DamageMonster(float damage)
+    {
+        lerpDuration = .5f;
+        float time = 0;
+        float endValue = currentHealth - damage;
+
+        if (endValue <= 0) endValue = 0;
+
+        while (time < .5f)
+        {
+            currentHealth = Mathf.Lerp(currentHealth, endValue, time / lerpDuration);
+            healthBarSprite.fillAmount = currentHealth / health;
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        currentHealth = endValue;
+
+        if (currentHealth <= 0)
+        {
+            Debug.Log("Monster dead");
+            death();
+        }
     }
 }
