@@ -10,7 +10,10 @@ public class Encounter : MonoBehaviour
     static public List<GameObject> Monsters = new List<GameObject>();
     public int totalMonsters = 0;
     public int currentMonsters = 0;
+    public float distanceToPlayer;
     public Collider encounterTrigger;
+    public GameObject chest;
+    public GameObject chestSpawn;
 
     private GameObject player;
 
@@ -55,7 +58,7 @@ public class Encounter : MonoBehaviour
                 GameObject cs = spawnPoints[rand];
 
                 float distToPlayer = Vector3.Distance(player.transform.position, cs.transform.position);
-                if (distToPlayer >= 2f)
+                if (distToPlayer >= distanceToPlayer)
                 {
                     float spawndelay = Random.Range(0f, 2f);
                     totalMonsters++;
@@ -69,6 +72,13 @@ public class Encounter : MonoBehaviour
                 victory = true;
                 activeEncounter = false;
             }
+        }
+        if (victory == true)
+        {
+            Vector3 direction = (player.transform.position - chestSpawn.transform.position).normalized;
+            Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+
+            GameObject loot = Instantiate(chest, chestSpawn.transform.position, lookRotation);
         }
     }
 
