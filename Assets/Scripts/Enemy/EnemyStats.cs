@@ -4,6 +4,8 @@ using UnityEngine.UI;
 
 public class EnemyStats : MonoBehaviour
 {
+    Encounter encounter;
+
     [SerializeField] float health;
     private float currentHealth;
     [SerializeField] Image healthBarSprite;
@@ -14,14 +16,14 @@ public class EnemyStats : MonoBehaviour
 
     private void Start()
     {
+        encounter = GetComponentInParent<Encounter>();
         currentHealth = health;
         lerpDuration = .5f;
     }
 
     public void death()
     {
-        Encounter encounter = GetComponentInParent<Encounter>();
-        //encounter.currentMonsters--; // TODO: DW This isn't working @BL
+        encounter.currentMonsters--;
         Destroy(gameObject);
     }
 

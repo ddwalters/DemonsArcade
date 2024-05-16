@@ -14,6 +14,7 @@ public class Encounter : MonoBehaviour
     public Collider encounterTrigger;
     public GameObject chest;
     public GameObject chestSpawn;
+    private bool lootSpawned;
 
     private GameObject player;
 
@@ -78,7 +79,8 @@ public class Encounter : MonoBehaviour
             Vector3 direction = (player.transform.position - chestSpawn.transform.position).normalized;
             Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
 
-            GameObject loot = Instantiate(chest, chestSpawn.transform.position, lookRotation);
+            if (!lootSpawned)
+                Instantiate(chest, chestSpawn.transform.position, lookRotation);
         }
     }
 

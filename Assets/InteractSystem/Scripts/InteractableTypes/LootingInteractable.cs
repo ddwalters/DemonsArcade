@@ -1,3 +1,4 @@
+using NUnit.Framework.Interfaces;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +7,10 @@ public class LootingInteractable : InteractableBase
     [SerializeField] InventoryType invType;
 
     [SerializeField] List<ItemData> items;
+
+    [SerializeField] bool isRewardChest;
+    [SerializeField] int minChestReward;
+    [SerializeField] int maxChestReward;
 
     private Inventory inventory;
 
@@ -25,6 +30,19 @@ public class LootingInteractable : InteractableBase
     private void Start()
     {
         gridId = inventoryManager.AddNewGridList(invType);
+
+        if (isRewardChest)
+        {
+            int itemRange = Random.Range(minChestReward, maxChestReward);
+
+            for (int i = itemRange; i >= 0; i--)
+            {
+                int randIndex = Random.Range(0, items.Count-1);
+                ItemData randomItem = items[randIndex];
+                inventory.AddItem(gridId, randomItem);
+            }
+            return;
+        }
 
         foreach (var itemData in items)
         {
