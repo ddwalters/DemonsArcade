@@ -329,6 +329,8 @@ MonoBehaviour:
   hallPrefabs:
   - {fileID: 6811111763282992217, guid: c1fc181f84c202849b0b3ac8c3882c4a, type: 3}
   - {fileID: 6811111763282992217, guid: 00c14c211236f404ba6d1a1987665f3d, type: 3}
+  - {fileID: 6811111763282992217, guid: b5ba61ab3bdb4f843b63aac258cc87b9, type: 3}
+  - {fileID: 6811111763282992217, guid: 0caf6d1fec0ab284e898d2f5233cece7, type: 3}
   doorprefab: {fileID: 6811111763282992217, guid: d614129c0d2f4444f83f8a6cadb72d67, type: 3}
   startprefab: {fileID: 7415050535990569633, guid: 284b7a42dc9b35249a849538ab732136, type: 3}
   bossprefab: {fileID: 7415050535990569633, guid: badcf01720b98fb4e9dadea128068ce6, type: 3}
@@ -1268,9 +1270,9 @@ MonoBehaviour:
   feet: {fileID: 9209439883123208620}
   cam: {fileID: 3617464603236236141}
   rb: {fileID: 6461694072611613570}
-  Speed: 7
-  Sensitivity: 400
-  JumpForce: 6
+  speed: 5
+  sensitivity: 2
+  jumpForce: 5
 --- !u!20 &3617464603236236141
 Camera:
   m_ObjectHideFlags: 0
@@ -1550,6 +1552,7 @@ MonoBehaviour:
   itemPrefab: {fileID: 6969914677378755897, guid: 1d326d966bd18764589627f54c258ba3, type: 3}
   inventoryType: {fileID: 11400000, guid: 0fee3a5fa20b29d42aa33f52f053137b, type: 2}
   tooltip: {fileID: 1443444946954833272}
+  weaponsHandler: {fileID: 0}
 --- !u!224 &3924304524560409966
 RectTransform:
   m_ObjectHideFlags: 0
