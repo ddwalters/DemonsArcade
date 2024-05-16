@@ -43,6 +43,11 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
+    private void OnLevelWasLoaded(int level)
+    {
+        weaponHandler = FindAnyObjectByType<WeaponsHandler>();
+    }
+
     private void Start()
     {
         weaponHandler = FindAnyObjectByType<WeaponsHandler>();
