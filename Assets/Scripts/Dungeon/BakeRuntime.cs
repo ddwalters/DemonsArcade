@@ -10,6 +10,8 @@ public class BakeRuntime : MonoBehaviour
 
     public void Bake()
     {
+        
         navMesh.BuildNavMesh();
     }
+
 }
