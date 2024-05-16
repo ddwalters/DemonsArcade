@@ -80,7 +80,10 @@ public class Encounter : MonoBehaviour
             Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
 
             if (!lootSpawned)
+            {
                 Instantiate(chest, chestSpawn.transform.position, lookRotation);
+                lootSpawned = true;
+            }
         }
     }
 
