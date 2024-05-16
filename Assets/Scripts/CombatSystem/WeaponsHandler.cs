@@ -128,6 +128,8 @@ public class WeaponsHandler : MonoBehaviour
         {
             EnemyStats enemyStats = other.GetComponent<EnemyStats>();
             var weaponStats = GetCurrentMainHandItemStats();
+            if (weaponStats == null) return;
+
             switch (weaponStats.GetWeaponType())
             {
                 case WeaponType.ShortSword:
