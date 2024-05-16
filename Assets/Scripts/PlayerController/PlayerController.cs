@@ -28,6 +28,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        MovePlayerCamera();
         // Jumping
         if (Input.GetButtonDown("Jump"))
         {
@@ -49,7 +50,6 @@ public class PlayerController : MonoBehaviour
         playerMovementInput = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
 
         MovePlayer();
-        MovePlayerCamera();
     }
 
     private void MovePlayer()
@@ -78,8 +78,8 @@ public class PlayerController : MonoBehaviour
 
     private void MovePlayerCamera()
     {
-        float mouseX = Input.GetAxis("Mouse X") * sensitivity;
-        float mouseY = Input.GetAxis("Mouse Y") * sensitivity * 1.3f;
+        float mouseX = Input.GetAxis("Mouse X") * sensitivity * Time.deltaTime;
+        float mouseY = Input.GetAxis("Mouse Y") * sensitivity * Time.deltaTime;
 
         xRot -= mouseY;
         xRot = Mathf.Clamp(xRot, -90f, 90f);
