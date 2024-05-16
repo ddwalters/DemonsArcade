@@ -227,6 +227,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 120549151084747443, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: m_Animation
+      value: 
+      objectReference: {fileID: 7400000, guid: 28707f795398b394dba21fd79162585c, type: 2}
+    - target: {fileID: 120549151084747443, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: m_Animations.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 120549151084747443, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: 'm_Animations.Array.data[0]'
+      value: 
+      objectReference: {fileID: 7400000, guid: 28707f795398b394dba21fd79162585c, type: 2}
     - target: {fileID: 1094290876629132184, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
       propertyPath: uiPanel
       value: 
@@ -239,6 +251,10 @@ PrefabInstance:
       propertyPath: playerBackpack
       value: 
       objectReference: {fileID: 8819744195505866099}
+    - target: {fileID: 1872426586686101173, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: inventoryManager
+      value: 
+      objectReference: {fileID: 1056720348097897953}
     - target: {fileID: 2199924824673124817, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
       propertyPath: m_Name
       value: player
@@ -8214,7 +8230,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4654797727340962881, guid: 029b5304be5606440938f66c9261cf09, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8202517161587574856, guid: 029b5304be5606440938f66c9261cf09, type: 3}
       propertyPath: m_LocalPosition.x
@@ -8462,7 +8478,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8069223294212210961, guid: 360db6f632e4938428bdf368e8fc353c, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -9.499817
+      value: -9.499878
       objectReference: {fileID: 0}
     - target: {fileID: 8069223294212210961, guid: 360db6f632e4938428bdf368e8fc353c, type: 3}
       propertyPath: m_AnchoredPosition.y

@@ -337,7 +337,7 @@ MonoBehaviour:
   cam: {fileID: 7534581174159498519}
   rb: {fileID: 2578407542080586197}
   speed: 5
-  sensitivity: 30
+  sensitivity: 300
   jumpForce: 5
   sprintFOV: 90
   normalFOV: 75
@@ -543,6 +543,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5129002959967588074}
+  - component: {fileID: 3626785149432881254}
   - component: {fileID: 120549151084747443}
   - component: {fileID: 6371591244207102275}
   m_Layer: 0
@@ -560,13 +561,35 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6185000821403009190}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.54556763, y: 0.5478043, z: 0.45358843, w: 0.44331032}
+  m_LocalRotation: {x: 0.20936862, y: 0.6444469, z: -0.067732535, w: 0.73230135}
   m_LocalPosition: {x: -0.00602, y: 0.00781, z: -0.01389}
   m_LocalScale: {x: 0.015, y: 0.015, z: 0.015}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5965878646411091363}
-  m_LocalEulerAnglesHint: {x: -0.759, y: 101.273, z: 90.388}
+  m_LocalEulerAnglesHint: {x: 23.2, y: 84.9, z: 10.7}
+--- !u!95 &3626785149432881254
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6185000821403009190}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 383c1e62bac00f7429ef6c34b079f02a, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!111 &120549151084747443
 Animation:
   m_ObjectHideFlags: 0
@@ -576,8 +599,10 @@ Animation:
   m_GameObject: {fileID: 6185000821403009190}
   m_Enabled: 1
   serializedVersion: 4
-  m_Animation: {fileID: 0}
-  m_Animations: []
+  m_Animation: {fileID: 7400000, guid: 28707f795398b394dba21fd79162585c, type: 2}
+  m_Animations:
+  - {fileID: 0}
+  - {fileID: 7400000, guid: 28707f795398b394dba21fd79162585c, type: 2}
   m_WrapMode: 0
   m_PlayAutomatically: 0
   m_AnimatePhysics: 0

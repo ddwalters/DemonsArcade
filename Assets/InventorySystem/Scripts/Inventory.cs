@@ -82,7 +82,7 @@ public class Inventory : MonoBehaviour
     /// </summary>
     private void Awake()
     {
-        inventoryManager = GetComponent<InventoryManager>();
+        inventoryManager = FindAnyObjectByType<InventoryManager>();
         grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.InstanceID);
         canvas = GetComponentInParent<Canvas>();
 

@@ -125,6 +125,57 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2107089812243751594, guid: a97530c185124e449afd901abea24f0e, type: 3}
   m_PrefabInstance: {fileID: 1977296973}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &87688016
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 87688018}
+  - component: {fileID: 87688017}
+  m_Layer: 0
+  m_Name: InventoryManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &87688017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 87688016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22f464e447a2f324ea277c6afa860b50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  weaponHandler: {fileID: 2083863741}
+  fakeHelmetData: {fileID: 11400000, guid: f6df0a7a3d049d94c82751e14c5587ba, type: 2}
+  fakeChestpieceData: {fileID: 11400000, guid: 913fa0ccbb30af744b00163b6588ea35, type: 2}
+  fakeLeggingsData: {fileID: 11400000, guid: f54448847877b4c4b88831b82a15e8d4, type: 2}
+  fakeBootsData: {fileID: 11400000, guid: bb0cc8868c089e948a2983759102a53d, type: 2}
+  fakeNecklaceData: {fileID: 11400000, guid: 83d8afdee50daa343a916962dfea52d1, type: 2}
+  fakeWeaponData: {fileID: 11400000, guid: dd491ac729206494ea20b564e12cea43, type: 2}
+--- !u!4 &87688018
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 87688016}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.2835007, y: 52.144444, z: 13.534833}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &115635003 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6541883842414260499, guid: 6d6a1dda7053648889fe6d01d841ef31, type: 3}
@@ -850,7 +901,6 @@ GameObject:
   - component: {fileID: 483896922}
   - component: {fileID: 483896921}
   - component: {fileID: 483896920}
-  - component: {fileID: 483896919}
   m_Layer: 7
   m_Name: Merchant
   m_TagString: Untagged
@@ -873,18 +923,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 923072947}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &483896919
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 483896917}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80e20ff69e7622f458ea7fbf88c28822, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!136 &483896920
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2052,7 +2090,6 @@ GameObject:
   - component: {fileID: 847723844}
   - component: {fileID: 847723843}
   - component: {fileID: 847723842}
-  - component: {fileID: 847723841}
   m_Layer: 7
   m_Name: Merchant
   m_TagString: Untagged
@@ -2075,18 +2112,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2119869522}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &847723841
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 847723839}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80e20ff69e7622f458ea7fbf88c28822, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!136 &847723842
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2588,7 +2613,6 @@ GameObject:
   - component: {fileID: 1057539667}
   - component: {fileID: 1057539666}
   - component: {fileID: 1057539665}
-  - component: {fileID: 1057539664}
   m_Layer: 7
   m_Name: Merchant
   m_TagString: Untagged
@@ -2611,18 +2635,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 389158730}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1057539664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1057539662}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80e20ff69e7622f458ea7fbf88c28822, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!136 &1057539665
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -3655,7 +3667,6 @@ GameObject:
   - component: {fileID: 1321690031}
   - component: {fileID: 1321690030}
   - component: {fileID: 1321690029}
-  - component: {fileID: 1321690028}
   m_Layer: 7
   m_Name: Merchant
   m_TagString: Untagged
@@ -3678,18 +3689,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1229503845}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1321690028
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1321690026}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80e20ff69e7622f458ea7fbf88c28822, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!136 &1321690029
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -4391,7 +4390,6 @@ GameObject:
   - component: {fileID: 1749817123}
   - component: {fileID: 1749817122}
   - component: {fileID: 1749817121}
-  - component: {fileID: 1749817120}
   m_Layer: 7
   m_Name: Merchant
   m_TagString: Untagged
@@ -4414,18 +4412,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2014685901}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1749817120
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1749817118}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 80e20ff69e7622f458ea7fbf88c28822, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!136 &1749817121
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -5569,6 +5555,10 @@ PrefabInstance:
       propertyPath: playerBackpack
       value: 
       objectReference: {fileID: 6025607656168539598}
+    - target: {fileID: 1872426586686101173, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: inventoryManager
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 2199924824673124817, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
       propertyPath: m_Name
       value: player
@@ -5612,6 +5602,10 @@ PrefabInstance:
     - target: {fileID: 3223157730553495151, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4712954185119262278, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: sensitivity
+      value: 300
       objectReference: {fileID: 0}
     - target: {fileID: 6467257779549542023, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
       propertyPath: manaFill
@@ -10063,25 +10057,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &2833746234927310172
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6025607656168539598}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22f464e447a2f324ea277c6afa860b50, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  weaponHandler: {fileID: 2083863741}
-  fakeHelmetData: {fileID: 11400000, guid: f6df0a7a3d049d94c82751e14c5587ba, type: 2}
-  fakeChestpieceData: {fileID: 11400000, guid: 913fa0ccbb30af744b00163b6588ea35, type: 2}
-  fakeLeggingsData: {fileID: 11400000, guid: f54448847877b4c4b88831b82a15e8d4, type: 2}
-  fakeBootsData: {fileID: 11400000, guid: bb0cc8868c089e948a2983759102a53d, type: 2}
-  fakeNecklaceData: {fileID: 11400000, guid: 83d8afdee50daa343a916962dfea52d1, type: 2}
-  fakeWeaponData: {fileID: 11400000, guid: dd491ac729206494ea20b564e12cea43, type: 2}
 --- !u!1 &2837055903762286520
 GameObject:
   m_ObjectHideFlags: 0
@@ -15045,7 +15020,6 @@ GameObject:
   - component: {fileID: 8304962392281858662}
   - component: {fileID: 2509232429050976623}
   - component: {fileID: 3025782518287607511}
-  - component: {fileID: 2833746234927310172}
   m_Layer: 5
   m_Name: Inventory
   m_TagString: Untagged
@@ -19333,6 +19307,7 @@ SceneRoots:
   - {fileID: 2002545635}
   - {fileID: 1820216511}
   - {fileID: 8699765990155259123}
+  - {fileID: 87688018}
   - {fileID: 207263154}
   - {fileID: 2400830366696496957}
   - {fileID: 842220595}

@@ -4,7 +4,7 @@ using UnityEngine;
 public class WeaponsHandler : MonoBehaviour
 {
 
-    [SerializeField] InventoryManager inventoryManager;
+    InventoryManager inventoryManager;
 
     [Header("Main Hand")]
     private bool _hasMainHandWeapon;
@@ -25,6 +25,7 @@ public class WeaponsHandler : MonoBehaviour
 
     private void Start()
     {
+        inventoryManager = FindAnyObjectByType<InventoryManager>();
         sword = GetComponentInChildren<Sword>();
         axe = GetComponentInChildren<Axe>();
         shield = GetComponentInChildren<Shield>();

@@ -1,11 +1,10 @@
-using NUnit.Framework.Interfaces;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
     private Dictionary<int, (List<ItemSaveData> list, InventoryType type)> ItemDataInformation;
-    [SerializeField] WeaponsHandler weaponHandler;
+    WeaponsHandler weaponHandler;
 
     [SerializeField] ItemData fakeHelmetData;
     [SerializeField] ItemData fakeChestpieceData;
@@ -16,6 +15,8 @@ public class InventoryManager : MonoBehaviour
 
     private void Awake()
     {
+        DontDestroyOnLoad(this);
+
         if (ItemDataInformation == null)
         {
             var statsData = FindAnyObjectByType<PlayerStatsManager>().GetPlayerStats();
@@ -40,6 +41,11 @@ public class InventoryManager : MonoBehaviour
                 { 7, LeftHandSlot }
             };
         }
+    }
+
+    private void Start()
+    {
+        weaponHandler = FindAnyObjectByType<WeaponsHandler>();
     }
 
     /// <summary>
@@ -82,19 +88,19 @@ public class InventoryManager : MonoBehaviour
             switch (gridId)
             {
                 case 1:
-                        itemSaveData = CreateSlotSaveData(WeaponType.Helmet, fakeHelmetData, data);
+                    itemSaveData = CreateSlotSaveData(WeaponType.Helmet, fakeHelmetData, data);
                     break;
                 case 2:
-                        itemSaveData = CreateSlotSaveData(WeaponType.Chestpiece, fakeChestpieceData, data);
+                    itemSaveData = CreateSlotSaveData(WeaponType.Chestpiece, fakeChestpieceData, data);
                     break;
                 case 3:
-                        itemSaveData = CreateSlotSaveData(WeaponType.Leggings, fakeLeggingsData, data);
+                    itemSaveData = CreateSlotSaveData(WeaponType.Leggings, fakeLeggingsData, data);
                     break;
                 case 4:
-                        itemSaveData = CreateSlotSaveData(WeaponType.Boots, fakeBootsData, data);
+                    itemSaveData = CreateSlotSaveData(WeaponType.Boots, fakeBootsData, data);
                     break;
                 case 5:
-                        itemSaveData = CreateSlotSaveData(WeaponType.Necklace, fakeNecklaceData, data);
+                    itemSaveData = CreateSlotSaveData(WeaponType.Necklace, fakeNecklaceData, data);
                     break;
                 case 6:
                     itemSaveData = CreateSlotSaveData(fakeWeaponData, data);
@@ -117,7 +123,7 @@ public class InventoryManager : MonoBehaviour
             list.Add(itemSaveData);
             return true;
         }
-        
+
         data.Id = list.Count;
         list.Add(data);
         return true;
