@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour
     private PlayerStatsManager statsManager;
     private Vector3 playerMovementInput;
     private float xRot;
+    private float targetFOV;
 
     [SerializeField] private LayerMask floorMask;
     [SerializeField] private Transform feet;
@@ -16,6 +17,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float speed = 5f;
     [SerializeField] private float sensitivity = 2f;
     [SerializeField] private float jumpForce = 5f;
+    [SerializeField] private float sprintFOV = 90f;
+    [SerializeField] private float normalFOV = 80f;
+    [SerializeField] private float fovLerpSpeed = 5f;
 
     private void Start()
     {
@@ -24,6 +28,9 @@ public class PlayerController : MonoBehaviour
         rb = gameObject.GetComponent<Rigidbody>();
 
         Cursor.lockState = CursorLockMode.Locked;
+
+        // Set initial target FOV
+        targetFOV = normalFOV;
     }
 
     void Update()
@@ -59,12 +66,12 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(KeyCode.LeftShift) && statsManager.GetStamina() > 0)
         {
             isSprinting = true;
-            cam.fieldOfView = 90;
+            targetFOV = sprintFOV;
         }
         else if (!Input.GetKey(KeyCode.LeftShift))
         {
             isSprinting = false;
-            cam.fieldOfView = 80;
+            targetFOV = normalFOV;
         }
 
         Vector3 moveVector = transform.TransformDirection(playerMovementInput) * speed;
@@ -74,6 +81,9 @@ public class PlayerController : MonoBehaviour
             moveVector *= 1.35f;
         }
         rb.velocity = new Vector3(moveVector.x, rb.velocity.y, moveVector.z);
+
+        // Smoothly adjust FOV
+        cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFOV, fovLerpSpeed * Time.deltaTime);
     }
 
     private void MovePlayerCamera()
