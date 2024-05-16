@@ -25,14 +25,13 @@ public class PlayerStatsManager : MonoBehaviour
         UpdateStaminaBar();
         UpdateManaBar();
 
-        StartCoroutine(RegenerateStamina());
-        StartCoroutine(RegenerateMana());
+        //StartCoroutine(RegenerateMana());
     }
 
     private void Update()
     {
-        RegenerateStamina();
-        RegenerateMana();
+        //while (statsData.currentStamina < statsData.maxStamina)
+        //    StartCoroutine(RegenerateStamina());
     }
 
     #region Core Stats
@@ -117,35 +116,40 @@ public class PlayerStatsManager : MonoBehaviour
     #endregion
 
     #region Stamina
+    bool usingStamina;
+
+    public void StartStaminaRegen() => usingStamina = false;
+
     // true or false for if there is stamina available/ if the action should happen
-    public bool UseStamina(int staminaAmount)
+    public IEnumerator UseStamina(float staminaAmount)
     {
-        int temp = statsData.currentStamina;
-
-        statsData.maxStamina -= staminaAmount;
-        if (statsData.currentStamina < 0)
+        if (statsData.currentStamina > 0)
         {
-            statsData.currentStamina = temp;
-            return false;
-        }
+            usingStamina = true;
+            statsData.currentStamina -= staminaAmount;
+            UpdateStaminaBar();
 
-        return true;
+            yield return new WaitForSeconds(0.25f);
+        }
     }
 
-    public int GetStamina()
+    public float GetStamina()
     {
         return statsData.currentStamina;
     }
 
     // this time should be based on players endurance stat
-    private IEnumerator RegenerateStamina()
+    public IEnumerator RegenerateStamina()
     {
+        yield return new WaitWhile(() => usingStamina);
+
         while (statsData.currentStamina < statsData.maxStamina)
         {
-            yield return new WaitForSeconds(0.5f);
-            statsData.currentStamina++;
-
+            usingStamina = false;
+            statsData.currentStamina += 0.25f;
             UpdateStaminaBar();
+
+            yield return new WaitForSeconds(0.75f);
         }
     }
 
@@ -160,16 +164,16 @@ public class PlayerStatsManager : MonoBehaviour
 
     private void UpdateStaminaBar()
     {
-        float staminaNormalized = (float)statsData.currentStamina / (float)statsData.maxStamina;
+        float staminaNormalized = statsData.currentStamina / statsData.maxStamina;
         staminaFill.fillAmount = staminaNormalized;
     }
     #endregion
 
     #region Mana
     // true or false for if there is stamina available/ if the action should happen
-    public bool UseMana(int manaAmount)
+    public bool UseMana(float manaAmount)
     {
-        int temp = statsData.currentMana;
+        float temp = statsData.currentMana;
 
         statsData.currentMana -= manaAmount;
         if (statsData.currentMana < 0)
@@ -186,16 +190,16 @@ public class PlayerStatsManager : MonoBehaviour
         while (statsData.currentMana < statsData.maxMana)
         {
             // this time should be based on players int stat
-            yield return new WaitForSeconds(0.25f);
             statsData.currentMana++;
-
             UpdateStaminaBar();
+
+            yield return new WaitForSeconds(0.25f);
         }
     }
 
     private void IncreaseManaStat()
     {
-        int toIncrease = Mathf.RoundToInt(statsData.lvl * .35f);
+        float toIncrease = Mathf.RoundToInt(statsData.lvl * .35f);
         statsData.maxMana += toIncrease;
         statsData.currentMana += toIncrease;
 

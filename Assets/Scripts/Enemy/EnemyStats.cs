@@ -15,6 +15,7 @@ public class EnemyStats : MonoBehaviour
     private void Start()
     {
         currentHealth = health;
+        lerpDuration = .5f;
     }
 
     public void death()
@@ -26,7 +27,6 @@ public class EnemyStats : MonoBehaviour
 
     public IEnumerator DamageMonster(float damage)
     {
-        lerpDuration = .5f;
         float time = 0;
         float endValue = currentHealth - damage;
 

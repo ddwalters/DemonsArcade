@@ -5,12 +5,12 @@ public class PlayerStatsData
     public int nextLevelXP;
     public int currentXP;
     public int gold;
-    public int maxHealth;
-    public int currentHealth;
-    public int maxStamina;
-    public int currentStamina;
-    public int maxMana;
-    public int currentMana;
+    public float maxHealth;
+    public float currentHealth;
+    public float maxStamina;
+    public float currentStamina;
+    public float maxMana;
+    public float currentMana;
     //public int baseSP;
     //public float spGrowth;
     //public int SP;
@@ -29,9 +29,9 @@ public class PlayerStatsData
         gold = 100;
         nextLevelXP = 500;
 
-        maxHealth = 100;
-        maxStamina = 100;
-        maxMana = 100;
+        maxHealth = 100f;
+        maxStamina = 100f;
+        maxMana = 100f;
 
         //SP = 0;
         //baseSP = 1;

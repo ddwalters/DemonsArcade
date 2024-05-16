@@ -63,22 +63,37 @@ public class PlayerController : MonoBehaviour
     {
         bool isSprinting = false;
 
-        if (Input.GetKey(KeyCode.LeftShift) && statsManager.GetStamina() > 0)
+        if (Input.GetKey(KeyCode.LeftShift))
         {
             isSprinting = true;
             targetFOV = sprintFOV;
+            StartCoroutine(statsManager.UseStamina(0.5f));
+
+            // hardcoded stamina for now-- can update for player stats later
+            if (statsManager.GetStamina() <= 0)
+            {
+                isSprinting = false;
+                targetFOV = normalFOV;
+            }
         }
         else if (!Input.GetKey(KeyCode.LeftShift))
         {
             isSprinting = false;
             targetFOV = normalFOV;
+            statsManager.StartStaminaRegen();
+            StartCoroutine(statsManager.RegenerateStamina());
         }
 
         Vector3 moveVector = transform.TransformDirection(playerMovementInput) * speed;
         if (isSprinting && statsManager.GetStamina() > 0)
         {
-            statsManager.UseStamina(1);
+            StartCoroutine(statsManager.UseStamina(0.5f));
             moveVector *= 1.35f;
+        }
+        else
+        {
+            statsManager.StartStaminaRegen();
+            StartCoroutine(statsManager.RegenerateStamina());
         }
         rb.velocity = new Vector3(moveVector.x, rb.velocity.y, moveVector.z);
 
