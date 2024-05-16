@@ -5,22 +5,29 @@ using UnityEngine;
 public class Encounter : MonoBehaviour
 {
     public GameObject[] spawnPoints;
+    public ParticleTemplate particleTemplate;
     public MonsterTemplates monsterTempates;
     static public List<GameObject> Monsters = new List<GameObject>();
+    public int totalMonsters = 0;
     public int currentMonsters = 0;
     public Collider encounterTrigger;
 
     private GameObject player;
 
+    private ParticleSystem spawnParticle;
+
     public int maxOccupancy;
     public int roomArea;
 
     public bool activeEncounter = false;
+    public bool victory = false;
 
     public LayerMask layerMask;
 
     private void Awake()
     {
+        particleTemplate = GetComponentInParent<ParticleTemplate>();
+        spawnParticle = particleTemplate.spawnParticle;
         monsterTempates = GetComponentInParent<MonsterTemplates>();
         player = GameObject.Find("player");
     }
@@ -29,8 +36,11 @@ public class Encounter : MonoBehaviour
     {
         if (layerMask == (layerMask | (1 << other.transform.gameObject.layer)))
         {
-            Debug.Log("FIGHT!");
-            activeEncounter = true;
+            if (victory == false)
+            {
+                activeEncounter = true;
+                Debug.Log("FIGHT!");
+            }
         }
     }
 
@@ -38,22 +48,46 @@ public class Encounter : MonoBehaviour
     {
         if (activeEncounter == true)
         {
-            if (maxOccupancy != currentMonsters)
+
+            if (maxOccupancy !> currentMonsters && totalMonsters < roomArea)
             {
                 int rand = Random.Range(0, spawnPoints.Length - 1);
                 GameObject cs = spawnPoints[rand];
+
                 float distToPlayer = Vector3.Distance(player.transform.position, cs.transform.position);
                 if (distToPlayer >= 2f)
                 {
-                    Vector3 direction = (player.transform.position - cs.transform.position).normalized;
-                    Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
-                    rand = Random.Range(0, monsterTempates.monsterPrefabs.Length - 1);
-                    GameObject go = Instantiate(monsterTempates.monsterPrefabs[rand], cs.transform.position, lookRotation, gameObject.transform);
-                    go.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+                    float spawndelay = Random.Range(0f, 2f);
+                    totalMonsters++;
                     currentMonsters++;
-                    Monsters.Add(go);
+                    StartCoroutine(spawnMon(cs, spawndelay));
                 }
             }
+            if (currentMonsters == 0 && totalMonsters == roomArea)
+            {
+                Debug.Log("Victory!");
+                victory = true;
+                activeEncounter = false;
+            }
         }
+    }
+
+    IEnumerator spawnMon(GameObject cs, float spawnDelay)
+    {
+        yield return new WaitForSeconds(spawnDelay);
+
+        Vector3 direction = (player.transform.position - cs.transform.position).normalized;
+        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+        ParticleSystem particle = Instantiate(spawnParticle, cs.transform.position, lookRotation);
+
+        yield return new WaitForSeconds(0.2f);
+
+        int mon = Random.Range(0, monsterTempates.monsterPrefabs.Length);
+        GameObject go = Instantiate(monsterTempates.monsterPrefabs[mon], cs.transform.position, lookRotation);
+        go.transform.SetParent(gameObject.transform);
+        go.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        Monsters.Add(go);
+
+        Destroy(particle, 2f);
     }
 }

@@ -42,7 +42,7 @@ public class Generator2D : MonoBehaviour
     [SerializeField]
     GameObject cubePrefab;
     [SerializeField]
-    GameObject hallprefab;
+    GameObject[] hallPrefabs;
     [SerializeField]
     GameObject doorprefab;
     [SerializeField]
@@ -354,10 +354,13 @@ public class Generator2D : MonoBehaviour
 
     void PlaceHallway(Vector2Int location)
     {
+        // Randomly choose a prefab from the array
+        GameObject selectedPrefab = hallPrefabs[Random.Range(0, hallPrefabs.Length)];
 
-        GameObject go = Instantiate(hallprefab, new Vector3(location.x, 0, location.y), Quaternion.identity, parent.transform);
+        // Instantiate the selected prefab
+        GameObject go = Instantiate(selectedPrefab, new Vector3(location.x, 0, location.y), Quaternion.identity, parent.transform);
         halllist.Add(go);
-        go.GetComponent<Transform>().localScale = new Vector3(1, 1, 1);
+        go.transform.localScale = new Vector3(1, 1, 1);
         go.GetComponent<MeshRenderer>().material = blueMaterial;
     }
 

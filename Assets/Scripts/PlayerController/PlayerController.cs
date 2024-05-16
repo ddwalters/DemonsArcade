@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private PlayerStatsManager statsManager;
-    private Vector3 PlayerMovementInput;
+    private Vector3 playerMovementInput;
     private float xRot;
 
     [SerializeField] private LayerMask floorMask;
@@ -13,9 +13,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Camera cam;
     [SerializeField] private Rigidbody rb;
     [Space]
-    [SerializeField] private float Speed;
-    [SerializeField] private float Sensitivity;
-    [SerializeField] private float JumpForce;
+    [SerializeField] private float speed = 5f;
+    [SerializeField] private float sensitivity = 2f;
+    [SerializeField] private float jumpForce = 5f;
 
     private void Start()
     {
@@ -30,10 +30,10 @@ public class PlayerController : MonoBehaviour
     {
         // Jumping
         if (Input.GetButtonDown("Jump"))
-        {   
-            if(Physics.CheckSphere(feet.position, 0.1f, floorMask))
+        {
+            if (Physics.CheckSphere(feet.position, 0.1f, floorMask))
             {
-                rb.AddForce(Vector3.up * JumpForce, ForceMode.Impulse);
+                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             }
         }
 
@@ -46,7 +46,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        PlayerMovementInput = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
+        playerMovementInput = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
 
         MovePlayer();
         MovePlayerCamera();
@@ -56,35 +56,35 @@ public class PlayerController : MonoBehaviour
     {
         bool isSprinting = false;
 
-        if (Input.GetKeyDown(KeyCode.LeftShift) && statsManager.GetStamina() > 0)
+        if (Input.GetKey(KeyCode.LeftShift) && statsManager.GetStamina() > 0)
         {
             isSprinting = true;
             cam.fieldOfView = 90;
         }
-        else if (Input.GetKeyUp(KeyCode.LeftShift))
+        else if (!Input.GetKey(KeyCode.LeftShift))
         {
             isSprinting = false;
             cam.fieldOfView = 80;
         }
 
-        Vector3 MoveVector = transform.TransformDirection(PlayerMovementInput) * Speed;
+        Vector3 moveVector = transform.TransformDirection(playerMovementInput) * speed;
         if (isSprinting && statsManager.GetStamina() > 0)
         {
             statsManager.UseStamina(1);
-            MoveVector = MoveVector * 1.35f;
+            moveVector *= 1.35f;
         }
-        rb.velocity = new Vector3(MoveVector.x, rb.velocity.y, MoveVector.z);
+        rb.velocity = new Vector3(moveVector.x, rb.velocity.y, moveVector.z);
     }
 
     private void MovePlayerCamera()
     {
-        float mouseX = Input.GetAxis("Mouse X") * Sensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * Sensitivity * 1.3f * Time.deltaTime;
+        float mouseX = Input.GetAxis("Mouse X") * sensitivity;
+        float mouseY = Input.GetAxis("Mouse Y") * sensitivity * 1.3f;
 
         xRot -= mouseY;
         xRot = Mathf.Clamp(xRot, -90f, 90f);
 
         cam.transform.localRotation = Quaternion.Euler(xRot, 0f, 0f);
-        gameObject.transform.Rotate(Vector3.up * mouseX);
+        transform.Rotate(Vector3.up * mouseX);
     }
 }

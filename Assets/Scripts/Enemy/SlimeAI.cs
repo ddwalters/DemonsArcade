@@ -12,6 +12,7 @@ public class SlimeAI : MonoBehaviour
 
     private void Awake()
     {
+        target = GameObject.Find("player");
         navMeshAgent = GetComponent<NavMeshAgent>();
     }
 
