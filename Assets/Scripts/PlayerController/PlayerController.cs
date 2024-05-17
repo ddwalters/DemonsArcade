@@ -9,17 +9,20 @@ public class PlayerController : MonoBehaviour
     private float xRot;
     private float targetFOV;
 
-    [SerializeField] private LayerMask floorMask;
-    [SerializeField] private Transform feet;
-    [SerializeField] private Camera cam;
-    [SerializeField] private Rigidbody rb;
-    [Space]
+    [Header("Settings")]
     [SerializeField] private float speed = 5f;
+    [SerializeField] private float sprintSpeedMultiplier;
     [SerializeField] private float sensitivity = 2f;
     [SerializeField] private float jumpForce = 5f;
     [SerializeField] private float sprintFOV = 90f;
     [SerializeField] private float normalFOV = 80f;
     [SerializeField] private float fovLerpSpeed = 5f;
+    [Space]
+    [Header("Components")]
+    [SerializeField] private LayerMask floorMask;
+    [SerializeField] private Transform feet;
+    [SerializeField] private Camera cam;
+    [SerializeField] private Rigidbody rb;
 
     private void Start()
     {
@@ -88,7 +91,7 @@ public class PlayerController : MonoBehaviour
         if (isSprinting && statsManager.GetStamina() > 0)
         {
             StartCoroutine(statsManager.UseStamina(0.5f));
-            moveVector *= 1.35f;
+            moveVector *= sprintSpeedMultiplier;
         }
         else
         {
@@ -103,13 +106,13 @@ public class PlayerController : MonoBehaviour
 
     private void MovePlayerCamera()
     {
-        float mouseX = Input.GetAxis("Mouse X") * sensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * sensitivity * Time.deltaTime;
+        float mouseX = Input.GetAxis("Mouse X") * sensitivity;
+    float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
 
-        xRot -= mouseY;
-        xRot = Mathf.Clamp(xRot, -90f, 90f);
+    xRot -= mouseY;
+    xRot = Mathf.Clamp(xRot, -90f, 90f);
 
-        cam.transform.localRotation = Quaternion.Euler(xRot, 0f, 0f);
-        transform.Rotate(Vector3.up * mouseX);
+    cam.transform.localRotation = Quaternion.Euler(xRot, 0f, 0f);
+    transform.Rotate(Vector3.up * mouseX);
     }
 }

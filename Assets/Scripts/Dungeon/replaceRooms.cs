@@ -49,76 +49,89 @@ public class replaceRooms : MonoBehaviour
 
         if (x == 3f && z == 3f)
         {
-            placeRoom(p3x3[0]);
+            int rand = Random.Range(0, p3x3.Length);
+            placeRoom(p3x3[rand]);
         }
         else if (x == 3f && z == 4f)
         {
-            placeRoom(p3x4[0]);
+            int rand = Random.Range(0, p3x4.Length);
+            placeRoom(p3x4[rand]);
         }
         else if (x == 3f && z == 5f)
         {
-            placeRoom(p3x5[0]);
+            int rand = Random.Range(0, p3x5.Length);
+            placeRoom(p3x5[rand]);
         }
         else if (x == 3f && z == 6f)
         {
-            placeRoom(p3x6[0]);
+            int rand = Random.Range(0, p3x6.Length);
+            placeRoom(p3x6[rand]);
         }
 
         // 4 by rooms
-
         else if (x == 4f && z == 3f)
         {
-            placeRoom(p4x3[0]);
+            int rand = Random.Range(0, p4x3.Length);
+            placeRoom(p4x3[rand]);
         }
         else if (x == 4f && z == 4f)
         {
-            placeRoom(p4x4[0]);
+            int rand = Random.Range(0, p4x4.Length);
+            placeRoom(p4x4[rand]);
         }
         else if (x == 4f && z == 5f)
         {
-            placeRoom(p4x5[0]);
+            int rand = Random.Range(0, p4x5.Length);
+            placeRoom(p4x5[rand]);
         }
         else if (x == 4f && z == 6f)
         {
-            placeRoom(p4x6[0]);
+            int rand = Random.Range(0, p4x6.Length);
+            placeRoom(p4x6[rand]);
         }
 
         // 5 by rooms
-
         else if (x == 5f && z == 3f)
         {
-            placeRoom(p5x3[0]);
+            int rand = Random.Range(0, p5x3.Length);
+            placeRoom(p5x3[rand]);
         }
         else if (x == 5f && z == 4f)
         {
-            placeRoom(p5x4[0]);
+            int rand = Random.Range(0, p5x4.Length);
+            placeRoom(p5x4[rand]);
         }
         else if (x == 5f && z == 5f)
         {
-            placeRoom(p5x5[0]);
+            int rand = Random.Range(0, p5x5.Length);
+            placeRoom(p5x5[rand]);
         }
         else if (x == 5f && z == 6f)
         {
-            placeRoom(p5x6[0]);
+            int rand = Random.Range(0, p5x6.Length);
+            placeRoom(p5x6[rand]);
         }
 
         // 6 by rooms
-
         else if (x == 6f && z == 3f)
         {
-            placeRoom(p6x3[0]);
+            int rand = Random.Range(0, p6x3.Length);
+            placeRoom(p6x3[rand]);
         }
         else if (x == 6f && z == 4f)
         {
-            placeRoom(p6x4[0]);
+            int rand = Random.Range(0, p6x4.Length);
+            placeRoom(p6x4[rand]);
         }
         else if (x == 6f && z == 5f)
         {
-            placeRoom(p6x5[0]);
+            int rand = Random.Range(0, p6x5.Length);
+            placeRoom(p6x5[rand]);
         }
         else if (x == 6f && z == 6f)
         {
-            placeRoom(p6x6[0]);
+            int rand = Random.Range(0, p6x6.Length);
+            placeRoom(p6x6[rand]);
         }
 
     }

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 756103513}
-  m_IndirectSpecularColor: {r: 0.000055046083, g: 0.00014094963, b: 0.0042733354, a: 1}
+  m_IndirectSpecularColor: {r: 0.000064787346, g: 0.00014024801, b: 0.0042892084, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -265,6 +265,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4712954185119262278, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: sensitivity
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 4712954185119262278, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: sprintSpeedMultiplier
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 6467257779549542023, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
       propertyPath: manaFill
       value: 
@@ -484,7 +492,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22f464e447a2f324ea277c6afa860b50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponHandler: {fileID: 0}
   fakeHelmetData: {fileID: 11400000, guid: f6df0a7a3d049d94c82751e14c5587ba, type: 2}
   fakeChestpieceData: {fileID: 11400000, guid: 913fa0ccbb30af744b00163b6588ea35, type: 2}
   fakeLeggingsData: {fileID: 11400000, guid: f54448847877b4c4b88831b82a15e8d4, type: 2}
