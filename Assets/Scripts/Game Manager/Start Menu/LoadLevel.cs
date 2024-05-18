@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class LoadLevel : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class LoadLevel : MonoBehaviour
 
     public GameObject loadingScreen;
     public Slider slider;
+    public TMP_Text textProgress;
 
     public float transitionTime;
 
@@ -33,6 +35,7 @@ public class LoadLevel : MonoBehaviour
             //float progress = Mathf.Clamp01(operation.progress / 0.9f);
 
             slider.value = progress;
+            textProgress.text = progress * 100f + "%";
 
             yield return null;
         }
