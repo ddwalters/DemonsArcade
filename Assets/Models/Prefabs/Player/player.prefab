@@ -329,18 +329,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94d958ec58f00ee4f853b630e0668df1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  speed: 5
+  sprintSpeedMultiplier: 1.5
+  sensitivity: 10
+  jumpForce: 5
+  sprintFOV: 90
+  normalFOV: 75
+  fovLerpSpeed: 5
   floorMask:
     serializedVersion: 2
     m_Bits: 64
   feet: {fileID: 4544887378659102359}
   cam: {fileID: 7534581174159498519}
   rb: {fileID: 2578407542080586197}
-  speed: 5
-  sensitivity: 30
-  jumpForce: 5
-  sprintFOV: 90
-  normalFOV: 75
-  fovLerpSpeed: 5
 --- !u!114 &1094290876629132184
 MonoBehaviour:
   m_ObjectHideFlags: 0

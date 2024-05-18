@@ -3,11 +3,27 @@ using UnityEngine.SceneManagement;
 
 public class Portal : MonoBehaviour
 {
-    public string selectedScene;
+    private int selectedScene;
+    private LoadLevel GameManager;
+
+    public void SetScene(int scene)
+    {
+        selectedScene = scene;
+    }
+
+    public int GetScene()
+    {
+        return selectedScene;
+    }
+
+    private void Awake()
+    {
+        GameManager = FindAnyObjectByType<LoadLevel>();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
         if (other.tag == "HitCone") return;
-        SceneManager.LoadScene(selectedScene); // Dungeon
+        GameManager.loadLevel(selectedScene);
     }
 }
