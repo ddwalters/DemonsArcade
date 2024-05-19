@@ -52,12 +52,6 @@ public class PlayerController : MonoBehaviour
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
             }
         }
-
-        // Unlock cursor if Escape key is pressed
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            Cursor.lockState = CursorLockMode.None;
-        }
     }
 
     private void FixedUpdate()
@@ -124,10 +118,12 @@ public class PlayerController : MonoBehaviour
     public void EnableCameraMovement()
     {
         canMoveCamera = true;
+        //Cursor.lockState = CursorLockMode.Locked;
     }
 
     public void DisableCameraMovement()
     {
         canMoveCamera = false;
+        //Cursor.lockState = CursorLockMode.Confined;
     }
 }

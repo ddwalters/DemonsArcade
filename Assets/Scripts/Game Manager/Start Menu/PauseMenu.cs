@@ -93,18 +93,18 @@ public class PauseMenu : MonoBehaviour
     public void options()
     {
         optionsMenu.SetActive(true);
+        Cursor.lockState = CursorLockMode.Confined;
         playerController.DisableCameraMovement();
         isOptionsMenuActive = true;
-        Cursor.lockState = CursorLockMode.None; // Unlock cursor for options menu
         Cursor.visible = true;
     }
 
     public void resume()
     {
         optionsMenu.SetActive(false);
+        Cursor.lockState = CursorLockMode.Locked;
         playerController.EnableCameraMovement();
         isOptionsMenuActive = false;
-        Cursor.lockState = CursorLockMode.Locked; // Lock cursor back for gameplay
         Cursor.visible = false;
         EventSystem.current.SetSelectedGameObject(null);
     }

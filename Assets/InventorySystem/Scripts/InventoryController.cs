@@ -5,22 +5,20 @@ public class InventoryController : MonoBehaviour
 {
     public Inventory inventory { get; private set; }
 
+    private PlayerController playerController;
+
     private ItemToolTip itemToolTip;
 
-    private PlayerController playerController;
     private bool gridOpen = false;
     private bool tabKeyPressed = false;
 
-    private void Start()
-    {
-        playerController = FindAnyObjectByType<PlayerController>();
-    }
     /// <summary>
     /// Awake is called when the script instance is being loaded.
     /// </summary>
-    /// 
     private void Awake()
     {
+        playerController = FindAnyObjectByType<PlayerController>();
+
         inventory = GetComponent<Inventory>();
         itemToolTip = inventory.GetItemTooltip();
     }
@@ -42,6 +40,11 @@ public class InventoryController : MonoBehaviour
             {
                 CloseInventory();
             }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape) && gridOpen)
+        {
+            CloseInventory();
         }
 
         if (Input.GetKeyUp(KeyCode.Tab))
@@ -69,20 +72,36 @@ public class InventoryController : MonoBehaviour
                 }
             }
         }
+
+        // Remove an item from the inventory
+        //if (Input.GetKeyDown(KeyCode.Mouse1))
+        //{
+        //    RemoveItemWithMouse();
+        //}
+
+        // move and rotate item
+        if (inventory.selectedItem != null)
+        {
+            MoveSelectedItemToMouse();
+
+            if (Input.GetKeyDown(KeyCode.R))
+                inventory.selectedItem.Rotate();
+        }
     }
 
     private void OpenInventory()
     {
-        Cursor.lockState = CursorLockMode.Confined;
+        //Cursor.lockState = CursorLockMode.Confined;
         inventory.CreateGrid(0, true);
         gridOpen = true;
+        Cursor.lockState = CursorLockMode.Confined;
         playerController.DisableCameraMovement();
     }
 
     private void CloseInventory()
     {
         var grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
-        Cursor.lockState = CursorLockMode.Locked;
+        //Cursor.lockState = CursorLockMode.Locked;
 
         foreach (var grid in grids)
         {
@@ -91,6 +110,7 @@ public class InventoryController : MonoBehaviour
 
         itemToolTip.HideToolTip();
         gridOpen = false;
+        Cursor.lockState = CursorLockMode.Locked;
         playerController.EnableCameraMovement();
     }
 
