@@ -94,6 +94,7 @@ public class PauseMenu : MonoBehaviour
     {
         optionsMenu.SetActive(true);
         Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
         playerController.DisableCameraMovement();
         isOptionsMenuActive = true;
         Cursor.visible = true;
@@ -103,6 +104,7 @@ public class PauseMenu : MonoBehaviour
     {
         optionsMenu.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         playerController.EnableCameraMovement();
         isOptionsMenuActive = false;
         Cursor.visible = false;

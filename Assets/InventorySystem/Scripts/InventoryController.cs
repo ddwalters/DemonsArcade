@@ -95,6 +95,7 @@ public class InventoryController : MonoBehaviour
         inventory.CreateGrid(0, true);
         gridOpen = true;
         Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
         playerController.DisableCameraMovement();
     }
 
@@ -111,6 +112,7 @@ public class InventoryController : MonoBehaviour
         itemToolTip.HideToolTip();
         gridOpen = false;
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
         playerController.EnableCameraMovement();
     }
 
