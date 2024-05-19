@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 2002545634}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028352, g: 0.22571376, b: 0.30692244, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -5668,6 +5668,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5129002959967588074, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.00362
+      objectReference: {fileID: 0}
+    - target: {fileID: 5129002959967588074, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.01552
+      objectReference: {fileID: 0}
+    - target: {fileID: 5129002959967588074, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.52075773
+      objectReference: {fileID: 0}
+    - target: {fileID: 5129002959967588074, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.47102883
+      objectReference: {fileID: 0}
+    - target: {fileID: 5129002959967588074, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.47479045
+      objectReference: {fileID: 0}
+    - target: {fileID: 5129002959967588074, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.53058213
+      objectReference: {fileID: 0}
+    - target: {fileID: 5129002959967588074, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 83.949
+      objectReference: {fileID: 0}
     - target: {fileID: 6467257779549542023, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
       propertyPath: manaFill
       value: 
@@ -5708,7 +5736,8 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: -0.91063124
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 120549151084747443, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
