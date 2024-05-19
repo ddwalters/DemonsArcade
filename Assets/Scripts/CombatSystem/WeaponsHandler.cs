@@ -7,11 +7,17 @@ public class WeaponsHandler : MonoBehaviour
     InventoryManager inventoryManager;
 
     [Header("Main Hand")]
-    private bool _hasMainHandWeapon;
-    [SerializeField] GameObject mainHandShortSwordLocation;
-    [SerializeField] GameObject mainHandAxeLocation;
-    [SerializeField] GameObject mainHandSheildLocation;
-    [SerializeField] GameObject mainHandStaffLocation;
+    private bool _hasRightHandWeapon;
+    [SerializeField] GameObject rightHandShortSwordLocation;
+    [SerializeField] GameObject rightHandAxeLocation;
+    [SerializeField] GameObject rightHandSheildLocation;
+    [SerializeField] GameObject rightHandStaffLocation;
+
+    private bool _hasLeftHandWeapon;
+    [SerializeField] GameObject leftHandShortSwordLocation;
+    [SerializeField] GameObject leftHandAxeLocation;
+    [SerializeField] GameObject leftHandSheildLocation;
+    [SerializeField] GameObject leftHandStaffLocation;
 
     private Sword sword;
     private Axe axe;
@@ -34,7 +40,7 @@ public class WeaponsHandler : MonoBehaviour
 
     private void Update()
     {
-        if (!_hasMainHandWeapon) return;
+        if (!_hasRightHandWeapon) return;
 
         if (currentCoolDownTime > 0f)
         {
@@ -49,23 +55,24 @@ public class WeaponsHandler : MonoBehaviour
         }
     }
 
-    public void AddItemToPlayerMainHand(ItemStatsData itemStats)
+    #region right hand
+    public void AddItemToPlayerRightHand(ItemStatsData itemStats)
     {
-        if (_hasMainHandWeapon) return;
+        if (_hasRightHandWeapon) return;
 
         switch (itemStats.GetWeaponType())
         {
             case WeaponType.ShortSword:
-                CreateWeapon(itemStats, mainHandShortSwordLocation);
+                CreateWeapon(itemStats, rightHandShortSwordLocation);
                 break;
             case WeaponType.Axe:
-                CreateWeapon(itemStats, mainHandAxeLocation);
+                CreateWeapon(itemStats, rightHandAxeLocation);
                 break;
             case WeaponType.Shield:
-                CreateWeapon(itemStats, mainHandSheildLocation);
+                CreateWeapon(itemStats, rightHandSheildLocation);
                 break;
             case WeaponType.Staff:
-                CreateWeapon(itemStats, mainHandStaffLocation);
+                CreateWeapon(itemStats, rightHandStaffLocation);
                 break;
             default:
                 Debug.Log("Not a weapon.");
@@ -73,26 +80,75 @@ public class WeaponsHandler : MonoBehaviour
         }
 
         attackCoolDown = itemStats.GetCoolDownTime();
-        _hasMainHandWeapon = true;
+        _hasRightHandWeapon = true;
     }
-    public void RemoveItemFromPlayerMainHand()
+    public void RemoveItemFromPlayerRightHand()
     {
-        if (!_hasMainHandWeapon) return;
+        if (!_hasRightHandWeapon) return;
 
-        if (mainHandShortSwordLocation.transform.childCount > 0)
-            Destroy(mainHandShortSwordLocation.transform.GetChild(0).gameObject);
+        if (rightHandShortSwordLocation.transform.childCount > 0)
+            Destroy(rightHandShortSwordLocation.transform.GetChild(0).gameObject);
 
-        if (mainHandAxeLocation.transform.childCount > 0)
-            Destroy(mainHandAxeLocation.transform.GetChild(0).gameObject);
+        if (rightHandAxeLocation.transform.childCount > 0)
+            Destroy(rightHandAxeLocation.transform.GetChild(0).gameObject);
 
-        if (mainHandSheildLocation.transform.childCount > 0)
-            Destroy(mainHandSheildLocation.transform.GetChild(0).gameObject);
+        if (rightHandSheildLocation.transform.childCount > 0)
+            Destroy(rightHandSheildLocation.transform.GetChild(0).gameObject);
 
-        if (mainHandStaffLocation.transform.childCount > 0)
-            Destroy(mainHandStaffLocation.transform.GetChild(0).gameObject);
+        if (rightHandStaffLocation.transform.childCount > 0)
+            Destroy(rightHandStaffLocation.transform.GetChild(0).gameObject);
 
-        _hasMainHandWeapon = false;
+        _hasRightHandWeapon = false;
     }
+    #endregion
+
+
+    #region left hand
+    public void AddItemToPlayerLeftHand(ItemStatsData itemStats)
+    {
+        if (_hasLeftHandWeapon) return;
+
+        switch (itemStats.GetWeaponType())
+        {
+            case WeaponType.ShortSword:
+                CreateWeapon(itemStats, leftHandShortSwordLocation);
+                break;
+            case WeaponType.Axe:
+                CreateWeapon(itemStats, leftHandAxeLocation);
+                break;
+            case WeaponType.Shield:
+                CreateWeapon(itemStats, leftHandSheildLocation);
+                break;
+            case WeaponType.Staff:
+                CreateWeapon(itemStats, leftHandStaffLocation);
+                break;
+            default:
+                Debug.Log("Not a weapon.");
+                return;
+        }
+
+        attackCoolDown = itemStats.GetCoolDownTime();
+        _hasRightHandWeapon = true;
+    }
+    public void RemoveItemFromPlayerLeftHand()
+    {
+        if (!_hasLeftHandWeapon) return;
+
+        if (leftHandShortSwordLocation.transform.childCount > 0)
+            Destroy(leftHandShortSwordLocation.transform.GetChild(0).gameObject);
+
+        if (leftHandAxeLocation.transform.childCount > 0)
+            Destroy(leftHandAxeLocation.transform.GetChild(0).gameObject);
+
+        if (leftHandSheildLocation.transform.childCount > 0)
+            Destroy(leftHandSheildLocation.transform.GetChild(0).gameObject);
+
+        if (leftHandStaffLocation.transform.childCount > 0)
+            Destroy(leftHandStaffLocation.transform.GetChild(0).gameObject);
+
+        _hasRightHandWeapon = false;
+    }
+    #endregion
 
     private void CreateWeapon(ItemStatsData itemStats, GameObject prefabLocation)
     {
