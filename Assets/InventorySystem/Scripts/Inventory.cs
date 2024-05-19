@@ -479,7 +479,14 @@ public class Inventory : MonoBehaviour
                 success = gridOnMouse.inventory.AddItem(gridOnMouse.id, item.saveData.PreviousItemData);
 
                 if (success)
-                    weaponsHandler.RemoveItemFromPlayerRightHand();
+                {
+                    if (storedItemGridId == 7)
+                        weaponsHandler.RemoveItemFromPlayerRightHand();
+
+                    if (storedItemGridId == 6)
+                        weaponsHandler.RemoveItemFromPlayerLeftHand();
+
+                }
             }
 
             // removed item from previous grid

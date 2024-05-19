@@ -110,7 +110,7 @@ public class InventoryManager : MonoBehaviour
                 case 6:
                     itemSaveData = CreateSlotSaveData(fakeWeaponData, data);
                     if (itemSaveData != null)
-                        weaponHandler.AddItemToPlayerRightHand(data.data.itemStats);
+                        weaponHandler.AddItemToPlayerLeftHand(data.data.itemStats);
                     break;
                 case 7:
                     itemSaveData = CreateSlotSaveData(fakeWeaponData, data);
