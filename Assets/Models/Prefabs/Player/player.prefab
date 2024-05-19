@@ -54,10 +54,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 860d0cc42ec231d45b9dc08fa55179fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainHandShortSwordLocation: {fileID: 6185000821403009190}
-  mainHandAxeLocation: {fileID: 2273555626443796363}
-  mainHandSheildLocation: {fileID: 7740215455678263615}
-  mainHandStaffLocation: {fileID: 2593185363418843646}
+  rightHandShortSwordLocation: {fileID: 0}
+  rightHandAxeLocation: {fileID: 0}
+  rightHandSheildLocation: {fileID: 0}
+  rightHandStaffLocation: {fileID: 0}
+  leftHandShortSwordLocation: {fileID: 0}
+  leftHandAxeLocation: {fileID: 0}
+  leftHandSheildLocation: {fileID: 0}
+  leftHandStaffLocation: {fileID: 0}
 --- !u!33 &5752079281146913472
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -748,7 +752,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27cb1341062a7aa4ebafa2f122db2bde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  anim: {fileID: 2776080526791656266}
 --- !u!1 &6185000821403009190
 GameObject:
   m_ObjectHideFlags: 0
@@ -762,7 +765,7 @@ GameObject:
   - component: {fileID: 120549151084747443}
   - component: {fileID: 6371591244207102275}
   m_Layer: 0
-  m_Name: Sword
+  m_Name: RightSword
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -835,7 +838,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27cb1341062a7aa4ebafa2f122db2bde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  anim: {fileID: 120549151084747443}
 --- !u!1 &7740215455678263615
 GameObject:
   m_ObjectHideFlags: 0
