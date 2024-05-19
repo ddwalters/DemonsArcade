@@ -7,9 +7,18 @@ public class InventoryController : MonoBehaviour
 
     private ItemToolTip itemToolTip;
 
+    private PlayerController playerController;
+    private bool gridOpen = false;
+    private bool tabKeyPressed = false;
+
+    private void Start()
+    {
+        playerController = FindAnyObjectByType<PlayerController>();
+    }
     /// <summary>
     /// Awake is called when the script instance is being loaded.
     /// </summary>
+    /// 
     private void Awake()
     {
         inventory = GetComponent<Inventory>();
@@ -21,21 +30,23 @@ public class InventoryController : MonoBehaviour
     /// </summary>
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab))
+        if (Input.GetKeyDown(KeyCode.Tab) && !tabKeyPressed)
         {
-            Cursor.lockState = CursorLockMode.Confined;
-            inventory.CreateGrid(0, true);
+            tabKeyPressed = true;
+
+            if (!gridOpen)
+            {
+                OpenInventory();
+            }
+            else
+            {
+                CloseInventory();
+            }
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyUp(KeyCode.Tab))
         {
-            var grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
-            Cursor.lockState = CursorLockMode.Locked;
-
-            foreach (var grid in grids)
-                grid.CloseGrid();
-
-            itemToolTip.HideToolTip();
+            tabKeyPressed = false;
         }
 
         if (Input.GetKeyDown(KeyCode.Mouse0) && inventory.gridOnMouse != null)
@@ -58,21 +69,29 @@ public class InventoryController : MonoBehaviour
                 }
             }
         }
+    }
 
-        // Remove an item from the inventory
-        //if (Input.GetKeyDown(KeyCode.Mouse1))
-        //{
-        //    RemoveItemWithMouse();
-        //}
+    private void OpenInventory()
+    {
+        Cursor.lockState = CursorLockMode.Confined;
+        inventory.CreateGrid(0, true);
+        gridOpen = true;
+        playerController.DisableCameraMovement();
+    }
 
-        // move and rotate item
-        if (inventory.selectedItem != null)
+    private void CloseInventory()
+    {
+        var grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
+        Cursor.lockState = CursorLockMode.Locked;
+
+        foreach (var grid in grids)
         {
-            MoveSelectedItemToMouse();
-
-            if (Input.GetKeyDown(KeyCode.R))
-                inventory.selectedItem.Rotate();
+            grid.CloseGrid();
         }
+
+        itemToolTip.HideToolTip();
+        gridOpen = false;
+        playerController.EnableCameraMovement();
     }
 
     /// <summary>

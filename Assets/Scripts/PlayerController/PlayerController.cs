@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 playerMovementInput;
     private float xRot;
     private float targetFOV;
+    private bool canMoveCamera = true;
 
     [Header("Settings")]
     [SerializeField] private float speed = 5f;
@@ -38,7 +39,11 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        MovePlayerCamera();
+        if (canMoveCamera)
+        {
+            MovePlayerCamera();
+        }
+
         // Jumping
         if (Input.GetButtonDown("Jump"))
         {
@@ -107,12 +112,22 @@ public class PlayerController : MonoBehaviour
     private void MovePlayerCamera()
     {
         float mouseX = Input.GetAxis("Mouse X") * sensitivity;
-    float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
+        float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
 
-    xRot -= mouseY;
-    xRot = Mathf.Clamp(xRot, -90f, 90f);
+        xRot -= mouseY;
+        xRot = Mathf.Clamp(xRot, -90f, 90f);
 
-    cam.transform.localRotation = Quaternion.Euler(xRot, 0f, 0f);
-    transform.Rotate(Vector3.up * mouseX);
+        cam.transform.localRotation = Quaternion.Euler(xRot, 0f, 0f);
+        transform.Rotate(Vector3.up * mouseX);
+    }
+
+    public void EnableCameraMovement()
+    {
+        canMoveCamera = true;
+    }
+
+    public void DisableCameraMovement()
+    {
+        canMoveCamera = false;
     }
 }
