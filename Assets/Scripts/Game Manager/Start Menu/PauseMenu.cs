@@ -66,7 +66,7 @@ public class PauseMenu : MonoBehaviour
         {
             if (isOptionsMenuActive)
             {
-                back();
+                resume();
             }
             else
             {
@@ -99,7 +99,7 @@ public class PauseMenu : MonoBehaviour
         Cursor.visible = true;
     }
 
-    public void back()
+    public void resume()
     {
         optionsMenu.SetActive(false);
         playerController.EnableCameraMovement();
