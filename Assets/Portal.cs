@@ -1,20 +1,11 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class Portal : MonoBehaviour
 {
+    [SerializeField]
     private int selectedScene;
+
     private LoadLevel GameManager;
-
-    public void SetScene(int scene)
-    {
-        selectedScene = scene;
-    }
-
-    public int GetScene()
-    {
-        return selectedScene;
-    }
 
     private void Awake()
     {
@@ -26,4 +17,7 @@ public class Portal : MonoBehaviour
         if (other.tag == "HitCone") return;
         GameManager.loadLevel(selectedScene);
     }
+
+    public void SetSceneIndex(int scene) => selectedScene = scene;
+    public int GetSceneIndex() => selectedScene;
 }

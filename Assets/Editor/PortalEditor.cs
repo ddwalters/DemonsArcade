@@ -15,13 +15,12 @@ public class PortalEditor : Editor
         string[] sceneNames = scenes.Select(scene => System.IO.Path.GetFileNameWithoutExtension(scene.path)).ToArray();
 
         // Create a dropdown
-        int currentIndex = System.Array.IndexOf(sceneNames, portal.GetScene());
-        int selectedIndex = EditorGUILayout.Popup("Select Scene", currentIndex, sceneNames);
+        int selectedIndex = EditorGUILayout.Popup("Select Scene", portal.GetSceneIndex(), sceneNames);
 
         // Update the selected scene when the user changes the dropdown
-        if (selectedIndex != currentIndex)
+        if (selectedIndex != portal.GetSceneIndex())
         {
-            portal.SetScene(selectedIndex);
+            portal.SetSceneIndex(selectedIndex);
             EditorUtility.SetDirty(target); // Mark the object as dirty to enable saving
         }
     }
