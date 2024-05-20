@@ -43,7 +43,7 @@ public class WeaponsHandler : MonoBehaviour
 
     private void Update()
     {
-        if (!_hasRightHandWeapon) return;
+        if (!_hasRightHandWeapon && !_hasLeftHandWeapon) return;
 
         if (currentRightHandCoolDownTime > 0f)
         {
@@ -54,14 +54,21 @@ public class WeaponsHandler : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             playerAttackingLeft = true;
-            currentRightHandCoolDownTime = attackRightHandCoolDown;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Mouse1))
-        {
             playerAttackingRight = true;
             currentRightHandCoolDownTime = attackRightHandCoolDown;
         }
+
+        //if (currentLeftHandCoolDownTime > 0f)
+        //{
+        //    currentLeftHandCoolDownTime -= Time.deltaTime;
+        //    return;
+        //}
+        //
+        //if (Input.GetKeyDown(KeyCode.Mouse1))
+        //{
+        //    playerAttackingLeft = true;
+        //    currentLeftHandCoolDownTime = attackLeftHandCoolDown;
+        //}
     }
 
     #region right hand
@@ -207,7 +214,7 @@ public class WeaponsHandler : MonoBehaviour
             return;
 
         ItemStatsData weaponStats = null;
-        if (playerAttackingLeft)
+        if (playerAttackingLeft && _hasLeftHandWeapon)
         {
             weaponStats = GetCurrentLeftHandItemStats();
             if (weaponStats == null) return;
@@ -217,7 +224,7 @@ public class WeaponsHandler : MonoBehaviour
             playerAttackingLeft = false;
         }
 
-        if (playerAttackingRight)
+        if (playerAttackingRight && _hasRightHandWeapon)
         {
             weaponStats = GetCurrentRightHandItemStats();
             if (weaponStats == null) return;
