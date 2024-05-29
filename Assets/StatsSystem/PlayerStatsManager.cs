@@ -12,6 +12,18 @@ public class PlayerStatsManager : MonoBehaviour
     [SerializeField] Image staminaFill;
     [SerializeField] Image manaFill;
 
+    private void Awake()
+    {
+        DontDestroyOnLoad(this);
+    }
+
+    public void SetGameObjectsOnSceneLoad()
+    {
+        healthFill = GameObject.Find("HeartFill").GetComponent<Image>();
+        staminaFill = GameObject.Find("StaminaFill").GetComponent<Image>();
+        manaFill = GameObject.Find("ManaFill").GetComponent<Image>();
+    }
+
     private void Start()
     {
         if (statsData == null)

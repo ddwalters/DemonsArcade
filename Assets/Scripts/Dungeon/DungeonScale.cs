@@ -9,6 +9,11 @@ public class DungeonScale : MonoBehaviour
 
     public GameObject Player;
 
+    private void Awake()
+    {
+        Player = FindAnyObjectByType<PlayerController>().gameObject;
+    }
+
     void Start()
     {
         StartCoroutine(Scale());

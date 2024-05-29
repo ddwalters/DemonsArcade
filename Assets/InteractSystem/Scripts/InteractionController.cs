@@ -1,4 +1,6 @@
+using Unity.Loading;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class InteractionController : MonoBehaviour
 {
@@ -8,8 +10,6 @@ public class InteractionController : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private InteractionUIPanel uiPanel;
-    [SerializeField] private GameObject playerHud;
-    [SerializeField] private GameObject playerBackpack;
 
     [Space]
     [Header("Ray Settings")]
@@ -37,6 +37,10 @@ public class InteractionController : MonoBehaviour
 
         CheckForInteractable();
         CheckForInteractableInput();
+    }
+    public void SetGameObjectsOnSceneLoad()
+    {
+        uiPanel = FindAnyObjectByType<InteractionUIPanel>();
     }
 
     private void CheckForInteractable()
