@@ -1,11 +1,13 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ItemToolTip : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI ItemName;
     [SerializeField] TextMeshProUGUI ItemDescription;
     [SerializeField] RectTransform backgroundRectTransform;
+    [SerializeField] RawImage border;
 
     private void Start()
     {
@@ -22,7 +24,7 @@ public class ItemToolTip : MonoBehaviour
         GetComponent<RectTransform>().anchoredPosition = Input.mousePosition * mergedFactors;
     }
 
-    public void ShowToolTip(string itemName, string itemStatsDescription)
+    public void ShowToolTip(string itemName, string itemStatsDescription, Color BorderColor)
     {
         gameObject.SetActive(true);
 
@@ -38,6 +40,10 @@ public class ItemToolTip : MonoBehaviour
             backgroundSize = new Vector2(ItemName.preferredWidth + textPaddingSize + 8f, ItemDescription.preferredHeight + ItemName.preferredHeight + textPaddingSize + 2f);
 
         backgroundRectTransform.sizeDelta = backgroundSize;
+
+        border.color = BorderColor;
+
+
     }
 
     public void HideToolTip()

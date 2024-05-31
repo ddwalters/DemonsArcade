@@ -168,9 +168,9 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (saveData.isSlotType == true)
-            tooltip.ShowToolTip(saveData.PreviousItemData.itemStats.GetItemName(), saveData.PreviousItemData.itemStats.CreateItemDescriptionText());
+            tooltip.ShowToolTip(saveData.PreviousItemData.itemStats.GetItemName(), saveData.PreviousItemData.itemStats.CreateItemDescriptionText(), saveData.PreviousItemData.itemRarity);
         else
-            tooltip.ShowToolTip(saveData.data.itemStats.GetItemName(), saveData.data.itemStats.CreateItemDescriptionText());
+            tooltip.ShowToolTip(saveData.data.itemStats.GetItemName(), saveData.data.itemStats.CreateItemDescriptionText(), saveData.data.itemRarity);
     }
 
     public void OnPointerExit(PointerEventData eventData)

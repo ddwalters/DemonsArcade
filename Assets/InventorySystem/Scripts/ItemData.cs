@@ -19,6 +19,7 @@ public class ItemData : ScriptableObject
     /// Background color of the item icon.
     /// </summary>
     public Color backgroundColor;
+    public Color itemRarity;
 
     /// <summary>
     /// The stats for the item, editable in the inspector..
