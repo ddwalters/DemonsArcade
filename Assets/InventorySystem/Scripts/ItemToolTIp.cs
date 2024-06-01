@@ -41,7 +41,9 @@ public class ItemToolTip : MonoBehaviour
 
         backgroundRectTransform.sizeDelta = backgroundSize;
 
+        ItemName.color = BorderColor;
         border.color = BorderColor;
+        
 
 
     }

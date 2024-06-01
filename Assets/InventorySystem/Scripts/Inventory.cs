@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.UI;
 using UnityEngine;
 
 public static class InventorySettings
@@ -76,6 +77,8 @@ public class Inventory : MonoBehaviour
     /// Location used for holding Inventory item during movement
     /// </summary>
     private GameObject heldItemHolder;
+
+    public Image border;
 
     /// <summary>
     /// Awake is called when the script instance is being loaded.
@@ -434,6 +437,7 @@ public class Inventory : MonoBehaviour
             // adding item to slot grid
             int storedItemGridId = item.inventoryGrid.id;
 
+
             item.indexPosition = slotPosition;
             item.saveData.slotPosition = slotPosition;
             item.rectTransform.SetParent(gridOnMouse.rectTransform);
@@ -476,6 +480,7 @@ public class Inventory : MonoBehaviour
             else
             {
                 // moving to a grid from a slot
+                item.saveData.data.icon = item.saveData.PreviousItemData.icon;
                 success = gridOnMouse.inventory.AddItem(gridOnMouse.id, item.saveData.PreviousItemData);
 
                 if (success)

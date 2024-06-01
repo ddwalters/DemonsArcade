@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "ItemData", menuName = "Inventory/ItemData")]
 public class ItemData : ScriptableObject
@@ -19,7 +20,8 @@ public class ItemData : ScriptableObject
     /// Background color of the item icon.
     /// </summary>
     public Color backgroundColor;
-    public Color itemRarity;
+
+    public Rarity rarity;
 
     /// <summary>
     /// The stats for the item, editable in the inspector..

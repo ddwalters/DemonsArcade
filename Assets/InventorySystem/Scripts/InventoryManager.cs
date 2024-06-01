@@ -13,6 +13,8 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] ItemData fakeNecklaceData;
     [SerializeField] ItemData fakeWeaponData;
 
+    public Sprite[] itemType;
+
     private void Awake()
     {
         DontDestroyOnLoad(this);
@@ -108,11 +110,47 @@ public class InventoryManager : MonoBehaviour
                     itemSaveData = CreateSlotSaveData(WeaponType.Necklace, fakeNecklaceData, data);
                     break;
                 case 6:
+                    switch (data.data.itemStats.GetWeaponType())
+                    {
+                        case WeaponType.ShortSword:
+                            fakeWeaponData.icon = itemType[1];
+                            break;
+                        case WeaponType.Axe:
+                            fakeWeaponData.icon = itemType[2];
+                            break;
+                        case WeaponType.Staff:
+                            fakeWeaponData.icon = itemType[3];
+                            break;
+                        case WeaponType.Shield:
+                            fakeWeaponData.icon = itemType[4];
+                            break;
+                        default:
+                            fakeWeaponData.icon = itemType[0];
+                            break;
+                    }
                     itemSaveData = CreateSlotSaveData(fakeWeaponData, data);
                     if (itemSaveData != null)
                         weaponHandler.AddItemToPlayerLeftHand(data.data.itemStats);
                     break;
                 case 7:
+                    switch (data.data.itemStats.GetWeaponType())
+                    {
+                        case WeaponType.ShortSword:
+                            fakeWeaponData.icon = itemType[1];
+                            break;
+                        case WeaponType.Axe:
+                            fakeWeaponData.icon = itemType[2];
+                            break;
+                        case WeaponType.Staff:
+                            fakeWeaponData.icon = itemType[3];
+                            break;
+                        case WeaponType.Shield:
+                            fakeWeaponData.icon = itemType[4];
+                            break;
+                        default:
+                            fakeWeaponData.icon = itemType[0];
+                            break;
+                    }
                     itemSaveData = CreateSlotSaveData(fakeWeaponData, data);
                     if (itemSaveData != null)
                         weaponHandler.AddItemToPlayerRightHand(data.data.itemStats);
