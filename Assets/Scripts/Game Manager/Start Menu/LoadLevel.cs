@@ -39,11 +39,16 @@ public class LoadLevel : MonoBehaviour
             yield return null;
         }
 
-        if (sceneIndex == 2)
+        if (sceneIndex != 2)
         {
-            yield return new WaitForSeconds(0.5f);
-            slider.value = 1f;
+            loadingScreen.SetActive(false);
+            Transition.SetTrigger("End");
         }
+    }
+
+    public void DungeonComplete()
+    {
+        slider.value = 1f;
         loadingScreen.SetActive(false);
         Transition.SetTrigger("End");
     }

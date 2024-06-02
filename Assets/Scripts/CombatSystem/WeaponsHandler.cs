@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class WeaponsHandler : MonoBehaviour
 {
-
     InventoryManager inventoryManager;
 
     [Header("Main Hand")]

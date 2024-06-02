@@ -95,19 +95,19 @@ public class InventoryManager : MonoBehaviour
             switch (gridId)
             {
                 case 1:
-                    itemSaveData = CreateSlotSaveData(WeaponType.Helmet, fakeHelmetData, data);
+                    itemSaveData = CreateSlotSaveData(ArmorType.Helmet, fakeHelmetData, data);
                     break;
                 case 2:
-                    itemSaveData = CreateSlotSaveData(WeaponType.Chestpiece, fakeChestpieceData, data);
+                    itemSaveData = CreateSlotSaveData(ArmorType.Chestpiece, fakeChestpieceData, data);
                     break;
                 case 3:
-                    itemSaveData = CreateSlotSaveData(WeaponType.Leggings, fakeLeggingsData, data);
+                    itemSaveData = CreateSlotSaveData(ArmorType.Leggings, fakeLeggingsData, data);
                     break;
                 case 4:
-                    itemSaveData = CreateSlotSaveData(WeaponType.Boots, fakeBootsData, data);
+                    itemSaveData = CreateSlotSaveData(ArmorType.Boots, fakeBootsData, data);
                     break;
                 case 5:
-                    itemSaveData = CreateSlotSaveData(WeaponType.Necklace, fakeNecklaceData, data);
+                    itemSaveData = CreateSlotSaveData(ArmorType.Necklace, fakeNecklaceData, data);
                     break;
                 case 6:
                     switch (data.data.itemStats.GetWeaponType())
@@ -189,6 +189,37 @@ public class InventoryManager : MonoBehaviour
             weaponType = data.PreviousItemData.itemStats.GetWeaponType();
         else
             weaponType = data.data.itemStats.GetWeaponType();
+
+        if (weaponType == typeToCheck)
+        {
+            itemSaveData.data = slotData;
+            itemSaveData.isSlotType = true;
+            itemSaveData.PreviousItemData = data.data;
+        }
+        else
+        {
+            itemSaveData = null;
+        }
+
+        return itemSaveData;
+    }
+
+    private ItemSaveData CreateSlotSaveData(ArmorType typeToCheck, ItemData slotData, ItemSaveData data)
+    {
+        if (data.isSlotType == true)
+        {
+            Debug.Log("Item already in a slot");
+            return null;
+        }
+
+        GameObject saveObject = new GameObject();
+        var itemSaveData = saveObject.AddComponent<ItemSaveData>();
+
+        ArmorType weaponType;
+        if (data.PreviousItemData != null)
+            weaponType = data.PreviousItemData.itemStats.GetArmorType();
+        else
+            weaponType = data.data.itemStats.GetArmorType();
 
         if (weaponType == typeToCheck)
         {

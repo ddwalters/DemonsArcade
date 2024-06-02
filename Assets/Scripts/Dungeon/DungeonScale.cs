@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class DungeonScale : MonoBehaviour
@@ -7,10 +8,13 @@ public class DungeonScale : MonoBehaviour
     public int scale;
     public float delay;
 
-    public GameObject Player;
+    GameObject Player;
+    LoadLevel loadLevel;
 
     void Start()
     {
+        Player = FindAnyObjectByType<PlayerController>().gameObject;
+        loadLevel = FindAnyObjectByType<LoadLevel>();
         StartCoroutine(Scale());
     }
 
@@ -28,5 +32,6 @@ public class DungeonScale : MonoBehaviour
         }
 
         Player.transform.position = SpawnPoint.transform.position;
+        loadLevel.DungeonComplete();
     }
 }

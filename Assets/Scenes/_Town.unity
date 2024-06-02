@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 2002545634}
-  m_IndirectSpecularColor: {r: 0.18028352, g: 0.22571376, b: 0.30692244, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -4856,7 +4856,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1820216511}
   - component: {fileID: 1820216510}
-  - component: {fileID: 1820216509}
+  - component: {fileID: 1820216512}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -4864,26 +4864,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1820216509
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1820216508}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f231c4fb786f3946a6b90b886c48677, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SendPointerHoverToParent: 1
-  m_HorizontalAxis: Horizontal
-  m_VerticalAxis: Vertical
-  m_SubmitButton: Submit
-  m_CancelButton: Cancel
-  m_InputActionsPerSecond: 10
-  m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
 --- !u!114 &1820216510
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4914,6 +4894,36 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1820216512
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1820216508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SendPointerHoverToParent: 1
+  m_MoveRepeatDelay: 0.5
+  m_MoveRepeatRate: 0.1
+  m_XRTrackingOrigin: {fileID: 0}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: cf7a91870d4b9b04eb9f4d1d90e55925, type: 3}
+  m_PointAction: {fileID: 5692051897279618442, guid: cf7a91870d4b9b04eb9f4d1d90e55925, type: 3}
+  m_MoveAction: {fileID: -10412620559853607, guid: cf7a91870d4b9b04eb9f4d1d90e55925, type: 3}
+  m_SubmitAction: {fileID: -6680434535207870812, guid: cf7a91870d4b9b04eb9f4d1d90e55925, type: 3}
+  m_CancelAction: {fileID: 144294085084829717, guid: cf7a91870d4b9b04eb9f4d1d90e55925, type: 3}
+  m_LeftClickAction: {fileID: -6287102335706233035, guid: cf7a91870d4b9b04eb9f4d1d90e55925, type: 3}
+  m_MiddleClickAction: {fileID: 757570021952963346, guid: cf7a91870d4b9b04eb9f4d1d90e55925, type: 3}
+  m_RightClickAction: {fileID: 7551707826219996721, guid: cf7a91870d4b9b04eb9f4d1d90e55925, type: 3}
+  m_ScrollWheelAction: {fileID: -2758654637503479552, guid: cf7a91870d4b9b04eb9f4d1d90e55925, type: 3}
+  m_TrackedDevicePositionAction: {fileID: -1373732575644340048, guid: cf7a91870d4b9b04eb9f4d1d90e55925, type: 3}
+  m_TrackedDeviceOrientationAction: {fileID: 8917621198276009184, guid: cf7a91870d4b9b04eb9f4d1d90e55925, type: 3}
+  m_DeselectOnBackgroundClick: 1
+  m_PointerBehavior: 0
+  m_CursorLockBehavior: 0
 --- !u!1 &1840748453
 GameObject:
   m_ObjectHideFlags: 0
@@ -5670,6 +5680,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6326895746567198878, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: m_UIInputModule
+      value: 
+      objectReference: {fileID: 1820216512}
     - target: {fileID: 6467257779549542023, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
       propertyPath: manaFill
       value: 
@@ -5689,7 +5703,7 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
 --- !u!114 &2083863741 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1872426586686101173, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+  m_CorrespondingSourceObject: {fileID: 5912365008084441041, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
   m_PrefabInstance: {fileID: 2083863740}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}

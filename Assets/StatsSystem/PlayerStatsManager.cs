@@ -1,318 +1,244 @@
 using BayatGames.SaveGameFree;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerStatsManager : MonoBehaviour
 {
-    string identifier = "gameSaveIdentifier";
-    PlayerStatsData statsData;
+    private const string SaveIdentifier = "gameSaveIdentifier";
+    private PlayerStatsData statsData;
 
-    [SerializeField] Image healthFill;
-    [SerializeField] Image staminaFill;
-    [SerializeField] Image manaFill;
+    [SerializeField] private Image healthFill;
+    [SerializeField] private Image staminaFill;
+    [SerializeField] private Image manaFill;
+
+    private bool isUsingStamina;
+    private bool isRegeneratingStamina;
 
     private void Start()
     {
-        if (statsData == null)
-            LoadPlayerStats();
-
-        statsData.currentHealth = statsData.maxHealth;
-        statsData.currentStamina = statsData.maxStamina;
-        statsData.currentMana = statsData.maxMana;
-
-        UpdateHealthBar();
-        UpdateStaminaBar();
-        UpdateManaBar();
-
-        //StartCoroutine(RegenerateMana());
+        LoadPlayerStats();
+        InitializeStats();
+        UpdateAllBars();
     }
 
     private void Update()
     {
-        //while (statsData.currentStamina < statsData.maxStamina)
-        //    StartCoroutine(RegenerateStamina());
+        if (isRegeneratingStamina)
+            RegenerateStamina();
+    }
+
+    private void InitializeStats()
+    {
+        statsData.currentHealth = statsData.maxHealth;
+        statsData.currentStamina = statsData.maxStamina;
+        statsData.currentMana = statsData.maxMana;
+    }
+
+    private void UpdateAllBars()
+    {
+        UpdateHealthBar();
+        UpdateStaminaBar();
+        UpdateManaBar();
     }
 
     #region Core Stats
     private void LevelUp()
     {
-        if (statsData.lvl < 100)
+        if (statsData.lvl >= 100)
         {
             Debug.Log("Max Level");
             return;
         }
 
-        if (statsData.lvl + 1 < 100)
-        {
-            statsData.lvl += 1;
-            IncreaseHealthStat();
-            IncreaseStaminaStat();
-            IncreaseManaStat();
-            //GainSP();
-        }
+        statsData.lvl++;
+        IncreaseStats();
+    }
+
+    private void IncreaseStats()
+    {
+        IncreaseHealthStat();
+        IncreaseStaminaStat();
+        IncreaseManaStat();
     }
 
     public void GainEXP(int expGain)
     {
-        if (statsData.lvl < 100)
+        if (statsData.lvl >= 100)
+        {
             Debug.Log("Max Level No Exp Gain");
+            return;
+        }
 
         statsData.currentXP += expGain;
-
         while (statsData.currentXP >= statsData.nextLevelXP && statsData.lvl < 100)
         {
             LevelUp();
             statsData.currentXP -= statsData.nextLevelXP;
             statsData.nextLevelXP *= 3;
         }
-
-        //xpSlider.maxValue = statsData.nextLevelXP;
-        //xpSlider.value = statsData.currentXP;
     }
+    #endregion
 
     #region Health
     public void DamagePlayer(int damageAmount)
     {
-        statsData.currentHealth -= damageAmount;
-
-        if (statsData.currentHealth <= 0)
-        {
-            statsData.currentHealth = 0;
-
-            UpdateHealthBar();
-            // player is dead now 
-            // do stuff for the dead thingy
-        }
-
+        statsData.currentHealth = Mathf.Max(0, statsData.currentHealth - damageAmount);
         UpdateHealthBar();
+        if (statsData.currentHealth == 0)
+        {
+            // Handle player death
+        }
     }
 
     public void HealPlayer(int healAmount)
     {
-        if (statsData.currentHealth >= statsData.maxHealth)
-            return;
-
-        statsData.currentHealth += healAmount;
-        if (statsData.currentHealth > statsData.maxHealth)
-            statsData.currentHealth = statsData.maxHealth;
-
+        statsData.currentHealth = Mathf.Min(statsData.maxHealth, statsData.currentHealth + healAmount);
         UpdateHealthBar();
     }
 
     private void IncreaseHealthStat()
     {
         statsData.maxHealth += statsData.lvl;
-        statsData.currentHealth += statsData.lvl;
-
+        statsData.currentHealth = statsData.maxHealth;
         UpdateHealthBar();
     }
 
     private void UpdateHealthBar()
     {
-        float healthNormalized = (float)statsData.currentHealth / (float)statsData.maxHealth;
-        healthFill.fillAmount = healthNormalized;
+        healthFill.fillAmount = (float)statsData.currentHealth / statsData.maxHealth;
     }
     #endregion
 
     #region Stamina
-    bool usingStamina;
+    public void StartUsingStamina() => isUsingStamina = true;
 
-    public void StartStaminaRegen() => usingStamina = false;
-
-    // true or false for if there is stamina available/ if the action should happen
-    public IEnumerator UseStamina(float staminaAmount)
+    public void StopUsingStamina()
     {
-        if (statsData.currentStamina > 0)
+        isUsingStamina = false;
+        isRegeneratingStamina = true;
+    }
+
+    public void UseStamina(float staminaAmount)
+    {
+        if (isUsingStamina && statsData.currentStamina > 0)
         {
-            usingStamina = true;
             statsData.currentStamina -= staminaAmount;
             UpdateStaminaBar();
-
-            yield return new WaitForSeconds(0.25f);
         }
     }
 
-    public float GetStamina()
+    private void RegenerateStamina()
     {
-        return statsData.currentStamina;
-    }
-
-    // this time should be based on players endurance stat
-    public IEnumerator RegenerateStamina()
-    {
-        yield return new WaitWhile(() => usingStamina);
-
-        while (statsData.currentStamina < statsData.maxStamina)
+        if (!isUsingStamina && statsData.currentStamina < statsData.maxStamina)
         {
-            usingStamina = false;
             statsData.currentStamina += 0.25f;
             UpdateStaminaBar();
-
-            yield return new WaitForSeconds(0.75f);
+            if (statsData.currentStamina >= statsData.maxStamina)
+                isRegeneratingStamina = false;
         }
     }
 
     private void IncreaseStaminaStat()
     {
-        int toIncrease = Mathf.RoundToInt(statsData.lvl * 1.35f);
-        statsData.maxStamina += toIncrease;
-        statsData.currentStamina += toIncrease;
-
+        int increase = Mathf.RoundToInt(statsData.lvl * 1.35f);
+        statsData.maxStamina += increase;
+        statsData.currentStamina = statsData.maxStamina;
         UpdateStaminaBar();
     }
 
     private void UpdateStaminaBar()
     {
-        float staminaNormalized = statsData.currentStamina / statsData.maxStamina;
-        staminaFill.fillAmount = staminaNormalized;
+        staminaFill.fillAmount = statsData.currentStamina / statsData.maxStamina;
     }
+
+    public float GetStamina() => statsData.currentStamina;
+    public float GetMaxStamina() => statsData.maxStamina;
     #endregion
 
     #region Mana
-    // true or false for if there is stamina available/ if the action should happen
     public bool UseMana(float manaAmount)
     {
-        float temp = statsData.currentMana;
-
-        statsData.currentMana -= manaAmount;
-        if (statsData.currentMana < 0)
+        if (statsData.currentMana >= manaAmount)
         {
-            statsData.currentMana = temp;
-            return false;
+            statsData.currentMana -= manaAmount;
+            UpdateManaBar();
+            return true;
         }
-
-        return true;
+        return false;
     }
 
-    private IEnumerator RegenerateMana()
+    private void RegenerateMana()
     {
-        while (statsData.currentMana < statsData.maxMana)
+        if (statsData.currentMana < statsData.maxMana)
         {
-            // this time should be based on players int stat
             statsData.currentMana++;
-            UpdateStaminaBar();
-
-            yield return new WaitForSeconds(0.25f);
+            UpdateManaBar();
         }
     }
 
     private void IncreaseManaStat()
     {
-        float toIncrease = Mathf.RoundToInt(statsData.lvl * .35f);
-        statsData.maxMana += toIncrease;
-        statsData.currentMana += toIncrease;
-
-        UpdateHealthBar();
+        float increase = Mathf.RoundToInt(statsData.lvl * 0.35f);
+        statsData.maxMana += increase;
+        statsData.currentMana = statsData.maxMana;
+        UpdateManaBar();
     }
 
     private void UpdateManaBar()
     {
-        float manaNormalized = (float)statsData.currentMana / (float)statsData.maxMana;
-        manaFill.fillAmount = manaNormalized;
-    }
-    #endregion
-    #endregion
-
-    //#region SP Stats
-    //private void GainSP()
-    //{
-    //    statsData.SP += Mathf.RoundToInt(statsData.baseSP * Mathf.Pow(statsData.lvl, statsData.spGrowth));
-    //}
-    //
-    //public void IncreaseStat(TextMeshProUGUI textObject, ref int attribute)
-    //{
-    //    if (statsData.SP < 1)
-    //        return;
-    //
-    //    statsData.SP -= 1;
-    //    attribute += 1;
-    //    textObject.text = attribute.ToString();
-    //}
-    //
-    //public void StatBuff(TextMeshProUGUI textObject, ref int attribute, int buffAmount, float buffTimer)
-    //{
-    //    int temp = attribute;
-    //    attribute += buffAmount;
-    //    textObject.text = attribute.ToString();
-    //
-    //    while (buffTimer > 0)
-    //    {
-    //        buffTimer -= Time.deltaTime;
-    //    }
-    //
-    //    attribute = temp;
-    //    textObject.text = attribute.ToString();
-    //}
-    //
-    //public void StatDebuff(TextMeshProUGUI textObject, ref int attribute, int debuffAmount, float debuffTimer)
-    //{
-    //    int temp = attribute;
-    //    if (attribute - debuffAmount < 1)
-    //        attribute = 1;
-    //    else
-    //        attribute -= debuffAmount;
-    //
-    //    textObject.text = attribute.ToString();
-    //
-    //    while (debuffTimer > 0)
-    //        debuffTimer -= Time.deltaTime;
-    //
-    //    attribute = temp;
-    //    textObject.text = attribute.ToString();
-    //}
-    //#endregion
-
-    #region gold
-    public int GetCurrentGold()
-    {
-        return statsData.gold;
-    }
-
-    public void GainGold(int newGold)
-    {
-        statsData.gold += newGold;
-        //goldText.text = "Gold: " + statsData.gold;
-    }
-
-    /// <summary>
-    /// Removes gold from the user if plausable.
-    /// </summary>
-    /// <param name="removeGoldAmount"></param>
-    /// <returns>True if gold has been removed, false if player lacked funds.</returns>
-    public bool RemoveGold(int removeGoldAmount)
-    {
-        int temp = statsData.gold;
-
-        temp -= removeGoldAmount;
-        if (temp < 0)
-            return false;
-
-        statsData.gold = temp;
-        //goldText.text = "Gold: " + statsData.gold;
-
-        return true;
+        manaFill.fillAmount = (float)statsData.currentMana / statsData.maxMana;
     }
     #endregion
 
+    #region SP Stats
+    public void StatBuff(TextMeshProUGUI textObject, Stat stat, int buffAmount, float buffDuration)
+    {
+        StartCoroutine(ApplyBuffDebuff(textObject, stat, buffAmount, buffDuration));
+    }
+
+    public void StatDebuff(TextMeshProUGUI textObject, Stat stat, int debuffAmount, float debuffDuration)
+    {
+        StartCoroutine(ApplyBuffDebuff(textObject, stat, -debuffAmount, debuffDuration));
+    }
+
+    private IEnumerator ApplyBuffDebuff(TextMeshProUGUI textObject, Stat stat, int amount, float duration)
+    {
+        int originalValue = stat.Value;
+        stat.Value = Mathf.Max(1, stat.Value + amount);
+        textObject.text = stat.Value.ToString();
+        yield return new WaitForSeconds(duration);
+        stat.Value = originalValue;
+        textObject.text = stat.Value.ToString();
+    }
+    #endregion
+
+    #region Save/Load
     public PlayerStatsData GetPlayerStats()
     {
-        if (statsData == null)
-            LoadPlayerStats();
-
+        LoadPlayerStats();
         return statsData;
     }
 
     public void SavePlayerStats()
     {
-        SaveGame.Save(identifier, statsData);
+        SaveGame.Save(SaveIdentifier, statsData);
     }
 
     public void LoadPlayerStats()
     {
-        if (statsData != null)
-            statsData = SaveGame.Load<PlayerStatsData>(identifier);
-        else
-            statsData = new PlayerStatsData();
+        statsData = SaveGame.Load<PlayerStatsData>(SaveIdentifier) ?? new PlayerStatsData();
+    }
+    #endregion
+}
+
+public class Stat
+{
+    public int Value { get; set; }
+
+    public Stat(int value)
+    {
+        Value = value;
     }
 }

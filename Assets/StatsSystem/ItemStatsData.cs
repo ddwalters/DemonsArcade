@@ -12,6 +12,7 @@ public class ItemStatsData
 
     [SerializeField] GameObject prefab;
     [SerializeField] WeaponType weaponType;
+    [SerializeField] ArmorType armorType;
 
     public ItemStatsData(ItemStatsData itemStats)
     {
@@ -25,6 +26,7 @@ public class ItemStatsData
     public float GetCoolDownTime() => weaponCoolDownTime;
     public int GetValue() => value;
     public WeaponType GetWeaponType() => weaponType;
+    public ArmorType GetArmorType() => armorType;
     public GameObject GetPrefab() => prefab;
 
     public string CreateItemDescriptionText()

@@ -4,10 +4,14 @@ public enum WeaponType
     Axe,
     Shield,
     Staff,
+    NonWeapon
+}
+
+public enum ArmorType
+{
     Helmet,
     Chestpiece,
     Leggings,
     Boots,
-    Necklace,
-    NonWeapon
+    Necklace
 }

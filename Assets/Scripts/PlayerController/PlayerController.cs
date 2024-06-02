@@ -1,29 +1,65 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
     private PlayerStatsManager statsManager;
-    private Vector3 playerMovementInput;
-    private float xRot;
-    private float targetFOV;
-    private bool canMoveCamera = true;
 
     [Header("Settings")]
-    [SerializeField] private float speed = 5f;
-    [SerializeField] private float sprintSpeedMultiplier;
+    [SerializeField] private float walkSpeed = 5f;
+    [SerializeField] private float sprintSpeed = 7f;
     [SerializeField] private float sensitivity = 2f;
+    [SerializeField] private float joystickScalingFactor = 2f;
     [SerializeField] private float jumpForce = 5f;
     [SerializeField] private float sprintFOV = 90f;
     [SerializeField] private float normalFOV = 80f;
     [SerializeField] private float fovLerpSpeed = 5f;
+    [SerializeField] private float staminaUsageRate = 1f;
     [Space]
     [Header("Components")]
     [SerializeField] private LayerMask floorMask;
-    [SerializeField] private Transform feet;
     [SerializeField] private Camera cam;
     [SerializeField] private Rigidbody rb;
+    [SerializeField] private Transform playerBody;
+
+    private Vector2 moveInput;
+
+    private NewControls controls;
+    private Vector2 lookInput;
+    private bool canMoveCamera = true;
+    private float xRotation = 0f;
+
+    private bool isGrounded;
+    private bool jumpInput;
+
+    private bool sprintInput;
+    private float currentSpeed;
+    private bool sprintCooldown;
+
+    private void Awake()
+    {
+        DontDestroyOnLoad(this);
+        controls = new NewControls();
+
+        // look
+        controls.BasicActionMap.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
+        controls.BasicActionMap.Look.canceled += ctx => lookInput = Vector2.zero;
+
+        // move
+        controls.BasicActionMap.Movement.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        controls.BasicActionMap.Movement.canceled += ctx => moveInput = Vector2.zero;
+
+        // jump
+        controls.BasicActionMap.Jump.performed += ctx => jumpInput = true;
+        controls.BasicActionMap.Jump.canceled += ctx => jumpInput = false;
+
+        // sprint
+        controls.BasicActionMap.Sprint.performed += ctx => sprintInput = true;
+        controls.BasicActionMap.Sprint.canceled += ctx => sprintInput = false;
+    }
+
+    private void OnEnable() => controls.BasicActionMap.Enable();
+    private void OnDisable() => controls.BasicActionMap.Disable();
 
     private void Start()
     {
@@ -32,98 +68,93 @@ public class PlayerController : MonoBehaviour
         rb = gameObject.GetComponent<Rigidbody>();
 
         Cursor.lockState = CursorLockMode.Locked;
-
-        // Set initial target FOV
-        targetFOV = normalFOV;
     }
 
     void Update()
     {
         if (canMoveCamera)
-        {
-            MovePlayerCamera();
-        }
-
-        // Jumping
-        if (Input.GetButtonDown("Jump"))
-        {
-            if (Physics.CheckSphere(feet.position, 0.1f, floorMask))
-            {
-                rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-            }
-        }
+            LookAround();
     }
 
     private void FixedUpdate()
     {
-        playerMovementInput = new Vector3(Input.GetAxis("Horizontal"), 0f, Input.GetAxis("Vertical"));
+        HandleMovement();
+        Sprint();
 
-        MovePlayer();
+        if (jumpInput && isGrounded)
+            Jump();
     }
 
-    private void MovePlayer()
+    private void HandleMovement()
     {
-        bool isSprinting = false;
+        float moveX = moveInput.x;
+        float moveZ = moveInput.y;
+        Vector3 move = transform.right * moveX + transform.forward * moveZ;
 
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            isSprinting = true;
-            targetFOV = sprintFOV;
-            StartCoroutine(statsManager.UseStamina(0.5f));
+        currentSpeed = sprintInput ? sprintSpeed : walkSpeed;
+        Vector3 velocity = move * currentSpeed;
+        velocity.y = rb.velocity.y;
+        rb.velocity = velocity;
 
-            // hardcoded stamina for now-- can update for player stats later
-            if (statsManager.GetStamina() <= 0)
-            {
-                isSprinting = false;
-                targetFOV = normalFOV;
-            }
-        }
-        else if (!Input.GetKey(KeyCode.LeftShift))
-        {
-            isSprinting = false;
-            targetFOV = normalFOV;
-            statsManager.StartStaminaRegen();
-            StartCoroutine(statsManager.RegenerateStamina());
-        }
+        if (sprintCooldown && statsManager.GetStamina() >= statsManager.GetMaxStamina() - 1)
+            sprintCooldown = false;
+    }
 
-        Vector3 moveVector = transform.TransformDirection(playerMovementInput) * speed;
-        if (isSprinting && statsManager.GetStamina() > 0)
+    private void Sprint()
+    {
+        if (statsManager.GetStamina() <= 0)
+            sprintCooldown = true;
+
+        if (sprintInput && !sprintCooldown)
         {
-            StartCoroutine(statsManager.UseStamina(0.5f));
-            moveVector *= sprintSpeedMultiplier;
+            cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, sprintFOV, Time.deltaTime * fovLerpSpeed);
+            statsManager.StartUsingStamina();
+            statsManager.UseStamina(staminaUsageRate * Time.deltaTime);
         }
         else
         {
-            statsManager.StartStaminaRegen();
-            StartCoroutine(statsManager.RegenerateStamina());
+            cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, normalFOV, Time.deltaTime * fovLerpSpeed);
+            statsManager.StopUsingStamina();
         }
-        rb.velocity = new Vector3(moveVector.x, rb.velocity.y, moveVector.z);
-
-        // Smoothly adjust FOV
-        cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, targetFOV, fovLerpSpeed * Time.deltaTime);
     }
 
-    private void MovePlayerCamera()
+    private void Jump()
     {
-        float mouseX = Input.GetAxis("Mouse X") * sensitivity;
-        float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
-
-        xRot -= mouseY;
-        xRot = Mathf.Clamp(xRot, -90f, 90f);
-
-        cam.transform.localRotation = Quaternion.Euler(xRot, 0f, 0f);
-        transform.Rotate(Vector3.up * mouseX);
+        Vector3 jumpVelocity = Vector3.up * jumpForce;
+        rb.AddForce(jumpVelocity, ForceMode.Impulse);
+        jumpInput = false;
     }
 
-    public void EnableCameraMovement()
+    private void LookAround()
     {
-        canMoveCamera = true;
-        //Cursor.lockState = CursorLockMode.Locked;
+        float inputMultiplier = 1f;
+
+        if (controls.BasicActionMap.Look.activeControl != null)
+            inputMultiplier = controls.BasicActionMap.Look.activeControl.device is Mouse ? 1f : joystickScalingFactor;
+
+        float mouseX = lookInput.x * sensitivity * inputMultiplier * Time.deltaTime;
+        float mouseY = lookInput.y * sensitivity * inputMultiplier * Time.deltaTime;
+
+        playerBody.Rotate(Vector3.up * mouseX);
+
+        xRotation -= mouseY;
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
+
+        cam.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
     }
 
-    public void DisableCameraMovement()
+    public void EnableCameraMovement() => canMoveCamera = true;
+    public void DisableCameraMovement() => canMoveCamera = false;
+
+    private void OnCollisionEnter(Collision collision)
     {
-        canMoveCamera = false;
-        //Cursor.lockState = CursorLockMode.Confined;
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+            isGrounded = true;
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+            isGrounded = false;
     }
 }
