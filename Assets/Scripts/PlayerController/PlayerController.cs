@@ -132,8 +132,8 @@ public class PlayerController : MonoBehaviour
         if (controls.BasicActionMap.Look.activeControl != null)
             inputMultiplier = controls.BasicActionMap.Look.activeControl.device is Mouse ? 1f : joystickScalingFactor;
 
-        float mouseX = lookInput.x * sensitivity * inputMultiplier * Time.deltaTime;
-        float mouseY = lookInput.y * sensitivity * inputMultiplier * Time.deltaTime;
+        float mouseX = lookInput.x * sensitivity * inputMultiplier;
+        float mouseY = lookInput.y * sensitivity * inputMultiplier;
 
         playerBody.Rotate(Vector3.up * mouseX);
 

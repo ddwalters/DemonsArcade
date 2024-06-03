@@ -12,6 +12,8 @@ public class LoadLevel : MonoBehaviour
     public Slider slider;
     public TMP_Text textProgress;
 
+    public bool dungeonComplete = false;
+
     public float transitionTime;
 
     public void loadLevel(int sceneIndex)
@@ -51,5 +53,7 @@ public class LoadLevel : MonoBehaviour
         slider.value = 1f;
         loadingScreen.SetActive(false);
         Transition.SetTrigger("End");
+
+        dungeonComplete = true;
     }
 }

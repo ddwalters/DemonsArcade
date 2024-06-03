@@ -8,8 +8,12 @@ public class doorwayWalls : MonoBehaviour
     public GameObject door;
     public Collider collide;
 
+    LoadLevel loadLevel;
+    public bool DungeonComplete = false;
+
     void Start()
     {
+        loadLevel = FindAnyObjectByType<LoadLevel>();
         collide = gameObject.GetComponent<Collider>();
     }
 
@@ -23,6 +27,16 @@ public class doorwayWalls : MonoBehaviour
         {
             wall.SetActive(false);
             door.SetActive(true);
+        }
+    }
+
+    private void Update()
+    {
+        if (loadLevel.dungeonComplete == true && DungeonComplete != true)
+        {
+            DungeonComplete = true;
+            Destroy(wall.GetComponent<Rigidbody>());
+            Destroy(gameObject);
         }
     }
 }
