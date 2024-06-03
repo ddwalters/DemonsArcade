@@ -74,6 +74,7 @@ GameObject:
   - component: {fileID: 7794019963669744067}
   - component: {fileID: 3689141084392140296}
   - component: {fileID: 4833517352701187018}
+  - component: {fileID: 9207463952968093030}
   m_Layer: 0
   m_Name: wall object
   m_TagString: Doorway
@@ -194,6 +195,22 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 126
   m_CollisionDetection: 0
+--- !u!208 &9207463952968093030
+NavMeshObstacle:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7978274029615506386}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Shape: 1
+  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_MoveThreshold: 0.1
+  m_Carve: 1
+  m_CarveOnlyStationary: 1
+  m_Center: {x: 0, y: 0, z: 0}
+  m_TimeToStationary: 0.5
 --- !u!1 &8514016851580834401
 GameObject:
   m_ObjectHideFlags: 0
@@ -291,3 +308,4 @@ MonoBehaviour:
   wall: {fileID: 7978274029615506386}
   parent: {fileID: 6506917567876388490}
   collide: {fileID: 0}
+  DungeonComplete: 0

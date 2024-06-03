@@ -7,8 +7,13 @@ public class EnemyStats : MonoBehaviour
     Encounter encounter;
 
     [SerializeField] float health;
+    [SerializeField] Vector2Int coinDropRange;
     private float currentHealth;
     [SerializeField] Image healthBarSprite;
+    [SerializeField] GameObject deathParticle;
+    [SerializeField] Transform deathTransform;
+    [SerializeField] GameObject coinParticle;
+    [SerializeField] Transform coinTransform;
 
     public bool inRange;
 
@@ -23,6 +28,8 @@ public class EnemyStats : MonoBehaviour
 
     public void death()
     {
+        Instantiate(coinParticle, coinTransform.position, coinTransform.rotation);
+        Instantiate(deathParticle, deathTransform.position, deathTransform.rotation);
         encounter.currentMonsters--;
         Destroy(gameObject);
     }

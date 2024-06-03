@@ -32,8 +32,8 @@ public class LoadLevel : MonoBehaviour
 
         while (!operation.isDone)
         {
-            float progress = operation.progress;
-            //float progress = Mathf.Clamp01(operation.progress / 0.9f);
+            //float progress = operation.progress;
+            float progress = Mathf.Clamp01(operation.progress / 0.9f);
 
             slider.value = progress;
             textProgress.text = progress * 100f + "%";
@@ -50,7 +50,6 @@ public class LoadLevel : MonoBehaviour
 
     public void DungeonComplete()
     {
-        slider.value = 1f;
         loadingScreen.SetActive(false);
         Transition.SetTrigger("End");
 
