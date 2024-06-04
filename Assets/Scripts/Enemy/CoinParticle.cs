@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.ParticleSystem;
 
 public class CoinParticle : MonoBehaviour
 {
@@ -21,11 +22,18 @@ public class CoinParticle : MonoBehaviour
         ps.trigger.SetCollider(0, Player.GetComponent<Collider>());
     }
 
-    public void dropCoins(Vector2Int coinDropRange)
+    public IEnumerator dropCoins(Vector2Int coinDropRange, float interval, int count)
     {
-        ParticleSystem.Burst burst = new ParticleSystem.Burst(0.0f, (short)coinDropRange.x, (short)coinDropRange.y, 0.01f);
-        ps.emission.SetBursts(new ParticleSystem.Burst[] { burst });
-        ps.Play();
+        int random = Random.Range(coinDropRange.x, coinDropRange.y);
+
+        Burst burst = new(0.0f, count);
+        ps.emission.SetBursts(new Burst[] { burst });
+
+        for (int i = 0; i < random; i++)
+        {
+            ps.Play();
+            yield return new WaitForSeconds(interval);
+        }
     }
 
     private void OnParticleTrigger()

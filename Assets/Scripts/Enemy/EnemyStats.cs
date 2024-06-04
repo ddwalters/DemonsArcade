@@ -9,6 +9,8 @@ public class EnemyStats : MonoBehaviour
     [SerializeField] float health;
     public bool isAlive;
     [SerializeField] Vector2Int coinDropRange;
+    [SerializeField] float interval;
+    [SerializeField] int multiplier;
     private float currentHealth;
     [SerializeField] Image healthBarSprite;
     [SerializeField] GameObject deathParticle;
@@ -36,7 +38,7 @@ public class EnemyStats : MonoBehaviour
 
         GameObject coinGO = Instantiate(coinParticle, coinTransform.position, coinTransform.rotation);
         CoinParticle coinPS = coinGO.GetComponent<CoinParticle>();
-        coinPS.dropCoins(coinDropRange);
+        StartCoroutine(coinPS.dropCoins(coinDropRange, interval, multiplier));
 
         Instantiate(deathParticle, deathTransform.position, deathTransform.rotation);
         encounter.currentMonsters--;
