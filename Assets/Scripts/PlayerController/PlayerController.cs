@@ -22,6 +22,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform playerBody;
 
+    public int goldAmount;
+    public GameObject goldCounter;
+
     private Vector2 moveInput;
 
     private NewControls controls;

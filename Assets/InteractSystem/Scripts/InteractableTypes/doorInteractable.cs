@@ -8,7 +8,7 @@ public class doorInteractable : InteractableBase
     {
         base.OnInteract();
 
-        gameObject.SetActive(false);
+        openDoor();
     }
 
     public void closeDoor()

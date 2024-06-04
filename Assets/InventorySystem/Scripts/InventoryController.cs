@@ -7,6 +7,8 @@ public class InventoryController : MonoBehaviour
 
     private PlayerController playerController;
 
+    public GameObject goldCounter;
+
     private ItemToolTip itemToolTip;
 
     private bool gridOpen = false;
@@ -34,10 +36,12 @@ public class InventoryController : MonoBehaviour
 
             if (!gridOpen)
             {
+                goldCounter.SetActive(true);
                 OpenInventory();
             }
             else
             {
+                goldCounter.SetActive(false);
                 CloseInventory();
             }
         }

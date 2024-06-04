@@ -7,6 +7,7 @@ public class EnemyStats : MonoBehaviour
     Encounter encounter;
 
     [SerializeField] float health;
+    public bool isAlive;
     [SerializeField] Vector2Int coinDropRange;
     private float currentHealth;
     [SerializeField] Image healthBarSprite;
@@ -21,6 +22,7 @@ public class EnemyStats : MonoBehaviour
 
     private void Start()
     {
+        isAlive = true;
         encounter = GetComponentInParent<Encounter>();
         currentHealth = health;
         lerpDuration = .5f;
@@ -28,7 +30,14 @@ public class EnemyStats : MonoBehaviour
 
     public void death()
     {
-        Instantiate(coinParticle, coinTransform.position, coinTransform.rotation);
+        if (!isAlive) return; // Prevent multiple calls
+
+        isAlive = false;
+
+        GameObject coinGO = Instantiate(coinParticle, coinTransform.position, coinTransform.rotation);
+        CoinParticle coinPS = coinGO.GetComponent<CoinParticle>();
+        coinPS.dropCoins(coinDropRange);
+
         Instantiate(deathParticle, deathTransform.position, deathTransform.rotation);
         encounter.currentMonsters--;
         Destroy(gameObject);
@@ -41,7 +50,7 @@ public class EnemyStats : MonoBehaviour
 
         if (endValue <= 0) endValue = 0;
 
-        while (time < .5f)
+        while (time < lerpDuration)
         {
             currentHealth = Mathf.Lerp(currentHealth, endValue, time / lerpDuration);
             healthBarSprite.fillAmount = currentHealth / health;
@@ -51,7 +60,7 @@ public class EnemyStats : MonoBehaviour
 
         currentHealth = endValue;
 
-        if (currentHealth <= 0)
+        if (currentHealth <= 0 && isAlive)
         {
             Debug.Log("Monster dead");
             death();

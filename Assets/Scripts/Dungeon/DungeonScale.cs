@@ -24,6 +24,7 @@ public class DungeonScale : MonoBehaviour
         gameObject.transform.localScale = new Vector3(scale, scale, scale);
 
         GameObject SpawnPoint = GameObject.Find("_SpawnPoint");
+        Player.transform.position = SpawnPoint.transform.position;
 
         BakeRuntime[] bakeRuntime = GetComponentsInChildren<BakeRuntime>();
         foreach (BakeRuntime bake in bakeRuntime)
@@ -31,7 +32,6 @@ public class DungeonScale : MonoBehaviour
             bake.Bake();
         }
 
-        Player.transform.position = SpawnPoint.transform.position;
         loadLevel.DungeonComplete();
     }
 }

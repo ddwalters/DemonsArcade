@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -16,24 +17,31 @@ public class LoadLevel : MonoBehaviour
 
     public float transitionTime;
 
+    private void Awake()
+    {
+        Transition.SetBool("Awake", true);
+        DontDestroyOnLoad(this);
+    }
+
     public void loadLevel(int sceneIndex)
     {
+        Transition.SetBool("Awake", false);
         StartCoroutine(loadAsynchronously(sceneIndex));
     }
 
     IEnumerator loadAsynchronously(int sceneIndex)
     {
-        Transition.SetTrigger("Start");
         yield return new WaitForSeconds(transitionTime);
+        loadingScreen.SetActive(true);
+        yield return new WaitForSeconds(0.5f);
 
         AsyncOperation operation = SceneManager.LoadSceneAsync(sceneIndex);
 
-        loadingScreen.SetActive(true);
-
         while (!operation.isDone)
         {
-            //float progress = operation.progress;
-            float progress = Mathf.Clamp01(operation.progress / 0.9f);
+            float progress;
+
+            progress = Mathf.Clamp01(operation.progress / 0.9f);
 
             slider.value = progress;
             textProgress.text = progress * 100f + "%";
@@ -41,18 +49,14 @@ public class LoadLevel : MonoBehaviour
             yield return null;
         }
 
-        if (sceneIndex != 2)
-        {
-            loadingScreen.SetActive(false);
-            Transition.SetTrigger("End");
-        }
+        yield return new WaitForSeconds(0.6f);
+
+        loadingScreen.SetActive(false);
+        Transition.SetBool("Awake", true);
     }
 
     public void DungeonComplete()
     {
-        loadingScreen.SetActive(false);
-        Transition.SetTrigger("End");
-
         dungeonComplete = true;
     }
 }
