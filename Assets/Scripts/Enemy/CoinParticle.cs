@@ -22,11 +22,16 @@ public class CoinParticle : MonoBehaviour
         ps.trigger.SetCollider(0, Player.GetComponent<Collider>());
     }
 
+    public void startRoutine(Vector2Int coinDropRange, float interval, int count)
+    {
+        StartCoroutine(dropCoins(coinDropRange, interval, count));
+    }
+
     public IEnumerator dropCoins(Vector2Int coinDropRange, float interval, int count)
     {
         int random = Random.Range(coinDropRange.x, coinDropRange.y);
 
-        Burst burst = new(0.0f, count);
+        Burst burst = new(0.0f, 1);
         ps.emission.SetBursts(new Burst[] { burst });
 
         for (int i = 0; i < random; i++)

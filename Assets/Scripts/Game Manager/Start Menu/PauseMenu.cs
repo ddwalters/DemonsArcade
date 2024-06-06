@@ -34,6 +34,8 @@ public class PauseMenu : MonoBehaviour
     {
         playerController = FindAnyObjectByType<PlayerController>();
 
+        GameManager = FindAnyObjectByType<GameManager>().gameObject;
+
         optionsMenu.SetActive(false);
 
         resolutions = Screen.resolutions;

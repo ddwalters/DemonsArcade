@@ -8,16 +8,58 @@ public class PlayerStatsManager : MonoBehaviour
 {
     private const string SaveIdentifier = "gameSaveIdentifier";
     private PlayerStatsData statsData;
+    private PlayerController controller;
+
+    private GameObject canvas;
 
     [SerializeField] private Image healthFill;
     [SerializeField] private Image staminaFill;
     [SerializeField] private Image manaFill;
 
+    [SerializeField] private GameObject BloodyScreen;
+    private Animator BloodyScreenAnim;
     private bool isUsingStamina;
     private bool isRegeneratingStamina;
 
-    private void Start()
+    private void Awake()
     {
+        canvas = GameObject.Find("MainCanvas");
+
+        GameObject healthObject = GameObject.Find("HeartFill");
+        healthFill = healthObject.GetComponent<Image>();
+
+        GameObject staminaObject = GameObject.Find("StaminaFill");
+        staminaFill = staminaObject.GetComponent<Image>();
+
+        GameObject ManaObject = GameObject.Find("ManaFill");
+        manaFill = ManaObject.GetComponent<Image>();
+
+        BloodyScreen = GameObject.Find("DeathScreen");
+        BloodyScreenAnim = BloodyScreen.GetComponent<Animator>();
+
+        LoadPlayerStats();
+        InitializeStats();
+        UpdateAllBars();
+
+        controller = gameObject.GetComponent<PlayerController>();
+    }
+
+    public void GetNewComponents()
+    {
+        canvas = GameObject.Find("MainCanvas");
+
+        GameObject healthObject = GameObject.Find("HeartFill");
+        healthFill = healthObject.GetComponent<Image>();
+
+        GameObject staminaObject = GameObject.Find("StaminaFill");
+        staminaFill = staminaObject.GetComponent<Image>();
+
+        GameObject ManaObject = GameObject.Find("ManaFill");
+        manaFill = ManaObject.GetComponent<Image>();
+
+        BloodyScreen = GameObject.Find("DeathScreen");
+        BloodyScreenAnim = BloodyScreen.GetComponent<Animator>();
+
         LoadPlayerStats();
         InitializeStats();
         UpdateAllBars();
@@ -88,7 +130,7 @@ public class PlayerStatsManager : MonoBehaviour
         UpdateHealthBar();
         if (statsData.currentHealth == 0)
         {
-            // Handle player death
+            PlayerDeath();
         }
     }
 
@@ -231,6 +273,13 @@ public class PlayerStatsManager : MonoBehaviour
         statsData = SaveGame.Load<PlayerStatsData>(SaveIdentifier) ?? new PlayerStatsData();
     }
     #endregion
+
+    private void PlayerDeath()
+    {
+        controller.DisableCameraMovement();
+        controller.DisableMovement();
+        BloodyScreenAnim.SetTrigger("Die");
+    }
 }
 
 public class Stat

@@ -38,6 +38,7 @@ public class PlayerController : MonoBehaviour
     private bool sprintInput;
     private float currentSpeed;
     private bool sprintCooldown;
+    private bool canMove = true;
 
     private void Awake()
     {
@@ -59,6 +60,13 @@ public class PlayerController : MonoBehaviour
         // sprint
         controls.BasicActionMap.Sprint.performed += ctx => sprintInput = true;
         controls.BasicActionMap.Sprint.canceled += ctx => sprintInput = false;
+
+        goldCounter = GameObject.Find("GoldCounter");
+    }
+
+    public void GetNewComponents()
+    {
+        goldCounter = GameObject.Find("GoldCounter");
     }
 
     private void OnEnable() => controls.BasicActionMap.Enable();
@@ -81,11 +89,14 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        HandleMovement();
-        Sprint();
+        if (canMove)
+        {
+            HandleMovement();
+            Sprint();
 
-        if (jumpInput && isGrounded)
-            Jump();
+            if (jumpInput && isGrounded)
+                Jump();
+        }
     }
 
     private void HandleMovement()
@@ -148,6 +159,9 @@ public class PlayerController : MonoBehaviour
 
     public void EnableCameraMovement() => canMoveCamera = true;
     public void DisableCameraMovement() => canMoveCamera = false;
+
+    public void EnableMovement() => canMove = true;
+    public void DisableMovement() => canMove = false;
 
     private void OnCollisionEnter(Collision collision)
     {

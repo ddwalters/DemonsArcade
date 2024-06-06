@@ -28,6 +28,16 @@ public class InteractionController : MonoBehaviour
     private void Awake()
     {
         _camera = FindAnyObjectByType<Camera>();
+        playerBackpack = GameObject.Find("Inventory");
+        playerHud = GameObject.Find("PlayerHud");
+        uiPanel = FindAnyObjectByType<InteractionUIPanel>();
+    }
+
+    public void GetNewComponents()
+    {
+        playerBackpack = GameObject.Find("Inventory");
+        playerHud = GameObject.Find("PlayerHud");
+        uiPanel = FindAnyObjectByType<InteractionUIPanel>();
     }
 
     private void Update()

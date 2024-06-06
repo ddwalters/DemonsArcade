@@ -38,10 +38,11 @@ public class EnemyStats : MonoBehaviour
 
         GameObject coinGO = Instantiate(coinParticle, coinTransform.position, coinTransform.rotation);
         CoinParticle coinPS = coinGO.GetComponent<CoinParticle>();
-        StartCoroutine(coinPS.dropCoins(coinDropRange, interval, multiplier));
+        coinPS.startRoutine(coinDropRange, interval, multiplier);
 
         Instantiate(deathParticle, deathTransform.position, deathTransform.rotation);
-        encounter.currentMonsters--;
+        if (encounter != null) 
+            encounter.currentMonsters--;
         Destroy(gameObject);
     }
 

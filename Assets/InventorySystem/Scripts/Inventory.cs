@@ -83,12 +83,14 @@ public class Inventory : MonoBehaviour
     /// <summary>
     /// Awake is called when the script instance is being loaded.
     /// </summary>
-    private void Awake()
+    private void Start()
     {
         inventoryManager = FindAnyObjectByType<InventoryManager>();
+        weaponsHandler = FindAnyObjectByType<WeaponsHandler>();
         grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.InstanceID);
         canvas = GetComponentInParent<Canvas>();
 
+        
         playerGridHolder = GameObject.Find("PlayerInventory");
         worldGridHolder = GameObject.Find("WorldInventory");
         heldItemHolder = GameObject.Find("HeldItemHolder");

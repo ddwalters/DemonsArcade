@@ -147,10 +147,10 @@ ParticleSystemForceField:
   m_Parameters:
     m_Shape: 0
     m_StartRange: 0
-    m_EndRange: 1.5
+    m_EndRange: 2
     m_Length: 1
     m_GravityFocus: 0.1
-    m_RotationRandomness: {x: 0, y: 0}
+    m_RotationRandomness: {x: 0.2, y: 0.2}
     m_DirectionCurveX:
       serializedVersion: 2
       minMaxState: 0
@@ -923,6 +923,8 @@ MonoBehaviour:
   cam: {fileID: 7534581174159498519}
   rb: {fileID: 2578407542080586197}
   playerBody: {fileID: 3223157730553495151}
+  goldAmount: 0
+  goldCounter: {fileID: 0}
 --- !u!114 &1094290876629132184
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -960,6 +962,8 @@ MonoBehaviour:
   healthFill: {fileID: 0}
   staminaFill: {fileID: 0}
   manaFill: {fileID: 0}
+  BloodyScreen: {fileID: 0}
+  BloodyText: {fileID: 0}
 --- !u!1 &2273555626443796363
 GameObject:
   m_ObjectHideFlags: 0
