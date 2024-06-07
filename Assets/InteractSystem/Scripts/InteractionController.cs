@@ -28,6 +28,16 @@ public class InteractionController : MonoBehaviour
     private void Awake()
     {
         _camera = FindAnyObjectByType<Camera>();
+        playerBackpack = GameObject.Find("Inventory");
+        playerHud = GameObject.Find("PlayerHud");
+        uiPanel = FindAnyObjectByType<InteractionUIPanel>();
+    }
+
+    public void GetNewComponents()
+    {
+        playerBackpack = GameObject.Find("Inventory");
+        playerHud = GameObject.Find("PlayerHud");
+        uiPanel = FindAnyObjectByType<InteractionUIPanel>();
     }
 
     private void Update()
@@ -35,6 +45,9 @@ public class InteractionController : MonoBehaviour
         interactionInputData.InteractClicked = Input.GetKeyDown(KeyCode.E);
         interactionInputData.InteractRelease = Input.GetKeyUp(KeyCode.E);
 
+        if (uiPanel == null)
+            return;
+        
         CheckForInteractable();
         CheckForInteractableInput();
     }

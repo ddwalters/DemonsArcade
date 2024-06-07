@@ -9,6 +9,11 @@ public class LoadLevel : MonoBehaviour
 {
     public Animator Transition;
 
+    public GameObject player;
+    private PlayerController playerController;
+    private PlayerStatsManager playerStats;
+    private InteractionController playerInteraction;
+
     public GameObject loadingScreen;
     public Slider slider;
     public TMP_Text textProgress;
@@ -19,6 +24,11 @@ public class LoadLevel : MonoBehaviour
 
     private void Awake()
     {
+        player = FindAnyObjectByType<PlayerController>().gameObject;
+        playerController = player.GetComponent<PlayerController>();
+        playerStats = player.GetComponent<PlayerStatsManager>();
+        playerInteraction = player.GetComponent<InteractionController>();
+
         Transition.SetBool("Awake", true);
         DontDestroyOnLoad(this);
     }
@@ -53,6 +63,10 @@ public class LoadLevel : MonoBehaviour
 
         loadingScreen.SetActive(false);
         Transition.SetBool("Awake", true);
+
+        playerController.GetNewComponents();
+        playerStats.GetNewComponents();
+        playerInteraction.GetNewComponents();
     }
 
     public void DungeonComplete()

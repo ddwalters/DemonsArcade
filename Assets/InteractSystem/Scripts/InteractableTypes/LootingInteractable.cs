@@ -56,7 +56,7 @@ public class LootingInteractable : InteractableBase
 
         controller.SetLootingInteracted();
 
-        Cursor.lockState = CursorLockMode.Confined;
+        
         inventory.CreateGrid(0, true);
         inventory.CreateGrid(gridId, false);
     }
