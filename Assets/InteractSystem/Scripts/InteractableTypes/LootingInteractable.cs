@@ -56,6 +56,7 @@ public class LootingInteractable : InteractableBase
 
         controller.SetLootingInteracted();
 
+        
         inventory.CreateGrid(0, true);
         inventory.CreateGrid(gridId, false);
     }

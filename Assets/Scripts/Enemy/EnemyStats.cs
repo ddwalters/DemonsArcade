@@ -41,8 +41,10 @@ public class EnemyStats : MonoBehaviour
         coinPS.startRoutine(coinDropRange, interval, multiplier);
 
         Instantiate(deathParticle, deathTransform.position, deathTransform.rotation);
-        if (encounter != null) 
+        if (encounter != null)
+        {
             encounter.currentMonsters--;
+        }
         Destroy(gameObject);
     }
 

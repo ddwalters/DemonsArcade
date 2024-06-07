@@ -45,6 +45,9 @@ public class InteractionController : MonoBehaviour
         interactionInputData.InteractClicked = Input.GetKeyDown(KeyCode.E);
         interactionInputData.InteractRelease = Input.GetKeyUp(KeyCode.E);
 
+        if (uiPanel == null)
+            return;
+        
         CheckForInteractable();
         CheckForInteractableInput();
     }
