@@ -37,11 +37,14 @@ public class PlayerStatsManager : MonoBehaviour
         BloodyScreen = GameObject.Find("DeathScreen");
         BloodyScreenAnim = BloodyScreen.GetComponent<Animator>();
 
+        controller = gameObject.GetComponent<PlayerController>();
+    }
+
+    private void Start()
+    {
         LoadPlayerStats();
         InitializeStats();
         UpdateAllBars();
-
-        controller = gameObject.GetComponent<PlayerController>();
     }
 
     public void GetNewComponents()

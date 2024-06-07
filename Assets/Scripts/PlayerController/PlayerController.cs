@@ -38,7 +38,7 @@ public class PlayerController : MonoBehaviour
     private bool sprintInput;
     private float currentSpeed;
     private bool sprintCooldown;
-    private bool canMove = true;
+    private bool canMove = true; // Add this flag
 
     private void Awake()
     {
@@ -160,8 +160,8 @@ public class PlayerController : MonoBehaviour
     public void EnableCameraMovement() => canMoveCamera = true;
     public void DisableCameraMovement() => canMoveCamera = false;
 
-    public void EnableMovement() => canMove = true;
-    public void DisableMovement() => canMove = false;
+    public void EnableMovement() => canMove = true; // Add this method
+    public void DisableMovement() => canMove = false; // Add this method
 
     private void OnCollisionEnter(Collision collision)
     {
