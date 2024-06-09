@@ -42,12 +42,7 @@ public class PlayerCombatHandler : MonoBehaviour
     private void Update()
     {
         if (!canAttack || isAttacking)
-        {
-            // check attack state, if idle
-            //if (swordHandler.currentAnimationState().Equals("MainShortSwordIDLE"))
-            //    isAttacking = false;
             return;
-        }
 
         if (basicAttackControl)
             BasicAttack();

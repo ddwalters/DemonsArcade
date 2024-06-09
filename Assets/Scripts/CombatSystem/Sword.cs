@@ -7,10 +7,21 @@ public class Sword : MonoBehaviour
     PlayerCombatHandler combatHandler;
     WeaponCollisionCheck collisionCheck;
 
+    bool animRunning;
+
     private void Start()
     {
         anim = GetComponent<Animator>();
         combatHandler = FindAnyObjectByType<PlayerCombatHandler>();
+    }
+
+    private void Update()
+    {
+        if (!animRunning)
+            return;
+
+        if (anim.GetCurrentAnimatorClipInfo(0)[0].clip.name.Equals("MainShortSwordIDLE"))
+            combatHandler.EndAttack();
     }
 
     public void BeginSwordAnimation()
@@ -23,14 +34,11 @@ public class Sword : MonoBehaviour
 
         anim.SetTrigger("Attacking");
         anim.SetInteger("Attack", animAttackIndex);
+
+        animRunning = true;
     }
 
     public void SwordAttack(EnemyStats enemyStats) => combatHandler.DamageEnemy(enemyStats);
-
-    public string currentAnimationState()
-    {
-        return anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
-    }
 
     // Called in unity
     public void OnAttackAnimationEnd() 
