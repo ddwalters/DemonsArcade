@@ -23,6 +23,8 @@ public class InventoryController : MonoBehaviour
 
         inventory = GetComponent<Inventory>();
         itemToolTip = inventory.GetItemTooltip();
+
+        goldCounter = GameObject.Find("GoldCounter");
     }
 
     /// <summary>

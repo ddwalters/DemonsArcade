@@ -1,5 +1,4 @@
 using System.Collections;
-using Unity.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -24,11 +23,6 @@ public class LoadLevel : MonoBehaviour
 
     private void Awake()
     {
-        player = FindAnyObjectByType<PlayerController>().gameObject;
-        playerController = player.GetComponent<PlayerController>();
-        playerStats = player.GetComponent<PlayerStatsManager>();
-        playerInteraction = player.GetComponent<InteractionController>();
-
         Transition.SetBool("Awake", true);
         DontDestroyOnLoad(this);
     }
@@ -63,6 +57,14 @@ public class LoadLevel : MonoBehaviour
 
         loadingScreen.SetActive(false);
         Transition.SetBool("Awake", true);
+
+        if (player == null)
+        {
+            player = FindAnyObjectByType<PlayerController>().gameObject;
+            playerController = player.GetComponent<PlayerController>();
+            playerStats = player.GetComponent<PlayerStatsManager>();
+            playerInteraction = player.GetComponent<InteractionController>();
+        }
 
         playerController.GetNewComponents();
         playerStats.GetNewComponents();

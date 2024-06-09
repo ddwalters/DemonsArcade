@@ -38,26 +38,22 @@ public class PlayerController : MonoBehaviour
     private bool sprintInput;
     private float currentSpeed;
     private bool sprintCooldown;
-    private bool canMove = true; // Add this flag
+    private bool canMove = true;
 
     private void Awake()
     {
         DontDestroyOnLoad(this);
         controls = new NewControls();
 
-        // look
         controls.BasicActionMap.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         controls.BasicActionMap.Look.canceled += ctx => lookInput = Vector2.zero;
 
-        // move
         controls.BasicActionMap.Movement.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
         controls.BasicActionMap.Movement.canceled += ctx => moveInput = Vector2.zero;
 
-        // jump
         controls.BasicActionMap.Jump.performed += ctx => jumpInput = true;
         controls.BasicActionMap.Jump.canceled += ctx => jumpInput = false;
 
-        // sprint
         controls.BasicActionMap.Sprint.performed += ctx => sprintInput = true;
         controls.BasicActionMap.Sprint.canceled += ctx => sprintInput = false;
 
@@ -89,15 +85,17 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (canMove)
-        {
-            HandleMovement();
-            Sprint();
+        if (!canMove)
+            return;
 
-            if (jumpInput && isGrounded)
-                Jump();
-        }
+        HandleMovement();
+        Sprint();
+
+        if (jumpInput && isGrounded) 
+            Jump();
     }
+
+    public NewControls GetNewControls() => controls;
 
     private void HandleMovement()
     {
@@ -160,8 +158,8 @@ public class PlayerController : MonoBehaviour
     public void EnableCameraMovement() => canMoveCamera = true;
     public void DisableCameraMovement() => canMoveCamera = false;
 
-    public void EnableMovement() => canMove = true; // Add this method
-    public void DisableMovement() => canMove = false; // Add this method
+    public void EnableMovement() => canMove = true;
+    public void DisableMovement() => canMove = false;
 
     private void OnCollisionEnter(Collision collision)
     {

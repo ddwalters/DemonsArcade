@@ -4,6 +4,7 @@ using UnityEngine;
 public class WeaponsHandler : MonoBehaviour
 {
     InventoryManager inventoryManager;
+    PlayerCombatHandler combatHandler;
 
     [Header("Main Hand")]
     private bool _hasRightHandWeapon;
@@ -17,57 +18,10 @@ public class WeaponsHandler : MonoBehaviour
     [SerializeField] GameObject leftHandAxeLocation;
     [SerializeField] GameObject leftHandSheildLocation;
 
-    private Sword sword;
-    private Axe axe;
-    private Shield shield;
-    private Staff staff;
-
-    private bool playerAttackingRight;
-    private float attackRightHandCoolDown;
-    private float currentRightHandCoolDownTime = 0f;
-
-    private bool playerAttackingLeft;
-    private float attackLeftHandCoolDown;
-    private float currentLeftHandCoolDownTime = 0f;
-
-
     private void Start()
     {
         inventoryManager = FindAnyObjectByType<InventoryManager>();
-        sword = GetComponentInChildren<Sword>();
-        axe = GetComponentInChildren<Axe>();
-        shield = GetComponentInChildren<Shield>();
-        staff = GetComponentInChildren<Staff>();
-    }
-
-    private void Update()
-    {
-        if (!_hasRightHandWeapon && !_hasLeftHandWeapon) return;
-
-        if (currentRightHandCoolDownTime > 0f)
-        {
-            currentRightHandCoolDownTime -= Time.deltaTime;
-            return;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            playerAttackingLeft = true;
-            playerAttackingRight = true;
-            currentRightHandCoolDownTime = attackRightHandCoolDown;
-        }
-
-        //if (currentLeftHandCoolDownTime > 0f)
-        //{
-        //    currentLeftHandCoolDownTime -= Time.deltaTime;
-        //    return;
-        //}
-        //
-        //if (Input.GetKeyDown(KeyCode.Mouse1))
-        //{
-        //    playerAttackingLeft = true;
-        //    currentLeftHandCoolDownTime = attackLeftHandCoolDown;
-        //}
+        combatHandler = GetComponent<PlayerCombatHandler>();
     }
 
     #region right hand
@@ -79,6 +33,7 @@ public class WeaponsHandler : MonoBehaviour
         {
             case WeaponType.ShortSword:
                 CreateWeapon(itemStats, rightHandShortSwordLocation);
+                combatHandler.SetAttack(true);
                 break;
             case WeaponType.Axe:
                 CreateWeapon(itemStats, rightHandAxeLocation);
@@ -94,7 +49,6 @@ public class WeaponsHandler : MonoBehaviour
                 return;
         }
 
-        attackRightHandCoolDown = itemStats.GetCoolDownTime();
         _hasRightHandWeapon = true;
     }
     public void RemoveItemFromPlayerRightHand()
@@ -114,6 +68,7 @@ public class WeaponsHandler : MonoBehaviour
             Destroy(rightHandStaffLocation.transform.GetChild(0).gameObject);
 
         _hasRightHandWeapon = false;
+        combatHandler.SetAttack(false);
     }
     #endregion
 
@@ -126,6 +81,7 @@ public class WeaponsHandler : MonoBehaviour
         {
             case WeaponType.ShortSword:
                 CreateWeapon(itemStats, leftHandShortSwordLocation);
+                combatHandler.SetAttack(true);
                 break;
             case WeaponType.Axe:
                 CreateWeapon(itemStats, leftHandAxeLocation);
@@ -138,9 +94,9 @@ public class WeaponsHandler : MonoBehaviour
                 return;
         }
 
-        attackLeftHandCoolDown = itemStats.GetCoolDownTime();
         _hasLeftHandWeapon = true;
     }
+
     public void RemoveItemFromPlayerLeftHand()
     {
         if (!_hasLeftHandWeapon) return;
@@ -155,6 +111,7 @@ public class WeaponsHandler : MonoBehaviour
             Destroy(leftHandSheildLocation.transform.GetChild(0).gameObject);
 
         _hasRightHandWeapon = false;
+        combatHandler.SetAttack(false);
     }
     #endregion
 
@@ -166,83 +123,22 @@ public class WeaponsHandler : MonoBehaviour
         Destroy(weapon.GetComponent<MeshCollider>());
         weapon.transform.SetParent(prefabLocation.transform);
         weapon.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        combatHandler.SetWeaponStats(itemStats);
     }
 
     public ItemStatsData GetCurrentLeftHandItemStats()
     {
+        if (!inventoryManager.GetItems(6).list.Any())
+            return null;
+
         return inventoryManager.GetItems(6).list.FirstOrDefault().PreviousItemData.itemStats;
     }
 
     public ItemStatsData GetCurrentRightHandItemStats()
     {
+        if (!inventoryManager.GetItems(7).list.Any())
+            return null;
+
         return inventoryManager.GetItems(7).list.FirstOrDefault().PreviousItemData.itemStats;
-    }
-
-    private void TriggerAttack(ItemStatsData weaponStats, Collider other)
-    {
-        EnemyStats enemyStats = other.GetComponent<EnemyStats>(); // this only attacks one enemy
-        switch (weaponStats.GetWeaponType())
-        {
-            case WeaponType.ShortSword:
-                sword.SwordAttack(weaponStats, enemyStats);
-                break;
-            case WeaponType.Axe:
-                axe.AxeAttack(weaponStats, enemyStats);
-                break;
-        }
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.tag != "Enemy")
-            return;
-
-        EnemyStats enemyStat;
-        if (!other.TryGetComponent(out enemyStat))
-            return;
-
-        enemyStat.inRange = true;
-    }
-
-    private void OnTriggerStay(Collider other)
-    {
-        if (other.tag != "Enemy")
-            return;
-
-        if (!playerAttackingLeft && !playerAttackingRight)
-            return;
-
-        ItemStatsData weaponStats = null;
-        if (playerAttackingLeft && _hasLeftHandWeapon)
-        {
-            weaponStats = GetCurrentLeftHandItemStats();
-            if (weaponStats == null) return;
-
-            TriggerAttack(weaponStats, other);
-
-            playerAttackingLeft = false;
-        }
-
-        if (playerAttackingRight && _hasRightHandWeapon)
-        {
-            weaponStats = GetCurrentRightHandItemStats();
-            if (weaponStats == null) return;
-
-            TriggerAttack(weaponStats, other);
-
-            playerAttackingRight = false;
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.tag != "Enemy")
-            return;
-
-        EnemyStats enemyStat;
-        if (!other.TryGetComponent(out enemyStat))
-            return;
-
-        enemyStat.inRange = false;
     }
 }

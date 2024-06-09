@@ -185,6 +185,7 @@ public class Inventory : MonoBehaviour
             for (int x = 0; x < inventoryGrid.gridSize.x; x++)
             {
                 var currentItems = inventoryManager.GetItems(gridId);
+
                 if (currentItems.list.Count == 0)
                 {
                     itemSaveData.slotPosition = new Vector2Int(x, y);

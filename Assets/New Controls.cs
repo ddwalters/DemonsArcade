@@ -82,15 +82,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Defend"",
-                    ""type"": ""Button"",
-                    ""id"": ""63ebf6e8-1099-4254-beae-9e35ae6a687b"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Skill Selector"",
                     ""type"": ""Button"",
                     ""id"": ""1bff10b4-762a-4c41-a6ab-5f127fd45a46"",
@@ -202,11 +193,33 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""89785e13-9389-4bf2-8c07-6bcdcdc50f10"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Basic Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""4e7a85ae-13fd-4544-8312-9644af83c9ed"",
-                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""path"": ""<Gamepad>/leftShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
+                    ""action"": ""Basic Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6996acd6-311b-46d3-a3d1-5de723a31a85"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
                     ""action"": ""Basic Attack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -312,14 +325,80 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""9ef47966-8173-4cd8-8707-a943b4348bea"",
+                    ""id"": ""3df0dfdc-e8f8-42be-8c7b-c111b870cba7"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Heavy Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""Right Heavy [Mouse]"",
+                    ""id"": ""f8cee1c5-fa8b-4874-ad92-e997c5c1027c"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Heavy Attack"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""a479af78-6425-4ceb-b3ed-6b764e3317d6"",
+                    ""path"": ""<Keyboard>/leftCtrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard & Mouse"",
+                    ""action"": ""Heavy Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""836a9a3b-cb4e-41c4-b2a3-30a276e8f631"",
                     ""path"": ""<Mouse>/rightButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": ""Keyboard & Mouse"",
                     ""action"": ""Heavy Attack"",
                     ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""Left Heavy [Mouse]"",
+                    ""id"": ""bbfaa443-821b-4c17-bc28-7b7862f4c992"",
+                    ""path"": ""OneModifier"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Heavy Attack"",
+                    ""isComposite"": true,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""modifier"",
+                    ""id"": ""6c54caa9-0a6c-45f0-a81e-d2335bd407eb"",
+                    ""path"": ""<Keyboard>/leftCtrl"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Heavy Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""binding"",
+                    ""id"": ""4482aa25-60c8-4750-b9bd-0a3c6bc11044"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Heavy Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
                 },
                 {
                     ""name"": """",
@@ -340,28 +419,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
                     ""action"": ""Look"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""6d9c2ae1-bbf3-48b5-9288-5c7e60d49697"",
-                    ""path"": ""<Mouse>/rightButton"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard & Mouse"",
-                    ""action"": ""Defend"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""ffdd67c6-c12f-47fc-99a3-3959e2fe2e2d"",
-                    ""path"": ""<Gamepad>/rightShoulder"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Gamepad"",
-                    ""action"": ""Defend"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -944,7 +1001,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
         m_BasicActionMap_Look = m_BasicActionMap.FindAction("Look", throwIfNotFound: true);
         m_BasicActionMap_BasicAttack = m_BasicActionMap.FindAction("Basic Attack", throwIfNotFound: true);
         m_BasicActionMap_HeavyAttack = m_BasicActionMap.FindAction("Heavy Attack", throwIfNotFound: true);
-        m_BasicActionMap_Defend = m_BasicActionMap.FindAction("Defend", throwIfNotFound: true);
         m_BasicActionMap_SkillSelector = m_BasicActionMap.FindAction("Skill Selector", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
@@ -1025,7 +1081,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_BasicActionMap_Look;
     private readonly InputAction m_BasicActionMap_BasicAttack;
     private readonly InputAction m_BasicActionMap_HeavyAttack;
-    private readonly InputAction m_BasicActionMap_Defend;
     private readonly InputAction m_BasicActionMap_SkillSelector;
     public struct BasicActionMapActions
     {
@@ -1037,7 +1092,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
         public InputAction @Look => m_Wrapper.m_BasicActionMap_Look;
         public InputAction @BasicAttack => m_Wrapper.m_BasicActionMap_BasicAttack;
         public InputAction @HeavyAttack => m_Wrapper.m_BasicActionMap_HeavyAttack;
-        public InputAction @Defend => m_Wrapper.m_BasicActionMap_Defend;
         public InputAction @SkillSelector => m_Wrapper.m_BasicActionMap_SkillSelector;
         public InputActionMap Get() { return m_Wrapper.m_BasicActionMap; }
         public void Enable() { Get().Enable(); }
@@ -1066,9 +1120,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
             @HeavyAttack.started += instance.OnHeavyAttack;
             @HeavyAttack.performed += instance.OnHeavyAttack;
             @HeavyAttack.canceled += instance.OnHeavyAttack;
-            @Defend.started += instance.OnDefend;
-            @Defend.performed += instance.OnDefend;
-            @Defend.canceled += instance.OnDefend;
             @SkillSelector.started += instance.OnSkillSelector;
             @SkillSelector.performed += instance.OnSkillSelector;
             @SkillSelector.canceled += instance.OnSkillSelector;
@@ -1094,9 +1145,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
             @HeavyAttack.started -= instance.OnHeavyAttack;
             @HeavyAttack.performed -= instance.OnHeavyAttack;
             @HeavyAttack.canceled -= instance.OnHeavyAttack;
-            @Defend.started -= instance.OnDefend;
-            @Defend.performed -= instance.OnDefend;
-            @Defend.canceled -= instance.OnDefend;
             @SkillSelector.started -= instance.OnSkillSelector;
             @SkillSelector.performed -= instance.OnSkillSelector;
             @SkillSelector.canceled -= instance.OnSkillSelector;
@@ -1261,7 +1309,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
         void OnLook(InputAction.CallbackContext context);
         void OnBasicAttack(InputAction.CallbackContext context);
         void OnHeavyAttack(InputAction.CallbackContext context);
-        void OnDefend(InputAction.CallbackContext context);
         void OnSkillSelector(InputAction.CallbackContext context);
     }
     public interface IUIActions
