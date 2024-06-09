@@ -2,10 +2,15 @@ using UnityEngine;
 
 public class PlayerCombatHandler : MonoBehaviour
 {
-    [SerializeField] ScriptableObject weaponLocations;
+    bool canAttack = true;
+    bool isAttacking;
 
-    InventoryManager inventoryManager;
+    NewControls controls;
+    bool basicAttackControl;
+    bool heavyAttackControl;
 
+    ItemStatsData itemStats;
+    WeaponsHandler weaponsHandler;
     Sword swordHandler;
     Axe axeHandler;
     Shield shieldHandler;
@@ -13,57 +18,65 @@ public class PlayerCombatHandler : MonoBehaviour
 
     private void Start()
     {
-        inventoryManager = FindAnyObjectByType<InventoryManager>();
+        weaponsHandler = GetComponent<WeaponsHandler>();
         swordHandler = GetComponentInChildren<Sword>();
         axeHandler = GetComponentInChildren<Axe>();
         shieldHandler = GetComponentInChildren<Shield>();
         staffHandler = GetComponentInChildren<Staff>();
+        controls = FindAnyObjectByType<PlayerController>().GetNewControls();
+    }
+
+    private void Awake()
+    {
+        controls = new NewControls();
+
+        controls.BasicActionMap.BasicAttack.performed += ctx => basicAttackControl = true;
+        controls.BasicActionMap.BasicAttack.canceled += ctx => basicAttackControl = false;
+
+        controls.BasicActionMap.HeavyAttack.performed += ctx => heavyAttackControl = true;
+        controls.BasicActionMap.HeavyAttack.canceled += ctx => heavyAttackControl = false;
+        
+        controls.Enable();
     }
 
     private void Update()
     {
-        // right hand basic attack - Mouse0
-        // left hand basic attack - Mouse1
+        if (!canAttack || isAttacking)
+            return;
 
-        // right heavy attack - Ctrl + Mouse0
+        if (basicAttackControl)
+            BasicAttack();
 
-        // if left hand has shield (block) - Mouse1
+        if (heavyAttackControl)
+            HeavyAttack();
+    }
 
-        // ---------------------------------------------
-        // Mage staff
-        // Basic attck - Mouse0
-        // Charged attack - Ctrl + Mouse1
-        // Prepared spell - Mouse1
-        // (Prepared spells will have cooldown but can be prepared to be used on hotkeys 1, 2, and 3)
+    private void BasicAttack()
+    {
+        if (weaponsHandler.GetCurrentRightHandItemStats() == null)
+            return;
 
+        isAttacking = true;
+        swordHandler.BeginSwordAnimation();
+    }
 
-        // if an attack animation is playing return
+    private void HeavyAttack()
+    {
 
-        if (Input.GetKeyDown(KeyCode.Mouse0) && !Input.GetKeyDown(KeyCode.LeftControl))
-        {
-            // if weapon is in right hand
-                // right hand basic attack
+    }
 
-            // else if staff is in hand
-                // Basic magic attck
-        }
+    public void SetWeaponStats(ItemStatsData itemStats)
+    {
+        this.itemStats = itemStats;
+    }
 
-        if (Input.GetKeyDown(KeyCode.Mouse0) && Input.GetKeyDown(KeyCode.LeftControl))
-        {
-            // if weapon is in right hand
-                // right heavy attack
+    public void DamageEnemy(EnemyStats enemyStats)
+    {
+        StartCoroutine(enemyStats.DamageMonster(itemStats.GetDamage()));
+    }
 
-            // else if staff in hand 
-                // charged magic attack ( longer held, larger the spell and more damage done)
-        }
-
-        if (Input.GetKeyDown(KeyCode.Mouse1))
-        {
-            // if weapon is in left hand
-                // left hand basic attack
-            
-            // else if staff in hand
-                // readied attack (between 1, 2, 3)
-        }
+    public void EndAttack()
+    {
+        isAttacking = false;
     }
 }

@@ -11,8 +11,6 @@ GameObject:
   - component: {fileID: 5965878646411091363}
   - component: {fileID: 4255391819816955752}
   - component: {fileID: 5912365008084441041}
-  - component: {fileID: 5752079281146913472}
-  - component: {fileID: 7879935179620761730}
   m_Layer: 0
   m_Name: Hands
   m_TagString: Untagged
@@ -54,7 +52,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec0a4b621fa91864fbf36133cc8fa9db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponLocations: {fileID: 11400000, guid: 6e57b46c457890a44a8add47ba61bc5f, type: 2}
 --- !u!114 &5912365008084441041
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,36 +71,6 @@ MonoBehaviour:
   leftHandShortSwordLocation: {fileID: 5022507262262141412}
   leftHandAxeLocation: {fileID: 2273555626443796363}
   leftHandSheildLocation: {fileID: 8451529012344267102}
---- !u!33 &5752079281146913472
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 514892439272112612}
-  m_Mesh: {fileID: -5495902117074765545, guid: be3f943f0d7d25649884903f7c586e9c, type: 3}
---- !u!64 &7879935179620761730
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 514892439272112612}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -5495902117074765545, guid: be3f943f0d7d25649884903f7c586e9c, type: 3}
 --- !u!1 &562356581060918300
 GameObject:
   m_ObjectHideFlags: 0
@@ -963,7 +930,6 @@ MonoBehaviour:
   staminaFill: {fileID: 0}
   manaFill: {fileID: 0}
   BloodyScreen: {fileID: 0}
-  BloodyText: {fileID: 0}
 --- !u!1 &2273555626443796363
 GameObject:
   m_ObjectHideFlags: 0
