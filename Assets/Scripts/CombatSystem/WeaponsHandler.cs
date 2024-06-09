@@ -4,6 +4,7 @@ using UnityEngine;
 public class WeaponsHandler : MonoBehaviour
 {
     InventoryManager inventoryManager;
+    PlayerCombatHandler combatHandler;
 
     [Header("Main Hand")]
     private bool _hasRightHandWeapon;
@@ -20,6 +21,7 @@ public class WeaponsHandler : MonoBehaviour
     private void Start()
     {
         inventoryManager = FindAnyObjectByType<InventoryManager>();
+        combatHandler = GetComponent<PlayerCombatHandler>();
     }
 
     #region right hand
@@ -31,6 +33,7 @@ public class WeaponsHandler : MonoBehaviour
         {
             case WeaponType.ShortSword:
                 CreateWeapon(itemStats, rightHandShortSwordLocation);
+                combatHandler.SetAttack(true);
                 break;
             case WeaponType.Axe:
                 CreateWeapon(itemStats, rightHandAxeLocation);
@@ -65,6 +68,7 @@ public class WeaponsHandler : MonoBehaviour
             Destroy(rightHandStaffLocation.transform.GetChild(0).gameObject);
 
         _hasRightHandWeapon = false;
+        combatHandler.SetAttack(false);
     }
     #endregion
 
@@ -77,6 +81,7 @@ public class WeaponsHandler : MonoBehaviour
         {
             case WeaponType.ShortSword:
                 CreateWeapon(itemStats, leftHandShortSwordLocation);
+                combatHandler.SetAttack(true);
                 break;
             case WeaponType.Axe:
                 CreateWeapon(itemStats, leftHandAxeLocation);
@@ -91,6 +96,7 @@ public class WeaponsHandler : MonoBehaviour
 
         _hasLeftHandWeapon = true;
     }
+
     public void RemoveItemFromPlayerLeftHand()
     {
         if (!_hasLeftHandWeapon) return;
@@ -105,6 +111,7 @@ public class WeaponsHandler : MonoBehaviour
             Destroy(leftHandSheildLocation.transform.GetChild(0).gameObject);
 
         _hasRightHandWeapon = false;
+        combatHandler.SetAttack(false);
     }
     #endregion
 
@@ -116,6 +123,7 @@ public class WeaponsHandler : MonoBehaviour
         Destroy(weapon.GetComponent<MeshCollider>());
         weapon.transform.SetParent(prefabLocation.transform);
         weapon.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        combatHandler.SetWeaponStats(itemStats);
     }
 
     public ItemStatsData GetCurrentLeftHandItemStats()

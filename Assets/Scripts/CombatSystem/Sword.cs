@@ -27,6 +27,11 @@ public class Sword : MonoBehaviour
 
     public void SwordAttack(EnemyStats enemyStats) => combatHandler.DamageEnemy(enemyStats);
 
+    public string currentAnimationState()
+    {
+        return anim.GetCurrentAnimatorClipInfo(0)[0].clip.name;
+    }
+
     // Called in unity
     public void OnAttackAnimationEnd() 
     {

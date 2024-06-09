@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerCombatHandler : MonoBehaviour
 {
-    bool canAttack = true;
+    bool canAttack;
     bool isAttacking;
 
     NewControls controls;
@@ -42,7 +42,12 @@ public class PlayerCombatHandler : MonoBehaviour
     private void Update()
     {
         if (!canAttack || isAttacking)
+        {
+            // check attack state, if idle
+            //if (swordHandler.currentAnimationState().Equals("MainShortSwordIDLE"))
+            //    isAttacking = false;
             return;
+        }
 
         if (basicAttackControl)
             BasicAttack();
@@ -65,18 +70,8 @@ public class PlayerCombatHandler : MonoBehaviour
 
     }
 
-    public void SetWeaponStats(ItemStatsData itemStats)
-    {
-        this.itemStats = itemStats;
-    }
-
-    public void DamageEnemy(EnemyStats enemyStats)
-    {
-        StartCoroutine(enemyStats.DamageMonster(itemStats.GetDamage()));
-    }
-
-    public void EndAttack()
-    {
-        isAttacking = false;
-    }
+    public void DamageEnemy(EnemyStats enemyStats) => StartCoroutine(enemyStats.DamageMonster(itemStats.GetDamage()));
+    public void SetWeaponStats(ItemStatsData itemStats) => this.itemStats = itemStats;
+    public void SetAttack(bool status) => canAttack = status;
+    public void EndAttack() => isAttacking = false;
 }
