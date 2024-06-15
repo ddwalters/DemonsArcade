@@ -8,6 +8,8 @@ public class Encounter : MonoBehaviour
     public ParticleTemplate particleTemplate;
     public MonsterTemplates monsterTempates;
     static public List<GameObject> Monsters = new List<GameObject>();
+    public GameObject objects;
+    private doorInteractable[] doors;
     public int totalMonsters = 0;
     public int currentMonsters = 0;
     public float distanceToPlayer;
@@ -40,10 +42,11 @@ public class Encounter : MonoBehaviour
     {
         if (layerMask == (layerMask | (1 << other.transform.gameObject.layer)))
         {
-            if (victory == false)
+            if (victory == false && activeEncounter == false)
             {
-                activeEncounter = true;
                 Debug.Log("FIGHT!");
+                CloseDoors();
+                activeEncounter = true;
             }
         }
     }
@@ -76,6 +79,7 @@ public class Encounter : MonoBehaviour
         }
         if (victory == true)
         {
+            OpenDoors();
             Vector3 direction = (player.transform.position - chestSpawn.transform.position).normalized;
             Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
 
@@ -104,5 +108,36 @@ public class Encounter : MonoBehaviour
         Monsters.Add(go);
 
         Destroy(particle, 2f);
+    }
+
+    public void CloseDoors()
+    {
+        if (doors != null)
+            doors = null;
+
+        doors = objects.GetComponentsInChildren<doorInteractable>();
+        foreach (var door in doors)
+        {
+            StartCoroutine(LockEmUp(door));
+        }
+    }
+
+    public void OpenDoors()
+    {
+        if (doors != null)
+            return;
+
+        foreach (var door in doors)
+        {
+            door.UnlockDoor();
+            door.Reopen();
+        }
+    }
+
+    public IEnumerator LockEmUp(doorInteractable door)
+    {
+        yield return new WaitForSeconds(0.2f);
+        door.CloseDoor();
+        door.LockDoor();
     }
 }

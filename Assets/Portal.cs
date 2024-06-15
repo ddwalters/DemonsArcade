@@ -14,7 +14,7 @@ public class Portal : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "HitCone") return;
+        if (other.tag == "Player") return;
         GameManager.loadLevel(selectedScene);
     }
 

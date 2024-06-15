@@ -5,6 +5,7 @@ using UnityEngine;
 public class roomDoors : MonoBehaviour
 {
     public GameObject wall;
+    public GameObject door;
     public GameObject parent;
     public Collider collide;
 
@@ -22,6 +23,7 @@ public class roomDoors : MonoBehaviour
         if (other.CompareTag("Halldoor"))
         {
             wall.SetActive(false);
+            door.SetActive(true);
         }
     }
 

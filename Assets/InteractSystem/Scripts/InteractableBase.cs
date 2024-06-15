@@ -16,4 +16,8 @@ public class InteractableBase : MonoBehaviour, IInteractable
     public string TooltipMessage => tooltipMessage;
 
     public virtual void OnInteract() { }
+
+    protected void SetInteractable(bool interactable) => isInteractable = interactable;
+
+    protected void SetToolTip(string Str) => tooltipMessage = Str;
 }

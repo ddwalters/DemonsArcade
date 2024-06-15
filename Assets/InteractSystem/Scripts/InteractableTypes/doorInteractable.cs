@@ -4,20 +4,54 @@ using UnityEngine;
 
 public class doorInteractable : InteractableBase
 {
+    public bool isOpen = false;
+
+    public bool opened = false;
+
+    private MeshRenderer rend;
+    private Collider coll;
+
     public override void OnInteract()
     {
         base.OnInteract();
 
-        openDoor();
+        OpenDoor();
+        opened = true;
     }
 
-    public void closeDoor()
+    private void Start()
     {
-        gameObject.SetActive(true);
+        rend = GetComponent<MeshRenderer>();
+        coll = GetComponent<Collider>();
     }
 
-    public void openDoor()
+    public void LockDoor()
     {
-        gameObject.SetActive(false);
+        SetInteractable(false);
+        SetToolTip("LOCKED");
+    }
+
+    public void UnlockDoor()
+    {
+        SetInteractable(true);
+        SetToolTip("Open");
+    }
+
+    public void CloseDoor()
+    {
+        rend.enabled = true;
+        coll.enabled = true;
+    }
+
+    public void OpenDoor()
+    {
+        rend.enabled = false;
+        coll.enabled = false;
+    }
+
+    public void Reopen()
+    {
+        if (opened == true)
+            OpenDoor();
     }
 }
