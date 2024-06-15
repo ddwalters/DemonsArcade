@@ -5,7 +5,7 @@ using UnityEngine;
 public class doorwayWalls : MonoBehaviour
 {
     public GameObject wall;
-    public GameObject door;
+
     public Collider collide;
 
     LoadLevel loadLevel;
@@ -26,7 +26,7 @@ public class doorwayWalls : MonoBehaviour
         else if (other.CompareTag("Doorway"))
         {
             wall.SetActive(false);
-            door.SetActive(true);
+            
         }
     }
 
