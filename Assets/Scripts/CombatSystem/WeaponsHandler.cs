@@ -10,13 +10,7 @@ public class WeaponsHandler : MonoBehaviour
     private bool _hasRightHandWeapon;
     [SerializeField] GameObject rightHandShortSwordLocation;
     [SerializeField] GameObject rightHandAxeLocation;
-    [SerializeField] GameObject rightHandSheildLocation;
     [SerializeField] GameObject rightHandStaffLocation;
-
-    private bool _hasLeftHandWeapon;
-    [SerializeField] GameObject leftHandShortSwordLocation;
-    [SerializeField] GameObject leftHandAxeLocation;
-    [SerializeField] GameObject leftHandSheildLocation;
 
     private void Start()
     {
@@ -38,9 +32,6 @@ public class WeaponsHandler : MonoBehaviour
             case WeaponType.Axe:
                 CreateWeapon(itemStats, rightHandAxeLocation);
                 break;
-            case WeaponType.Shield:
-                CreateWeapon(itemStats, rightHandSheildLocation);
-                break;
             case WeaponType.Staff:
                 CreateWeapon(itemStats, rightHandStaffLocation);
                 break;
@@ -61,9 +52,6 @@ public class WeaponsHandler : MonoBehaviour
         if (rightHandAxeLocation.transform.childCount > 0)
             Destroy(rightHandAxeLocation.transform.GetChild(0).gameObject);
 
-        if (rightHandSheildLocation.transform.childCount > 0)
-            Destroy(rightHandSheildLocation.transform.GetChild(0).gameObject);
-
         if (rightHandStaffLocation.transform.childCount > 0)
             Destroy(rightHandStaffLocation.transform.GetChild(0).gameObject);
 
@@ -75,43 +63,20 @@ public class WeaponsHandler : MonoBehaviour
     #region left hand
     public void AddItemToPlayerLeftHand(ItemStatsData itemStats)
     {
-        if (_hasLeftHandWeapon) return;
+        // check that it is a shield
 
-        switch (itemStats.GetWeaponType())
-        {
-            case WeaponType.ShortSword:
-                CreateWeapon(itemStats, leftHandShortSwordLocation);
-                combatHandler.SetAttack(true);
-                break;
-            case WeaponType.Axe:
-                CreateWeapon(itemStats, leftHandAxeLocation);
-                break;
-            case WeaponType.Shield:
-                CreateWeapon(itemStats, leftHandSheildLocation);
-                break;
-            default:
-                Debug.Log("Not a weapon.");
-                return;
-        }
-
-        _hasLeftHandWeapon = true;
+        //if (_hasLeftHandWeapon) return;
+        //CreateWeapon(itemStats, leftHandSheildLocation);
     }
 
     public void RemoveItemFromPlayerLeftHand()
     {
-        if (!_hasLeftHandWeapon) return;
+        // update to just work with shields for now
 
-        if (leftHandShortSwordLocation.transform.childCount > 0)
-            Destroy(leftHandShortSwordLocation.transform.GetChild(0).gameObject);
-
-        if (leftHandAxeLocation.transform.childCount > 0)
-            Destroy(leftHandAxeLocation.transform.GetChild(0).gameObject);
-
-        if (leftHandSheildLocation.transform.childCount > 0)
-            Destroy(leftHandSheildLocation.transform.GetChild(0).gameObject);
-
-        _hasRightHandWeapon = false;
-        combatHandler.SetAttack(false);
+        //if (!_hasLeftHandWeapon) return;
+        //
+        //if (leftHandShortSwordLocation.transform.childCount > 0)
+        //    Destroy(leftHandShortSwordLocation.transform.GetChild(0).gameObject);
     }
     #endregion
 
@@ -128,17 +93,17 @@ public class WeaponsHandler : MonoBehaviour
 
     public ItemStatsData GetCurrentLeftHandItemStats()
     {
-        if (!inventoryManager.GetItems(6).list.Any())
-            return null;
-
-        return inventoryManager.GetItems(6).list.FirstOrDefault().PreviousItemData.itemStats;
-    }
-
-    public ItemStatsData GetCurrentRightHandItemStats()
-    {
         if (!inventoryManager.GetItems(7).list.Any())
             return null;
 
         return inventoryManager.GetItems(7).list.FirstOrDefault().PreviousItemData.itemStats;
+    }
+
+    public ItemStatsData GetCurrentRightHandItemStats()
+    {
+        if (!inventoryManager.GetItems(6).list.Any())
+            return null;
+
+        return inventoryManager.GetItems(6).list.FirstOrDefault().PreviousItemData.itemStats;
     }
 }

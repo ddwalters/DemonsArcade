@@ -9,20 +9,22 @@ public class PlayerCombatHandler : MonoBehaviour
     bool basicAttackControl;
     bool heavyAttackControl;
 
+    bool basicAttackTriggered;
+    bool heavyAttackTriggered;
+
     ItemStatsData itemStats;
     WeaponsHandler weaponsHandler;
-    Sword swordHandler;
-    Axe axeHandler;
-    Shield shieldHandler;
-    Staff staffHandler;
+
+    Sword swordRightHandler;
+    Axe axeRightHandler;
+    Staff staffRightHandler;
 
     private void Start()
     {
         weaponsHandler = GetComponent<WeaponsHandler>();
-        swordHandler = GetComponentInChildren<Sword>();
-        axeHandler = GetComponentInChildren<Axe>();
-        shieldHandler = GetComponentInChildren<Shield>();
-        staffHandler = GetComponentInChildren<Staff>();
+
+        swordRightHandler = GameObject.Find("RightSword").GetComponent<Sword>();
+
         controls = FindAnyObjectByType<PlayerController>().GetNewControls();
     }
 
@@ -44,11 +46,17 @@ public class PlayerCombatHandler : MonoBehaviour
         if (!canAttack || isAttacking)
             return;
 
-        if (basicAttackControl)
+        if (basicAttackControl && !basicAttackTriggered)
+        {
             BasicAttack();
+            basicAttackTriggered = true;
+        }
 
-        if (heavyAttackControl)
+        if (heavyAttackControl && !heavyAttackTriggered)
+        {
             HeavyAttack();
+            heavyAttackTriggered = true;
+        }
     }
 
     private void BasicAttack()
@@ -57,7 +65,7 @@ public class PlayerCombatHandler : MonoBehaviour
             return;
 
         isAttacking = true;
-        swordHandler.BeginSwordAnimation();
+        swordRightHandler.BeginSwordAnimation();
     }
 
     private void HeavyAttack()
@@ -68,5 +76,10 @@ public class PlayerCombatHandler : MonoBehaviour
     public void DamageEnemy(EnemyStats enemyStats) => StartCoroutine(enemyStats.DamageMonster(itemStats.GetDamage()));
     public void SetWeaponStats(ItemStatsData itemStats) => this.itemStats = itemStats;
     public void SetAttack(bool status) => canAttack = status;
-    public void EndAttack() => isAttacking = false;
+    public void EndAttack()
+    {
+        isAttacking = false;
+        basicAttackTriggered = false;
+        heavyAttackTriggered = false;
+    } 
 }

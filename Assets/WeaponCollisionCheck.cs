@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WeaponCollisionCheck : MonoBehaviour
@@ -20,7 +18,7 @@ public class WeaponCollisionCheck : MonoBehaviour
 
         var enemyStats = other.GetComponent<EnemyStats>();
 
-        if (enemyStats != null )
+        if (enemyStats != null)
         {
             sword.SwordAttack(other.GetComponent<EnemyStats>());
             canDamage = false;
