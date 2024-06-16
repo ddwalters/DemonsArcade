@@ -12,13 +12,14 @@ public class SkeletonAI : MonoBehaviour
     public float lookSpeed;
     public float timeToAttack;
     private float nextTimeToAttack = 0f;
+
+    private bool attacking;
+
     public int Damage;
 
     public bool walk;
 
     public Animator anim;
-
-    public MeshCollider hurtCone;
 
     public LayerMask layerMask;
 
@@ -26,7 +27,9 @@ public class SkeletonAI : MonoBehaviour
     {
         Idle,
         walkingTo,
-        attacking
+        attacking,
+        swinging,
+        hitting
     }
 
     State state;
@@ -34,7 +37,6 @@ public class SkeletonAI : MonoBehaviour
     private void Awake()
     {
         target = GameObject.Find("player");
-        hurtCone.enabled = false;
         state = State.Idle;
         navMeshAgent = GetComponent<NavMeshAgent>();
         navMeshAgent.stoppingDistance = stoppingDistance;
@@ -48,7 +50,6 @@ public class SkeletonAI : MonoBehaviour
         {
             navMeshAgent.destination = transform.position;
             FaceTarget();
-            state = State.attacking;
             attack();
             walk = false;
         }
@@ -61,11 +62,22 @@ public class SkeletonAI : MonoBehaviour
         anim.SetBool("Walk", walk);
     }
 
+    public void takeDamage()
+    {
+        if(attacking != true)
+        {
+            //anim.SetTrigger("Attack");
+        }
+    }
+
     void FaceTarget()
     {
-        Vector3 direction = (target.transform.position - transform.position).normalized;
-        Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
-        transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * lookSpeed);
+        if (state != State.swinging)
+        {
+            Vector3 direction = (target.transform.position - transform.position).normalized;
+            Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
+            transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * lookSpeed);
+        }
     }
 
     void attack()
@@ -76,32 +88,36 @@ public class SkeletonAI : MonoBehaviour
         {
             nextTimeToAttack = Time.time + timeToAttack;
             anim.SetTrigger("Attack");
-            Invoke("checkCollide", 0.7f);
+            StartCoroutine(startAttacking());
         }
     }
 
-    void checkCollide()
+    public IEnumerator startAttacking()
     {
-        hurtCone.enabled = true;
-        Invoke("disableCollide", 0.1f);
+        state = State.swinging;
+        yield return new WaitForSeconds(0.5f);
+        attacking = true;
+        StartCoroutine(stopAttacking());
     }
 
-    void disableCollide()
+    public IEnumerator stopAttacking()
     {
-        hurtCone.enabled = false;
+        state = State.attacking;
+        yield return new WaitForSeconds(0.2f);
+        attacking = false;
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerStay(Collider other)
     {
         if (layerMask == (layerMask | (1 << other.transform.gameObject.layer)))
         {
             PlayerStatsManager playerHP = other.GetComponent<PlayerStatsManager>();
 
-            if (playerHP != null)
+            if (playerHP != null && attacking == true)
             {
                 playerHP.DamagePlayer(Damage);
+                attacking = false;
             }
         }
-        hurtCone.enabled = false;
     }
 }

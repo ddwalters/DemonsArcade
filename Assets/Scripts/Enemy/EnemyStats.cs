@@ -6,17 +6,24 @@ public class EnemyStats : MonoBehaviour
 {
     Encounter encounter;
 
+    [SerializeField] Animator anim;
+
     [SerializeField] float health;
     public bool isAlive;
+    private float currentHealth;
+    [SerializeField] Image healthBarSprite;
+    [Space]
+    [Header("Coin Particles")]
     [SerializeField] Vector2Int coinDropRange;
     [SerializeField] float interval;
     [SerializeField] int multiplier;
-    private float currentHealth;
-    [SerializeField] Image healthBarSprite;
-    [SerializeField] GameObject deathParticle;
-    [SerializeField] Transform deathTransform;
     [SerializeField] GameObject coinParticle;
     [SerializeField] Transform coinTransform;
+    [Space]
+    [Header("Death Particles")]
+    [SerializeField] GameObject deathParticle;
+    [SerializeField] Transform deathTransform;
+
 
     public bool inRange;
 
@@ -28,6 +35,15 @@ public class EnemyStats : MonoBehaviour
         encounter = GetComponentInParent<Encounter>();
         currentHealth = health;
         lerpDuration = .5f;
+    }
+
+    public void damageAI()
+    {
+        SkeletonAI skelly = gameObject.GetComponent<SkeletonAI>();
+        if (skelly != null)
+        {
+            skelly.takeDamage();
+        }
     }
 
     public void death()
@@ -62,6 +78,8 @@ public class EnemyStats : MonoBehaviour
             time += Time.deltaTime;
             yield return null;
         }
+
+        damageAI();
 
         currentHealth = endValue;
 
