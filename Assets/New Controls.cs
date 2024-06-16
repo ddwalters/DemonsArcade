@@ -37,6 +37,15 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
+                    ""name"": ""Crouch"",
+                    ""type"": ""Button"",
+                    ""id"": ""ae2c9498-9ed4-404a-9289-f24c360a3a69"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Movement"",
                     ""type"": ""Value"",
                     ""id"": ""8f80a369-a2b0-46fa-85b3-292b1a7c5890"",
@@ -49,6 +58,15 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
                     ""name"": ""Sprint"",
                     ""type"": ""Button"",
                     ""id"": ""bbe5ff75-58b4-4184-816e-7f7645d2c212"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Interact"",
+                    ""type"": ""Button"",
+                    ""id"": ""e5671177-a33f-4ea2-8273-d462cefc8cf7"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -419,6 +437,50 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
                     ""action"": ""Basic Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2711b925-8809-4fc0-96cd-236e915a31ef"",
+                    ""path"": ""<Keyboard>/c"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard & Mouse"",
+                    ""action"": ""Crouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a8f70b05-1300-4b13-8cb6-054e80c8fd70"",
+                    ""path"": ""<Gamepad>/rightStickPress"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Crouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0bffaf9c-438f-4c7a-bcd9-f1f20f8ab6e9"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""29745e2c-b2b1-41d7-8206-99b26453385b"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -974,8 +1036,10 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
         // BasicActionMap
         m_BasicActionMap = asset.FindActionMap("BasicActionMap", throwIfNotFound: true);
         m_BasicActionMap_Jump = m_BasicActionMap.FindAction("Jump", throwIfNotFound: true);
+        m_BasicActionMap_Crouch = m_BasicActionMap.FindAction("Crouch", throwIfNotFound: true);
         m_BasicActionMap_Movement = m_BasicActionMap.FindAction("Movement", throwIfNotFound: true);
         m_BasicActionMap_Sprint = m_BasicActionMap.FindAction("Sprint", throwIfNotFound: true);
+        m_BasicActionMap_Interact = m_BasicActionMap.FindAction("Interact", throwIfNotFound: true);
         m_BasicActionMap_Look = m_BasicActionMap.FindAction("Look", throwIfNotFound: true);
         m_BasicActionMap_BasicAttack = m_BasicActionMap.FindAction("Basic Attack", throwIfNotFound: true);
         m_BasicActionMap_HeavyAttack = m_BasicActionMap.FindAction("Heavy Attack", throwIfNotFound: true);
@@ -1054,8 +1118,10 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_BasicActionMap;
     private List<IBasicActionMapActions> m_BasicActionMapActionsCallbackInterfaces = new List<IBasicActionMapActions>();
     private readonly InputAction m_BasicActionMap_Jump;
+    private readonly InputAction m_BasicActionMap_Crouch;
     private readonly InputAction m_BasicActionMap_Movement;
     private readonly InputAction m_BasicActionMap_Sprint;
+    private readonly InputAction m_BasicActionMap_Interact;
     private readonly InputAction m_BasicActionMap_Look;
     private readonly InputAction m_BasicActionMap_BasicAttack;
     private readonly InputAction m_BasicActionMap_HeavyAttack;
@@ -1065,8 +1131,10 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
         private @NewControls m_Wrapper;
         public BasicActionMapActions(@NewControls wrapper) { m_Wrapper = wrapper; }
         public InputAction @Jump => m_Wrapper.m_BasicActionMap_Jump;
+        public InputAction @Crouch => m_Wrapper.m_BasicActionMap_Crouch;
         public InputAction @Movement => m_Wrapper.m_BasicActionMap_Movement;
         public InputAction @Sprint => m_Wrapper.m_BasicActionMap_Sprint;
+        public InputAction @Interact => m_Wrapper.m_BasicActionMap_Interact;
         public InputAction @Look => m_Wrapper.m_BasicActionMap_Look;
         public InputAction @BasicAttack => m_Wrapper.m_BasicActionMap_BasicAttack;
         public InputAction @HeavyAttack => m_Wrapper.m_BasicActionMap_HeavyAttack;
@@ -1083,12 +1151,18 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
+            @Crouch.started += instance.OnCrouch;
+            @Crouch.performed += instance.OnCrouch;
+            @Crouch.canceled += instance.OnCrouch;
             @Movement.started += instance.OnMovement;
             @Movement.performed += instance.OnMovement;
             @Movement.canceled += instance.OnMovement;
             @Sprint.started += instance.OnSprint;
             @Sprint.performed += instance.OnSprint;
             @Sprint.canceled += instance.OnSprint;
+            @Interact.started += instance.OnInteract;
+            @Interact.performed += instance.OnInteract;
+            @Interact.canceled += instance.OnInteract;
             @Look.started += instance.OnLook;
             @Look.performed += instance.OnLook;
             @Look.canceled += instance.OnLook;
@@ -1108,12 +1182,18 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
+            @Crouch.started -= instance.OnCrouch;
+            @Crouch.performed -= instance.OnCrouch;
+            @Crouch.canceled -= instance.OnCrouch;
             @Movement.started -= instance.OnMovement;
             @Movement.performed -= instance.OnMovement;
             @Movement.canceled -= instance.OnMovement;
             @Sprint.started -= instance.OnSprint;
             @Sprint.performed -= instance.OnSprint;
             @Sprint.canceled -= instance.OnSprint;
+            @Interact.started -= instance.OnInteract;
+            @Interact.performed -= instance.OnInteract;
+            @Interact.canceled -= instance.OnInteract;
             @Look.started -= instance.OnLook;
             @Look.performed -= instance.OnLook;
             @Look.canceled -= instance.OnLook;
@@ -1282,8 +1362,10 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
     public interface IBasicActionMapActions
     {
         void OnJump(InputAction.CallbackContext context);
+        void OnCrouch(InputAction.CallbackContext context);
         void OnMovement(InputAction.CallbackContext context);
         void OnSprint(InputAction.CallbackContext context);
+        void OnInteract(InputAction.CallbackContext context);
         void OnLook(InputAction.CallbackContext context);
         void OnBasicAttack(InputAction.CallbackContext context);
         void OnHeavyAttack(InputAction.CallbackContext context);
