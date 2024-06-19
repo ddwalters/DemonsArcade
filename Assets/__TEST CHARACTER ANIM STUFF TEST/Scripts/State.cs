@@ -49,21 +49,4 @@ public class State
     public virtual void Exit()
     {
     }
-
-
-    //private float xRotation = 0f;
-    //private float sensitivity = 2f;
-
-    //public void LookAround()
-    //{
-    //    float mouseX = lookAction. * sensitivity * 0.01f;
-    //    float mouseY = lookInput.y * sensitivity * 0.01f;
-    //
-    //    playerBody.Rotate(Vector3.up * mouseX);
-    //
-    //    xRotation -= mouseY;
-    //    xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-    //
-    //    cam.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-    //}
 }

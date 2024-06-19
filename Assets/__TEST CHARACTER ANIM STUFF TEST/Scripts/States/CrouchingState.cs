@@ -23,7 +23,7 @@ public class CrouchingState : State
         character.animator.SetTrigger("Crouch");
         belowCeiling = false;
         crouchHeld = false;
-        gravityVelocity.y = 0;
+        gravityVelocity = Vector3.zero;
 
         playerSpeed = character.crouchSpeed;
         character.controller.height = character.crouchColliderHeight;
@@ -37,7 +37,7 @@ public class CrouchingState : State
         base.Exit();
         character.controller.height = character.normalColliderHeight;
         character.controller.center = new Vector3(0f, character.normalColliderHeight / 2f, 0f);
-        gravityVelocity.y = 0f;
+        gravityVelocity = Vector3.zero;
         character.playerVelocity = new Vector3(input.x, 0, input.y);
         character.animator.SetTrigger("Move");
     }
@@ -46,9 +46,8 @@ public class CrouchingState : State
     {
         base.HandleInput();
         if (crouchAction.triggered && !belowCeiling)
-        {
             crouchHeld = true;
-        }
+
         input = moveAction.ReadValue<Vector2>();
         velocity = new Vector3(input.x, 0, input.y);
 
@@ -62,9 +61,7 @@ public class CrouchingState : State
         character.animator.SetFloat("Speed", input.magnitude, character.speedDampTime, Time.deltaTime);
 
         if (crouchHeld)
-        {
             stateMachine.ChangeState(character.standing);
-        }
     }
 
     public override void PhysicsUpdate()
@@ -74,16 +71,19 @@ public class CrouchingState : State
         gravityVelocity.y += gravityValue * Time.deltaTime;
         grounded = character.controller.isGrounded;
         if (grounded && gravityVelocity.y < 0)
-        {
-            gravityVelocity.y = 0f;
-        }
+            gravityVelocity.y = -0.01f;
+
         currentVelocity = Vector3.Lerp(currentVelocity, velocity, character.velocityDampTime);
 
         character.controller.Move(currentVelocity * Time.deltaTime * playerSpeed + gravityVelocity * Time.deltaTime);
 
         if (velocity.magnitude > 0)
         {
-            character.transform.rotation = Quaternion.Slerp(character.transform.rotation, Quaternion.LookRotation(velocity), character.rotationDampTime);
+            character.transform.rotation = 
+                Quaternion.Slerp(
+                    character.transform.rotation, 
+                    Quaternion.LookRotation(velocity), 
+                    character.rotationDampTime);
         }
     }
 

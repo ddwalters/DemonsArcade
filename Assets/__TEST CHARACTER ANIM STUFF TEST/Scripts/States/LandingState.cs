@@ -21,7 +21,6 @@ public class LandingState : State
 
     public override void LogicUpdate()
     {
-
         base.LogicUpdate();
         if (timePassed > landingTime)
         {

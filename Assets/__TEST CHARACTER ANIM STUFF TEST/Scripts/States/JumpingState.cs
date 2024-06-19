@@ -42,9 +42,7 @@ public class JumpingState : State
         base.LogicUpdate();
 
         if (grounded)
-        {
             stateMachine.ChangeState(character.landing);
-        }
     }
 
     public override void PhysicsUpdate()

@@ -15,7 +15,7 @@ public class Character : MonoBehaviour
     [Range(0, 1)]
     public float speedDampTime = 0.1f;
     [Range(0, 1)]
-    public float velocityDampTime = 0.9f;
+    public float velocityDampTime = 0.5f;
     [Range(0, 1)]
     public float rotationDampTime = 0.2f;
     [Range(0, 1)]

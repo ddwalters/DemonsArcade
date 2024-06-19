@@ -25,7 +25,7 @@ public class SprintState : State
         input = Vector2.zero;
         velocity = Vector3.zero;
         currentVelocity = Vector3.zero;
-        gravityVelocity.y = 0;
+        gravityVelocity = Vector3.zero;
 
         playerSpeed = character.sprintSpeed;
         grounded = character.controller.isGrounded;
@@ -41,34 +41,23 @@ public class SprintState : State
         velocity = velocity.x * character.cameraTransform.right.normalized + velocity.z * character.cameraTransform.forward.normalized;
         velocity.y = 0f;
         if (sprintAction.triggered || input.sqrMagnitude == 0f)
-        {
             sprint = false;
-        }
         else
-        {
             sprint = true;
-        }
-        if (jumpAction.triggered)
-        {
-            sprintJump = true;
 
-        }
+        if (jumpAction.triggered)
+            sprintJump = true;
     }
 
     public override void LogicUpdate()
     {
         if (sprint)
-        {
             character.animator.SetFloat("Speed", input.magnitude + 0.5f, character.speedDampTime, Time.deltaTime);
-        }
         else
-        {
             stateMachine.ChangeState(character.standing);
-        }
+
         if (sprintJump)
-        {
             stateMachine.ChangeState(character.sprintjumping);
-        }
     }
 
     public override void PhysicsUpdate()
@@ -77,17 +66,18 @@ public class SprintState : State
         gravityVelocity.y += gravityValue * Time.deltaTime;
         grounded = character.controller.isGrounded;
         if (grounded && gravityVelocity.y < 0)
-        {
-            gravityVelocity.y = 0f;
-        }
+            gravityVelocity.y = -0.01f;
+
         currentVelocity = Vector3.SmoothDamp(currentVelocity, velocity, ref cVelocity, character.velocityDampTime);
 
         character.controller.Move(currentVelocity * Time.deltaTime * playerSpeed + gravityVelocity * Time.deltaTime);
 
-
         if (velocity.sqrMagnitude > 0)
         {
-            character.transform.rotation = Quaternion.Slerp(character.transform.rotation, Quaternion.LookRotation(velocity), character.rotationDampTime);
+            character.transform.rotation = Quaternion.Slerp(
+                    character.transform.rotation,
+                    Quaternion.LookRotation(velocity),
+                    character.rotationDampTime);
         }
     }
 }
