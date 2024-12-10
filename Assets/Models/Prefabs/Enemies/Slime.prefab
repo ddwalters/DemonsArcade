@@ -189,10 +189,10 @@ GameObject:
   m_Component:
   - component: {fileID: 425364166932515149}
   - component: {fileID: 3331726973069911730}
-  - component: {fileID: 2496000905687911841}
   - component: {fileID: 2666985164119782404}
   - component: {fileID: 3661302101560994032}
   - component: {fileID: 6816722320915753826}
+  - component: {fileID: 2496000905687911841}
   - component: {fileID: 1119235462760914166}
   m_Layer: 0
   m_Name: Slime
@@ -242,20 +242,6 @@ NavMeshAgent:
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 4
---- !u!114 &2496000905687911841
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7287308620526909530}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e61b279423ca26646b276df99451918f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  target: {fileID: 0}
-  lookSpeed: 5
 --- !u!54 &2666985164119782404
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -328,6 +314,20 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &2496000905687911841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7287308620526909530}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e61b279423ca26646b276df99451918f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 0}
+  lookSpeed: 5
 --- !u!114 &1119235462760914166
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -341,16 +341,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   health: 25
+  encounter: {fileID: 0}
+  anim: {fileID: 0}
+  healthBarSprite: {fileID: 6373967056198358702}
   isAlive: 0
+  currentHealth: 0
   coinDropRange: {x: 3, y: 5}
   interval: 0.01
   multiplier: 1
-  healthBarSprite: {fileID: 6373967056198358702}
-  deathParticle: {fileID: 6891238084121759465, guid: 7f0bb6cf5ac34584d9bfc8735738a94f, type: 3}
-  deathTransform: {fileID: 2108780792050185571}
   coinParticle: {fileID: 6198689756717694234, guid: ff7d5bb90d4b56449a24e5551f691211, type: 3}
   coinTransform: {fileID: 5903487865608714502}
-  inRange: 0
+  deathParticle: {fileID: 6891238084121759465, guid: 7f0bb6cf5ac34584d9bfc8735738a94f, type: 3}
+  deathTransform: {fileID: 2108780792050185571}
 --- !u!1 &7592121684624913096
 GameObject:
   m_ObjectHideFlags: 0
