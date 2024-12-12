@@ -538,11 +538,10 @@ public class Generator3D : MonoBehaviour
         {
             if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
             {
-                //Debug.Log("Room Below");
+
             }
             else
             {
-                //Debug.Log(dir + new Vector3Int(0, -1, 0));
                 doorScript.destroyPlusX();
             }
         }
@@ -555,11 +554,10 @@ public class Generator3D : MonoBehaviour
         {
             if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
             {
-                //Debug.Log("Room Below");
+
             }
             else
             {
-                //Debug.Log(dir + new Vector3Int(0, -1, 0));
                 doorScript.destroyMinX();
             }
         }
@@ -572,11 +570,10 @@ public class Generator3D : MonoBehaviour
         {
             if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
             {
-                //Debug.Log("Room Below");
+
             }
             else
             {
-                //Debug.Log(dir + new Vector3Int(0, -1, 0));
                 doorScript.destroyPlusZ();
             }
         }
@@ -589,11 +586,10 @@ public class Generator3D : MonoBehaviour
         {
             if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
             {
-                //Debug.Log("Room Below");
+
             }
             else
             {
-                //Debug.Log(dir + new Vector3Int(0, -1, 0));
                 doorScript.destroyMinZ();
             }
         }
@@ -617,11 +613,10 @@ public class Generator3D : MonoBehaviour
         {
             if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
             {
-                //Debug.Log("Room Below");
+
             }
             else
             {
-                //Debug.Log(dir + new Vector3Int(0, -1, 0));
                 doorScript.destroyPlusX();
             }
         }
@@ -634,11 +629,10 @@ public class Generator3D : MonoBehaviour
         {
             if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
             {
-                //Debug.Log("Room Below");
+
             }
             else
             {
-                //Debug.Log(dir + new Vector3Int(0, -1, 0));
                 doorScript.destroyMinX();
             }
         }
@@ -651,11 +645,10 @@ public class Generator3D : MonoBehaviour
         {
             if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
             {
-                //Debug.Log("Room Below");
+
             }
             else
             {
-                //Debug.Log(dir + new Vector3Int(0, -1, 0));
                 doorScript.destroyPlusZ();
             }
         }
@@ -668,11 +661,10 @@ public class Generator3D : MonoBehaviour
         {
             if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
             {
-                //Debug.Log("Room Below");
+ 
             }
             else
             {
-                //Debug.Log(dir + new Vector3Int(0, -1, 0));
                 doorScript.destroyMinZ();
             }
         }

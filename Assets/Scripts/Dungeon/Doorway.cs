@@ -25,12 +25,6 @@ public class Doorway : MonoBehaviour
         collide = gameObject.GetComponent<Collider>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     public void destroyPlusX() 
     {
         if (plusX != null)
