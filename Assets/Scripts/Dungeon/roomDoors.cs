@@ -29,12 +29,15 @@ public class roomDoors : MonoBehaviour
 
     private void Update()
     {
-        if (loadLevel.dungeonComplete == true && DungeonComplete != true)
+        if (loadLevel != null)
         {
-            DungeonComplete = true;
-            Destroy(wall.GetComponent<Rigidbody>());
-            Destroy(parent.GetComponent<Rigidbody>());
-            Destroy(gameObject);
+            if (loadLevel.dungeonComplete == true && DungeonComplete != true)
+            {
+                DungeonComplete = true;
+                Destroy(wall.GetComponent<Rigidbody>());
+                Destroy(parent.GetComponent<Rigidbody>());
+                Destroy(gameObject);
+            }
         }
     }
 

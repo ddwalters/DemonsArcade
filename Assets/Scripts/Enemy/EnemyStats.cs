@@ -4,14 +4,15 @@ using UnityEngine.UI;
 
 public class EnemyStats : MonoBehaviour
 {
-    Encounter encounter;
-
-    [SerializeField] Animator anim;
-
+    [Header("Settings")]
     [SerializeField] float health;
-    public bool isAlive;
-    private float currentHealth;
+    [Space]
+    [Header("Components")]
+    [SerializeField] Encounter encounter;
+    [SerializeField] Animator anim;
     [SerializeField] Image healthBarSprite;
+    [SerializeField] public bool isAlive;
+    [SerializeField] private float currentHealth;
     [Space]
     [Header("Coin Particles")]
     [SerializeField] Vector2Int coinDropRange;
@@ -25,7 +26,7 @@ public class EnemyStats : MonoBehaviour
     [SerializeField] Transform deathTransform;
 
 
-    public bool inRange;
+    private bool inRange;
 
     private float lerpDuration;
 
@@ -66,6 +67,8 @@ public class EnemyStats : MonoBehaviour
 
     public IEnumerator DamageMonster(float damage)
     {
+        damageAI();
+
         float time = 0;
         float endValue = currentHealth - damage;
 
@@ -78,8 +81,6 @@ public class EnemyStats : MonoBehaviour
             time += Time.deltaTime;
             yield return null;
         }
-
-        damageAI();
 
         currentHealth = endValue;
 

@@ -23,6 +23,8 @@ public class DungeonPathfinder3D {
         public bool isStairs;
     }
 
+
+
     static readonly Vector3Int[] neighbors = {
         new Vector3Int(1, 0, 0),
         new Vector3Int(-1, 0, 0),

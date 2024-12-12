@@ -13,7 +13,6 @@ public class hallwayWalls : MonoBehaviour
     void Start()
     {
         loadLevel = FindAnyObjectByType<LoadLevel>();
-        collide = gameObject.GetComponent<Collider>();
     }
 
     private void OnTriggerStay(Collider other)
@@ -26,11 +25,12 @@ public class hallwayWalls : MonoBehaviour
 
     private void Update()
     {
-        if (loadLevel.dungeonComplete == true && DungeonComplete != true)
+        if (loadLevel != null)
         {
-            DungeonComplete = true;
-            Destroy(wall.GetComponent<Rigidbody>());
-            Destroy(gameObject);
+            if (loadLevel.dungeonComplete == true && DungeonComplete != true)
+            {
+                DungeonComplete = true;
+            }
         }
     }
 }
