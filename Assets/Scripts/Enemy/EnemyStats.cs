@@ -4,21 +4,29 @@ using UnityEngine.UI;
 
 public class EnemyStats : MonoBehaviour
 {
-    Encounter encounter;
-
+    [Header("Settings")]
     [SerializeField] float health;
-    public bool isAlive;
+    [Space]
+    [Header("Components")]
+    [SerializeField] Encounter encounter;
+    [SerializeField] Animator anim;
+    [SerializeField] Image healthBarSprite;
+    [SerializeField] public bool isAlive;
+    [SerializeField] private float currentHealth;
+    [Space]
+    [Header("Coin Particles")]
     [SerializeField] Vector2Int coinDropRange;
     [SerializeField] float interval;
     [SerializeField] int multiplier;
-    private float currentHealth;
-    [SerializeField] Image healthBarSprite;
-    [SerializeField] GameObject deathParticle;
-    [SerializeField] Transform deathTransform;
     [SerializeField] GameObject coinParticle;
     [SerializeField] Transform coinTransform;
+    [Space]
+    [Header("Death Particles")]
+    [SerializeField] GameObject deathParticle;
+    [SerializeField] Transform deathTransform;
 
-    public bool inRange;
+
+    private bool inRange;
 
     private float lerpDuration;
 
@@ -28,6 +36,15 @@ public class EnemyStats : MonoBehaviour
         encounter = GetComponentInParent<Encounter>();
         currentHealth = health;
         lerpDuration = .5f;
+    }
+
+    public void damageAI()
+    {
+        SkeletonAI skelly = gameObject.GetComponent<SkeletonAI>();
+        if (skelly != null)
+        {
+            skelly.takeDamage();
+        }
     }
 
     public void death()
@@ -50,6 +67,8 @@ public class EnemyStats : MonoBehaviour
 
     public IEnumerator DamageMonster(float damage)
     {
+        damageAI();
+
         float time = 0;
         float endValue = currentHealth - damage;
 

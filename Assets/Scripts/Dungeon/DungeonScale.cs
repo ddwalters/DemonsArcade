@@ -13,7 +13,14 @@ public class DungeonScale : MonoBehaviour
 
     void Start()
     {
-        Player = FindAnyObjectByType<PlayerController>().gameObject;
+        try
+        {
+            Player = FindAnyObjectByType<PlayerController>().gameObject;
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log(e);
+        }
         loadLevel = FindAnyObjectByType<LoadLevel>();
         StartCoroutine(Scale());
     }
@@ -24,7 +31,10 @@ public class DungeonScale : MonoBehaviour
         gameObject.transform.localScale = new Vector3(scale, scale, scale);
 
         GameObject SpawnPoint = GameObject.Find("_SpawnPoint");
-        Player.transform.position = SpawnPoint.transform.position;
+        if (Player != null)
+        {
+            Player.transform.position = SpawnPoint.transform.position;
+        }
 
         BakeRuntime[] bakeRuntime = GetComponentsInChildren<BakeRuntime>();
         foreach (BakeRuntime bake in bakeRuntime)

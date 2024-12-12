@@ -127,7 +127,7 @@ public class PlayerStatsManager : MonoBehaviour
     #endregion
 
     #region Health
-    public void DamagePlayer(int damageAmount)
+    public void DamagePlayer(float damageAmount)
     {
         statsData.currentHealth = Mathf.Max(0, statsData.currentHealth - damageAmount);
         UpdateHealthBar();
