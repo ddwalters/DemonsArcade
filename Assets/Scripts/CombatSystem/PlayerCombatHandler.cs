@@ -5,7 +5,7 @@ public class PlayerCombatHandler : MonoBehaviour
     bool canAttack;
     bool isAttacking;
 
-    NewControls controls;
+    //NewControls controls;
     bool basicAttackControl;
     bool heavyAttackControl;
 
@@ -25,20 +25,20 @@ public class PlayerCombatHandler : MonoBehaviour
 
         swordRightHandler = GameObject.Find("RightSword").GetComponent<Sword>();
 
-        controls = FindAnyObjectByType<PlayerController>().GetNewControls();
+        //controls = FindAnyObjectByType<PlayerController>().GetNewControls();
     }
 
     private void Awake()
     {
-        controls = new NewControls();
-
-        controls.BasicActionMap.BasicAttack.performed += ctx => basicAttackControl = true;
-        controls.BasicActionMap.BasicAttack.canceled += ctx => basicAttackControl = false;
-
-        controls.BasicActionMap.HeavyAttack.performed += ctx => heavyAttackControl = true;
-        controls.BasicActionMap.HeavyAttack.canceled += ctx => heavyAttackControl = false;
-        
-        controls.Enable();
+        //controls = new NewControls();
+        //
+        //controls.BasicActionMap.BasicAttack.performed += ctx => basicAttackControl = true;
+        //controls.BasicActionMap.BasicAttack.canceled += ctx => basicAttackControl = false;
+        //
+        //controls.BasicActionMap.HeavyAttack.performed += ctx => heavyAttackControl = true;
+        //controls.BasicActionMap.HeavyAttack.canceled += ctx => heavyAttackControl = false;
+        //
+        //controls.Enable();
     }
 
     private void Update()

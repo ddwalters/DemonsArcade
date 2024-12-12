@@ -27,7 +27,7 @@ public class PlayerController : MonoBehaviour
 
     private Vector2 moveInput;
 
-    private NewControls controls;
+    //private NewControls controls;
     private Vector2 lookInput;
     private bool canMoveCamera = true;
     private float xRotation = 0f;
@@ -43,19 +43,19 @@ public class PlayerController : MonoBehaviour
     private void Awake()
     {
         DontDestroyOnLoad(this);
-        controls = new NewControls();
-
-        controls.BasicActionMap.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
-        controls.BasicActionMap.Look.canceled += ctx => lookInput = Vector2.zero;
-
-        controls.BasicActionMap.Movement.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        controls.BasicActionMap.Movement.canceled += ctx => moveInput = Vector2.zero;
-
-        controls.BasicActionMap.Jump.performed += ctx => jumpInput = true;
-        controls.BasicActionMap.Jump.canceled += ctx => jumpInput = false;
-
-        controls.BasicActionMap.Sprint.performed += ctx => sprintInput = true;
-        controls.BasicActionMap.Sprint.canceled += ctx => sprintInput = false;
+        //controls = new NewControls();
+        //
+        //controls.BasicActionMap.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
+        //controls.BasicActionMap.Look.canceled += ctx => lookInput = Vector2.zero;
+        //
+        //controls.BasicActionMap.Movement.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        //controls.BasicActionMap.Movement.canceled += ctx => moveInput = Vector2.zero;
+        //
+        //controls.BasicActionMap.Jump.performed += ctx => jumpInput = true;
+        //controls.BasicActionMap.Jump.canceled += ctx => jumpInput = false;
+        //
+        //controls.BasicActionMap.Sprint.performed += ctx => sprintInput = true;
+        //controls.BasicActionMap.Sprint.canceled += ctx => sprintInput = false;
 
         goldCounter = GameObject.Find("GoldCounter");
     }
@@ -65,8 +65,8 @@ public class PlayerController : MonoBehaviour
         goldCounter = GameObject.Find("GoldCounter");
     }
 
-    private void OnEnable() => controls.BasicActionMap.Enable();
-    private void OnDisable() => controls.BasicActionMap.Disable();
+    //private void OnEnable() => controls.BasicActionMap.Enable();
+    //private void OnDisable() => controls.BasicActionMap.Disable();
 
     private void Start()
     {
@@ -95,7 +95,7 @@ public class PlayerController : MonoBehaviour
             Jump();
     }
 
-    public NewControls GetNewControls() => controls;
+    //public NewControls GetNewControls() => controls;
 
     private void HandleMovement()
     {
@@ -141,8 +141,8 @@ public class PlayerController : MonoBehaviour
     {
         float inputMultiplier = 1f;
 
-        if (controls.BasicActionMap.Look.activeControl != null)
-            inputMultiplier = controls.BasicActionMap.Look.activeControl.device is Mouse ? 1f : joystickScalingFactor;
+        //if (controls.BasicActionMap.Look.activeControl != null)
+        //    inputMultiplier = controls.BasicActionMap.Look.activeControl.device is Mouse ? 1f : joystickScalingFactor;
 
         float mouseX = lookInput.x * sensitivity * inputMultiplier * 0.01f;
         float mouseY = lookInput.y * sensitivity * inputMultiplier * 0.01f;
