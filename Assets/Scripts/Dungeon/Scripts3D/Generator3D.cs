@@ -68,7 +68,6 @@ public class Generator3D : MonoBehaviour
     public List<GameObject> roomList = new List<GameObject>();
     public List<GameObject> hallList = new List<GameObject>();
     public List<GameObject> doorList = new List<GameObject>();
-    public List<GameObject> stairDoorList = new List<GameObject>();
     List<Vector3Int> doorPosList = new List<Vector3Int>();
     List<Room> rooms;
     Delaunay3D delaunay;
@@ -121,7 +120,7 @@ public class Generator3D : MonoBehaviour
 
             bool add = true;
             Room newRoom = new Room(location, roomSize);
-            Room buffer = new Room(location + new Vector3Int(-1, 0, -1), roomSize + new Vector3Int(2, 0, 2));
+            Room buffer = new Room(location + new Vector3Int(-1, -1, -1), roomSize + new Vector3Int(2, 2, 2));
 
             foreach (var room in rooms)
             {
@@ -150,12 +149,6 @@ public class Generator3D : MonoBehaviour
                 }
             }
         }
-    }
-
-    void PlaceTorches()
-    {
-        int rand = Random.Range(1, 3);
-        Debug.Log(rand);
     }
 
     void PlaceRooms() 
@@ -187,7 +180,7 @@ public class Generator3D : MonoBehaviour
 
             bool add = true;
             Room newRoom = new Room(location, roomSize);
-            Room buffer = new Room(location + new Vector3Int(-1, 0, -1), roomSize + new Vector3Int(2, 0, 2));
+            Room buffer = new Room(location + new Vector3Int(-1, -1, -1), roomSize + new Vector3Int(2, 2, 2));
 
             foreach (var room in rooms) {
                 if (Room.Intersect(room, buffer)) {
@@ -537,24 +530,72 @@ public class Generator3D : MonoBehaviour
         Doorway doorScript = go.GetComponent<Doorway>();
 
         var dir = plusX;
-        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs || grid[dir] == CellType.Room))
+        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs))
         {
             doorScript.destroyPlusX();
         }
+        else if (grid.InBounds(dir) && grid[dir] == CellType.Room)
+        {
+            if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
+            {
+                //Debug.Log("Room Below");
+            }
+            else
+            {
+                //Debug.Log(dir + new Vector3Int(0, -1, 0));
+                doorScript.destroyPlusX();
+            }
+        }
         dir = minX;
-        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs || grid[dir] == CellType.Room))
+        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs))
         {
             doorScript.destroyMinX();
         }
+        else if (grid.InBounds(dir) && grid[dir] == CellType.Room)
+        {
+            if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
+            {
+                //Debug.Log("Room Below");
+            }
+            else
+            {
+                //Debug.Log(dir + new Vector3Int(0, -1, 0));
+                doorScript.destroyMinX();
+            }
+        }
         dir = plusZ;
-        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs || grid[dir] == CellType.Room))
+        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs))
         {
             doorScript.destroyPlusZ();
         }
+        else if (grid.InBounds(dir) && grid[dir] == CellType.Room)
+        {
+            if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
+            {
+                //Debug.Log("Room Below");
+            }
+            else
+            {
+                //Debug.Log(dir + new Vector3Int(0, -1, 0));
+                doorScript.destroyPlusZ();
+            }
+        }
         dir = minZ;
-        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs || grid[dir] == CellType.Room))
+        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs))
         {
             doorScript.destroyMinZ();
+        }
+        else if (grid.InBounds(dir) && grid[dir] == CellType.Room)
+        {
+            if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
+            {
+                //Debug.Log("Room Below");
+            }
+            else
+            {
+                //Debug.Log(dir + new Vector3Int(0, -1, 0));
+                doorScript.destroyMinZ();
+            }
         }
     }
 
@@ -568,24 +609,72 @@ public class Generator3D : MonoBehaviour
         Doorway doorScript = go.GetComponent<Doorway>();
 
         var dir = plusX;
-        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs || grid[dir] == CellType.Room))
+        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs))
         {
             doorScript.destroyPlusX();
         }
+        else if (grid.InBounds(dir) && grid[dir] == CellType.Room)
+        {
+            if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
+            {
+                //Debug.Log("Room Below");
+            }
+            else
+            {
+                //Debug.Log(dir + new Vector3Int(0, -1, 0));
+                doorScript.destroyPlusX();
+            }
+        }
         dir = minX;
-        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs || grid[dir] == CellType.Room))
+        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs))
         {
             doorScript.destroyMinX();
         }
+        else if (grid.InBounds(dir) && grid[dir] == CellType.Room)
+        {
+            if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
+            {
+                //Debug.Log("Room Below");
+            }
+            else
+            {
+                //Debug.Log(dir + new Vector3Int(0, -1, 0));
+                doorScript.destroyMinX();
+            }
+        }
         dir = plusZ;
-        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs || grid[dir] == CellType.Room))
+        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs))
         {
             doorScript.destroyPlusZ();
         }
+        else if (grid.InBounds(dir) && grid[dir] == CellType.Room)
+        {
+            if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
+            {
+                //Debug.Log("Room Below");
+            }
+            else
+            {
+                //Debug.Log(dir + new Vector3Int(0, -1, 0));
+                doorScript.destroyPlusZ();
+            }
+        }
         dir = minZ;
-        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs || grid[dir] == CellType.Room))
+        if (grid.InBounds(dir) && (grid[dir] == CellType.Hallway || grid[dir] == CellType.Doorway || grid[dir] == CellType.Stairs))
         {
             doorScript.destroyMinZ();
+        }
+        else if (grid.InBounds(dir) && grid[dir] == CellType.Room)
+        {
+            if (grid[dir + new Vector3Int(0, -1, 0)] == CellType.Room)
+            {
+                //Debug.Log("Room Below");
+            }
+            else
+            {
+                //Debug.Log(dir + new Vector3Int(0, -1, 0));
+                doorScript.destroyMinZ();
+            }
         }
     }
 
