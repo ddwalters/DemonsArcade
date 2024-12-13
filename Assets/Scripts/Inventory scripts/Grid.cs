@@ -33,6 +33,7 @@ public class Grid : MonoBehaviour
         items = gridReader.GetGridItems(gridId);
     }
 
+    #region Actions
     public void OpenGridMenu()
     {
         switch (gridType)
@@ -70,6 +71,7 @@ public class Grid : MonoBehaviour
                 break;
         }
     }
+    #endregion
 
     #region Player Grid __ NOT IMPLEMENTED
     void OpenPlayer()
@@ -86,7 +88,6 @@ public class Grid : MonoBehaviour
     #region Equipment Grid __ NOT IMPLEMENTED
     void OpenEquipment()
     {
-
     }
 
     void CloseEquipment()
