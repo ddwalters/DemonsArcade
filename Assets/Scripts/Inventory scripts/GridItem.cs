@@ -1,9 +1,9 @@
-//using System.Collections;
-//using System.Collections.Generic;
-//using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-//[CreateAssetMenu(fileName = "ItemData", menuName = "Inventory/ItemData")]
-//public class GridItem : ScriptableObject
-//{
+[CreateAssetMenu(fileName = "GridItem", menuName = "Inventory/GridItem")]
+public class GridItem : ScriptableObject
+{
 
-//}
+}

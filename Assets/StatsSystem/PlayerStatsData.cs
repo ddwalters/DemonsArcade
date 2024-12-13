@@ -1,6 +1,5 @@
 public class PlayerStatsData
 {
-    public InventoryType inventoryType;
     public int lvl;
     public int nextLevelXP;
     public int currentXP;
@@ -13,8 +12,6 @@ public class PlayerStatsData
 
     public PlayerStatsData()
     {
-        inventoryType = InventoryType.FourByFourFull;
-
         lvl = 1;
         nextLevelXP = 500;
 

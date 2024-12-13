@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class GridItem : MonoBehaviour
+public class GridSlot : MonoBehaviour
 {
     (int x, int y) gridSlot;
 
