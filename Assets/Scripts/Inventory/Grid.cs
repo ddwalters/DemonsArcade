@@ -46,6 +46,11 @@ public class Grid : MonoBehaviour
         {
             playerLayoutGroup = GetComponentInChildren<GridLayoutGroup>();
         }
+
+        if (gridType == GridType.Equipment)
+        {
+            
+        }
     }
 
     private void Update()
@@ -115,7 +120,10 @@ public class Grid : MonoBehaviour
 
     void ClosePlayer()
     {
-        itemSlotPrefabs.Clear();
+        foreach (GameObject go in itemSlotPrefabs)
+        {
+            Destroy(go);
+        }
     }
     #endregion
 
