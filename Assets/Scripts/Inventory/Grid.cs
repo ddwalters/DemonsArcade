@@ -23,24 +23,26 @@ public class Grid : MonoBehaviour
     [SerializeField] GameObject slotPrefab; //@DW this needs to become a scriptable object
 
     private GridLayoutGroup playerLayoutGroup;
+    private GridLayoutGroup armourLayoutGroup;
+    private GridLayoutGroup weaponLayoutGroup;
+    private GridLayoutGroup accessLayoutGroup;
 
-    public bool yes = false;
-
-    public bool no = false;
+    public bool isOpen = false;
 
     private void Awake()
     {
-        //gridReader = FindAnyObjectByType<GridManager>();
+        //gridReader = FindAnyObjectByType<GridManager>(); //changed may not work
+        gridReader = GetComponentInParent<IGridReader>();
     }
 
     private void OnEnable()
     {
-        //gridId = gridReader.GetNewGridId();
+        gridId = gridReader.GetNewGridId();
     }
 
     void Start()
     {
-        //items = gridReader.GetGridItems(gridId);
+        items = gridReader.GetGridItems(gridId);
 
         if (gridType == GridType.Player)
         {
@@ -49,23 +51,15 @@ public class Grid : MonoBehaviour
 
         if (gridType == GridType.Equipment)
         {
-            
+            armourLayoutGroup = GameObject.Find("InventoryManager/Panel/Player_Equipment/ItemParent/Armour").GetComponent<GridLayoutGroup>();
+            weaponLayoutGroup = GameObject.Find("InventoryManager/Panel/Player_Equipment/ItemParent/Hands").GetComponent<GridLayoutGroup>();
+            accessLayoutGroup = GameObject.Find("InventoryManager/Panel/Player_Equipment/ItemParent/Accessory").GetComponent<GridLayoutGroup>();
         }
     }
 
     private void Update()
     {
-        if (yes)
-        {
-            OpenPlayer();
-            yes = false;
-        }
 
-        if (no)
-        {
-            ClosePlayer();
-            no = false;
-        }
     }
 
     #region Actions
@@ -111,6 +105,7 @@ public class Grid : MonoBehaviour
     #region Player Grid __ NOT IMPLEMENTED
     void OpenPlayer()
     {
+        isOpen = true;
         for (int i = 1; i <= 25; i++)
         {
             GameObject go = Instantiate(slotPrefab, playerLayoutGroup.transform);
@@ -120,6 +115,7 @@ public class Grid : MonoBehaviour
 
     void ClosePlayer()
     {
+        isOpen = false;
         foreach (GameObject go in itemSlotPrefabs)
         {
             Destroy(go);
@@ -130,11 +126,34 @@ public class Grid : MonoBehaviour
     #region Equipment Grid __ NOT IMPLEMENTED
     void OpenEquipment()
     {
+        isOpen = true;
+        for (int i = 1; i <= 7; i++)
+        {
+            if (i !<= 4)
+            {
+                GameObject go = Instantiate(slotPrefab, armourLayoutGroup.transform);
+                itemSlotPrefabs.Add(go);
+            }
+            else if (i == 6)
+            {
+                GameObject go = Instantiate(slotPrefab, accessLayoutGroup.transform);
+                itemSlotPrefabs.Add(go);
+            }
+            else
+            {
+                GameObject go = Instantiate(slotPrefab, weaponLayoutGroup.transform);
+                itemSlotPrefabs.Add(go);
+            }
+        }
     }
 
     void CloseEquipment()
     {
-
+        isOpen = false;
+        foreach (GameObject go in itemSlotPrefabs)
+        {
+            Destroy(go);
+        }
     }
     #endregion
 
