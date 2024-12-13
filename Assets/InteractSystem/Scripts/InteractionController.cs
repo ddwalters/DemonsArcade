@@ -56,15 +56,15 @@ public class InteractionController : MonoBehaviour
     {
         if (_lootingInteracted)
         {
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                var grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
-                foreach (var grid in grids)
-                    grid.CloseGrid();
-
-                Cursor.lockState = CursorLockMode.Locked;
-                _lootingInteracted = false;
-            }
+            //if (Input.GetKeyDown(KeyCode.E))
+            //{
+            //    var grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
+            //    foreach (var grid in grids)
+            //        grid.CloseGrid();
+            //
+            //    Cursor.lockState = CursorLockMode.Locked;
+            //    _lootingInteracted = false;
+            //}
 
             return;
         }
