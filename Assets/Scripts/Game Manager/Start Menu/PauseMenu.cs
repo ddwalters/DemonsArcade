@@ -22,11 +22,9 @@ public class PauseMenu : MonoBehaviour
     public AudioMixer audioMixer;
     public Slider volume;
     public int Volume;
-    public TMP_Text volumeText;
     [Header("Sensitivity")]
     public Slider sensitivity;
     public int Sensitivity;
-    public TMP_Text sensitivityText;
 
     private bool isOptionsMenuActive = false;
 
@@ -80,7 +78,6 @@ public class PauseMenu : MonoBehaviour
         {
             // Update volume settings
             Volume = (int)volume.value;
-            volumeText.text = Volume + "%";
 
             // Map the 0-100 slider value to -80 to 0 for the audio mixer
             float mappedVolume = Map(Volume, 0, 100, -80, 0);
@@ -88,7 +85,6 @@ public class PauseMenu : MonoBehaviour
 
             // Update sensitivity settings
             Sensitivity = (int)sensitivity.value;
-            sensitivityText.text = Sensitivity.ToString();
         }
     }
 
