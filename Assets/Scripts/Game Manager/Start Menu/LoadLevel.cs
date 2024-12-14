@@ -66,9 +66,7 @@ public class LoadLevel : MonoBehaviour
             playerInteraction = player.GetComponent<InteractionController>();
         }
 
-        playerController.GetNewComponents();
         playerStats.GetNewComponents();
-        playerInteraction.GetNewComponents();
     }
 
     public void DungeonComplete()

@@ -279,8 +279,7 @@ public class PlayerStatsManager : MonoBehaviour
 
     private void PlayerDeath()
     {
-        controller.DisableCameraMovement();
-        controller.DisableMovement();
+        controller.TogglePlayerMovement();
         BloodyScreenAnim.SetTrigger("Die");
     }
 }
