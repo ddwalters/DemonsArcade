@@ -8,6 +8,5 @@ public class ChestInteractable : InteractableBase
     public override void OnInteract()
     {
         base.OnInteract();
-
     }
 }

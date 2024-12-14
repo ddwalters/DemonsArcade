@@ -1,12 +1,20 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.Audio;
 using TMPro;
 
-public class PauseMenu : MonoBehaviour
+interface IPauseMenu
+{
+    bool GetIsPaused();
+
+    void options();
+
+    void resume();
+}
+
+public class PauseMenu : MonoBehaviour, IPauseMenu
 {
     [Header("OPTION MENU")]
     public GameObject GameManager;
@@ -62,18 +70,6 @@ public class PauseMenu : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (isOptionsMenuActive)
-            {
-                resume();
-            }
-            else
-            {
-                options();
-            }
-        }
-
         if (isOptionsMenuActive)
         {
             // Update volume settings
@@ -88,14 +84,14 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
+    public bool GetIsPaused() => isOptionsMenuActive;
+
     public void options()
     {
         optionsMenu.SetActive(true);
         Cursor.lockState = CursorLockMode.Confined;
         Cursor.visible = true;
-        //playerController.DisableCameraMovement();
         isOptionsMenuActive = true;
-        Cursor.visible = true;
     }
 
     public void resume()
@@ -103,9 +99,7 @@ public class PauseMenu : MonoBehaviour
         optionsMenu.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-        //playerController.EnableCameraMovement();
         isOptionsMenuActive = false;
-        Cursor.visible = false;
         EventSystem.current.SetSelectedGameObject(null);
     }
 

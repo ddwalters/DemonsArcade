@@ -17,7 +17,7 @@ interface IGridCreator
     void CloseGridMenu();
 }
 
-public class Grid : MonoBehaviour
+public class Grid : MonoBehaviour, IGridCreator
 {
     private IGridReader gridReader;
 
@@ -27,14 +27,15 @@ public class Grid : MonoBehaviour
 
     [SerializeField] GridType gridType;
 
-    [SerializeField] GameObject slotPrefab; //@DW this needs to become a scriptable object
+    //It should be a script with both the slot and list?
+    GameObject slotPrefab;
 
     private GridLayoutGroup playerLayoutGroup;
     private GridLayoutGroup armourLayoutGroup;
     private GridLayoutGroup weaponLayoutGroup;
     private GridLayoutGroup accessLayoutGroup;
 
-    public bool isOpen = false;
+    private bool isOpen = false;
 
     private void Awake()
     {
@@ -49,6 +50,7 @@ public class Grid : MonoBehaviour
     void Start()
     {
         items = gridReader.GetGridItems(gridId);
+        slotPrefab = gridReader.GetSlotPrefab();
 
         if (gridType == GridType.Player)
         {
@@ -81,6 +83,9 @@ public class Grid : MonoBehaviour
                 OpenVendor();
                 break;
         }
+
+        Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
     }
 
     public void CloseGridMenu()
@@ -100,6 +105,9 @@ public class Grid : MonoBehaviour
                 CloseVendor();
                 break;
         }
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
     #endregion
 
@@ -161,7 +169,7 @@ public class Grid : MonoBehaviour
     #region Chest Grid __ NOT IMPLEMENTED
     void OpenChest()
     {
-
+        Debug.Log("Chest!");
     }
 
     void CloseChest()
@@ -173,7 +181,7 @@ public class Grid : MonoBehaviour
     #region Vendor Grid __ NOT IMPLEMENTED
     void OpenVendor()
     {
-
+        Debug.Log("Chest!");
     }
 
     void CloseVendor()

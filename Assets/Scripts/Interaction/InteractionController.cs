@@ -14,8 +14,9 @@ public class InteractionController : MonoBehaviour
     [SerializeField] private float raySphereRadius;
     [SerializeField] private LayerMask interactableLayer;
 
-    private IGridCreator gridCreator;
-    private PlayerControls playerControls;
+    private IGridCreator _gridCreator;
+    private IPauseMenu _pauseMenu;
+    private PlayerControls _playerControls;
     private Camera _camera;
 
     private bool _interacting;
@@ -24,18 +25,29 @@ public class InteractionController : MonoBehaviour
 
     private void Awake()
     {
-        playerControls = new PlayerControls();
+        _playerControls = new PlayerControls();
         _camera = FindAnyObjectByType<Camera>();
+        _pauseMenu = FindAnyObjectByType<PauseMenu>();
     }
 
     private void OnEnable()
     {
-        playerControls.Enable();
+        _playerControls.Enable();
     }
 
     private void OnDisable()
     {
-        playerControls.Disable();
+        _playerControls.Disable();
+    }
+
+    private void Update()
+    {
+        if (_gridCreator == null)
+        {
+            _gridCreator = gameObject.GetComponent<IGridCreator>(); // @DW Player grid wont be stored on player, what if opening armor?
+            if (_gridCreator == null)
+                Debug.Log("Can't retrive player grid");
+        }
     }
 
     public void OnInteract(InputAction.CallbackContext context)
@@ -48,23 +60,36 @@ public class InteractionController : MonoBehaviour
             bool hitSomething = Physics.SphereCast(ray, raySphereRadius, out var hit, rayDistance, interactableLayer);
             Debug.DrawRay(ray.origin, ray.direction * rayDistance, hitSomething ? Color.green : Color.red);
 
-            Debug.Log($"Interated: {hit.collider.name}");
             if (hitSomething)
             {
-                Cursor.lockState = CursorLockMode.Locked;
-                gridCreator = hit.collider.GetComponent<IGridCreator>();
-                gridCreator.OpenGridMenu();
+                Cursor.lockState = CursorLockMode.Confined;
+                _gridCreator = hit.collider.GetComponentInParent<Grid>();
+                if (_gridCreator != null)
+                    _gridCreator.OpenGridMenu();
+            }
+            else
+            {
+                _interacting = false;
             }
         }
         else
         {
-            Cursor.lockState = CursorLockMode.Locked;
+            _gridCreator.CloseGridMenu();
+            _interacting = false;
+        }
+    }
 
-            gridCreator.CloseGridMenu();
-
-            gridCreator = gameObject.GetComponent<IGridCreator>();
+    public void OnPause(InputAction.CallbackContext context)
+    {
+        if (_interacting)
+        {
+            _interacting = false;
+            _gridCreator.CloseGridMenu();
         }
 
-        _interacting = false;
+        if (_pauseMenu.GetIsPaused())
+            _pauseMenu.resume();
+        else
+            _pauseMenu.options();
     }
 }
