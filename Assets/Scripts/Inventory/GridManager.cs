@@ -15,13 +15,14 @@ public interface IGridWriter
 
 public class GridManager : MonoBehaviour, IGridWriter, IGridReader
 {
-    private IDictionary<int, List<((int x, int y), int itemData)>> _grids;
+    private IDictionary<int, List<((int x, int y), int itemData)>> _grids = new Dictionary<int, List<((int x, int y), int itemData)>>();
+
 
     public int GetNewGridId()
     {
-        _grids.Add(_grids.Count + 1, new List<((int x, int y), int itemData)>());
+        _grids.Add(_grids.Count, new List<((int x, int y), int itemData)>());
 
-        return _grids.Count;
+        return _grids.Count - 1;
     }
 
     public List<((int x, int y), int itemData)> GetGridItems(int id)

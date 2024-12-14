@@ -1,4 +1,6 @@
+using UnityEditor.ShaderGraph;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class InteractionController : MonoBehaviour
 {
@@ -6,153 +8,63 @@ public class InteractionController : MonoBehaviour
     [SerializeField] private InteractionInputData interactionInputData;
     [SerializeField] private InteractionData interactionData;
 
-    [Header("UI")]
-    [SerializeField] private InteractionUIPanel uiPanel;
-    [SerializeField] private GameObject playerHud;
-    [SerializeField] private GameObject playerBackpack;
-
     [Space]
     [Header("Ray Settings")]
     [SerializeField] private float rayDistance;
     [SerializeField] private float raySphereRadius;
     [SerializeField] private LayerMask interactableLayer;
 
+    private IGridCreator gridCreator;
+    private PlayerControls playerControls;
     private Camera _camera;
 
     private bool _interacting;
-
-    private bool _lootingInteracted;
 
     private float _holdTimer = 0f;
 
     private void Awake()
     {
+        playerControls = new PlayerControls();
         _camera = FindAnyObjectByType<Camera>();
-        playerBackpack = GameObject.Find("Inventory");
-        playerHud = GameObject.Find("PlayerHud");
-        uiPanel = FindAnyObjectByType<InteractionUIPanel>();
     }
 
-    public void GetNewComponents()
+    private void OnEnable()
     {
-        playerBackpack = GameObject.Find("Inventory");
-        playerHud = GameObject.Find("PlayerHud");
-        uiPanel = FindAnyObjectByType<InteractionUIPanel>();
+        playerControls.Enable();
     }
 
-    private void Update()
+    private void OnDisable()
     {
-        interactionInputData.InteractClicked = Input.GetKeyDown(KeyCode.E);
-        interactionInputData.InteractRelease = Input.GetKeyUp(KeyCode.E);
-
-        if (uiPanel == null)
-            return;
-        
-        CheckForInteractable();
-        CheckForInteractableInput();
+        playerControls.Disable();
     }
 
-    private void CheckForInteractable()
+    public void OnInteract(InputAction.CallbackContext context)
     {
-        if (_lootingInteracted)
+        if (!_interacting)
         {
-            // @DW This will need a revamp with the new Inventory
-            //if (Input.GetKeyDown(KeyCode.E))
-            //{
-            //    var grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
-            //    foreach (var grid in grids)
-            //        grid.CloseGrid();
-            //
-            //    Cursor.lockState = CursorLockMode.Locked;
-            //    _lootingInteracted = false;
-            //}
+            _interacting = true;
 
-            return;
-        }
+            Ray ray = new Ray(_camera.transform.position, _camera.transform.forward);
+            bool hitSomething = Physics.SphereCast(ray, raySphereRadius, out var hit, rayDistance, interactableLayer);
+            Debug.DrawRay(ray.origin, ray.direction * rayDistance, hitSomething ? Color.green : Color.red);
 
-        Ray ray = new Ray(_camera.transform.position, _camera.transform.forward);
-        bool hitSomething = Physics.SphereCast(ray, raySphereRadius, out var hit, rayDistance, interactableLayer);
-
-        if (hitSomething)
-        {
-            InteractableBase interactable = hit.transform.GetComponentInParent<InteractableBase>();
-
-            if (interactable != null)
+            Debug.Log($"Interated: {hit.collider.name}");
+            if (hitSomething)
             {
-                if (interactionData.IsEmpty())
-                {
-                    interactionData.Interactable = interactable;
-                    uiPanel.SetToolTip(interactable.TooltipMessage);
-                }
-                else
-                {
-                    if (!interactionData.IsSameInteractable(interactable))
-                    {
-                        interactionData.Interactable = interactable;
-                        uiPanel.SetToolTip(interactable.TooltipMessage);
-                    }
-                }
+                Cursor.lockState = CursorLockMode.Locked;
+                gridCreator = hit.collider.GetComponent<IGridCreator>();
+                gridCreator.OpenGridMenu();
             }
         }
         else
         {
-            uiPanel.ResetUI();
-            interactionData.ResetData();
+            Cursor.lockState = CursorLockMode.Locked;
+
+            gridCreator.CloseGridMenu();
+
+            gridCreator = gameObject.GetComponent<IGridCreator>();
         }
 
-        Debug.DrawRay(ray.origin, ray.direction * rayDistance, hitSomething ? Color.green : Color.red);
-    }
-
-    private void CheckForInteractableInput()
-    {
-        if (interactionData.IsEmpty() || _lootingInteracted)
-        {
-            _holdTimer = 0f;
-            uiPanel.UpdateProgressBar(_holdTimer);
-            return;
-        }
-
-        if (interactionInputData.InteractClicked)
-        {
-            _interacting = true;
-            _holdTimer = 0f;
-        }
-
-        if (interactionInputData.InteractRelease)
-        {
-            _interacting = false;
-            _holdTimer = 0f;
-            uiPanel.UpdateProgressBar(_holdTimer);
-        }
-
-        if (_interacting)
-        {
-            if (!interactionData.Interactable.IsInteractable)
-                return;
-
-            if (interactionData.Interactable.HoldInteract)
-            {
-                _holdTimer += Time.deltaTime;
-
-                float progressTimer = _holdTimer / interactionData.Interactable.HoldDuration;
-                uiPanel.UpdateProgressBar(progressTimer);
-
-                if (progressTimer > 1f)
-                {
-                    interactionData.Interact();
-                    _interacting = false;
-                }
-            }
-            else
-            {
-                interactionData.Interact();
-                _interacting = false;
-            }
-        }
-    }
-
-    public void SetLootingInteracted()
-    {
-        _lootingInteracted = true;
+        _interacting = false;
     }
 }

@@ -10,6 +10,13 @@ enum GridType
     Vendor
 }
 
+interface IGridCreator
+{
+    void OpenGridMenu();
+
+    void CloseGridMenu();
+}
+
 public class Grid : MonoBehaviour
 {
     private IGridReader gridReader;
@@ -31,7 +38,6 @@ public class Grid : MonoBehaviour
 
     private void Awake()
     {
-        //gridReader = FindAnyObjectByType<GridManager>(); //changed may not work
         gridReader = GetComponentInParent<IGridReader>();
     }
 
@@ -55,11 +61,6 @@ public class Grid : MonoBehaviour
             weaponLayoutGroup = GameObject.Find("InventoryManager/Panel/Player_Equipment/ItemParent/Hands").GetComponent<GridLayoutGroup>();
             accessLayoutGroup = GameObject.Find("InventoryManager/Panel/Player_Equipment/ItemParent/Accessory").GetComponent<GridLayoutGroup>();
         }
-    }
-
-    private void Update()
-    {
-
     }
 
     #region Actions

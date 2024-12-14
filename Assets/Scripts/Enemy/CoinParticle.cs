@@ -49,7 +49,7 @@ public class CoinParticle : MonoBehaviour
         {
             ParticleSystem.Particle p = particles[i];
             p.remainingLifetime = 0f;
-            controller.goldAmount++;
+            //controller.goldAmount++; @DW This should be stored elsewhere
             
             particles[i] = p;
         }

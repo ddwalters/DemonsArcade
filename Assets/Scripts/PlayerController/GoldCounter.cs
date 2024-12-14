@@ -10,16 +10,15 @@ public class GoldCounter : MonoBehaviour
     public PlayerController controller;
     public TMP_Text text;
 
-    // Start is called before the first frame update
     void Start()
     {
         Player = FindAnyObjectByType<PlayerController>().gameObject;
         controller = Player.GetComponent<PlayerController>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        text.text = controller.goldAmount + "";
+        //@DW Is this how we want to do gold?
+        //text.text = controller.goldAmount + "";
     }
 }

@@ -3,173 +3,123 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    private PlayerStatsManager statsManager;
+    private PlayerControls _playerControls;
 
-    [Header("Settings")]
-    [SerializeField] private float walkSpeed = 5f;
-    [SerializeField] private float sprintSpeed = 7f;
-    [SerializeField] private float sensitivity = 2f;
-    [SerializeField] private float joystickScalingFactor = 2f;
-    [SerializeField] private float jumpForce = 5f;
-    [SerializeField] private float sprintFOV = 90f;
-    [SerializeField] private float normalFOV = 80f;
-    [SerializeField] private float fovLerpSpeed = 5f;
-    [SerializeField] private float staminaUsageRate = 1f;
-    [Space]
-    [Header("Components")]
-    [SerializeField] private LayerMask floorMask;
-    [SerializeField] private Camera cam;
-    [SerializeField] private Rigidbody rb;
-    [SerializeField] private Transform playerBody;
+    [Header("Movement Settings")]
+    public float moveSpeed = 5f;
+    public float jumpForce = 5f;
 
-    public int goldAmount;
-    public GameObject goldCounter;
+    [Header("Look Settings")]
+    public float lookSpeed = 2f;
+    public Vector2 lookSensitivity = new Vector2(1f, 1f);
 
-    private Vector2 moveInput;
+    [Header("Ground Check")]
+    public Transform groundCheck;
+    public float groundDistance = 0.4f;
+    public LayerMask groundMask;
 
-    private NewControls controls;
-    private Vector2 lookInput;
-    private bool canMoveCamera = true;
-    private float xRotation = 0f;
+    private Vector2 _moveInput;
+    private Vector2 _lookInput;
+    private Transform _cameraTransform;
+    private Rigidbody _rb;
 
-    private bool isGrounded;
-    private bool jumpInput;
+    private float _verticalLookRotation = 0f;
+    private bool _isGrounded;
 
-    private bool sprintInput;
-    private float currentSpeed;
-    private bool sprintCooldown;
-    private bool canMove = true;
+    private bool _allowedControl;
 
     private void Awake()
     {
-        DontDestroyOnLoad(this);
-        controls = new NewControls();
+        _playerControls = new PlayerControls();
 
-        controls.BasicActionMap.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
-        controls.BasicActionMap.Look.canceled += ctx => lookInput = Vector2.zero;
-
-        controls.BasicActionMap.Movement.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        controls.BasicActionMap.Movement.canceled += ctx => moveInput = Vector2.zero;
-
-        controls.BasicActionMap.Jump.performed += ctx => jumpInput = true;
-        controls.BasicActionMap.Jump.canceled += ctx => jumpInput = false;
-
-        controls.BasicActionMap.Sprint.performed += ctx => sprintInput = true;
-        controls.BasicActionMap.Sprint.canceled += ctx => sprintInput = false;
-
-        goldCounter = GameObject.Find("GoldCounter");
+        _cameraTransform = GetComponentInChildren<Camera>().transform;
+        _rb = GetComponent<Rigidbody>();
+        _allowedControl = true;
     }
 
-    public void GetNewComponents()
+    private void OnEnable()
     {
-        goldCounter = GameObject.Find("GoldCounter");
+        _playerControls.Enable();
     }
 
-    private void OnEnable() => controls.BasicActionMap.Enable();
-    private void OnDisable() => controls.BasicActionMap.Disable();
-
-    private void Start()
+    private void OnDisable()
     {
-        statsManager = GetComponent<PlayerStatsManager>();
-        cam = gameObject.GetComponentInChildren<Camera>();
-        rb = gameObject.GetComponent<Rigidbody>();
-
-        Cursor.lockState = CursorLockMode.Locked;
+        _playerControls.Disable();
     }
 
-    void Update()
+
+    float _sprintMultiplier = 1.0f;
+    [SerializeField]bool _isSprinting = false;
+    public void OnMove(InputAction.CallbackContext context)
     {
-        if (canMoveCamera)
-            LookAround();
+        if (!_isSprinting)
+            _sprintMultiplier = 1.0f;
+
+        _moveInput = context.ReadValue<Vector2>() * _sprintMultiplier;
     }
 
-    private void FixedUpdate()
+    public void OnSprint(InputAction.CallbackContext context)
     {
-        if (!canMove)
+        if (_isSprinting)
             return;
 
-        HandleMovement();
-        Sprint();
-
-        if (jumpInput && isGrounded) 
-            Jump();
+        _isSprinting = true;
+        float forwardFactor = Mathf.Lerp(0, 1, Mathf.Abs(_moveInput.y));
+        _sprintMultiplier *= (1 + forwardFactor);
     }
 
-    public NewControls GetNewControls() => controls;
-
-    private void HandleMovement()
+    public void OnLook(InputAction.CallbackContext context)
     {
-        float moveX = moveInput.x;
-        float moveZ = moveInput.y;
+        _lookInput = context.ReadValue<Vector2>() * lookSensitivity;
+    }
+
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        if (context.performed && _isGrounded && _allowedControl)
+        {
+            Vector3 jumpVelocity = Vector3.up * jumpForce;
+            _rb.AddForce(jumpVelocity, ForceMode.Impulse);
+        }
+    }
+
+    private void Update()
+    {
+        if (!_allowedControl)
+            return;
+
+        CheckGroundStatus();
+        MovePlayer();
+        LookAround();
+    }
+
+    private void CheckGroundStatus()
+    {
+        _isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+    }
+
+    private void MovePlayer()
+    {
+        float moveX = _moveInput.x;
+        float moveZ = _moveInput.y;
         Vector3 move = transform.right * moveX + transform.forward * moveZ;
 
-        currentSpeed = sprintInput ? sprintSpeed : walkSpeed;
-        Vector3 velocity = move * currentSpeed;
-        velocity.y = rb.velocity.y;
-        rb.velocity = velocity;
-
-        if (sprintCooldown && statsManager.GetStamina() >= statsManager.GetMaxStamina() - 1)
-            sprintCooldown = false;
-    }
-
-    private void Sprint()
-    {
-        if (statsManager.GetStamina() <= 0)
-            sprintCooldown = true;
-
-        if (sprintInput && !sprintCooldown)
-        {
-            cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, sprintFOV, Time.deltaTime * fovLerpSpeed);
-            statsManager.StartUsingStamina();
-            statsManager.UseStamina(staminaUsageRate * Time.deltaTime);
-        }
-        else
-        {
-            cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, normalFOV, Time.deltaTime * fovLerpSpeed);
-            statsManager.StopUsingStamina();
-        }
-    }
-
-    private void Jump()
-    {
-        Vector3 jumpVelocity = Vector3.up * jumpForce;
-        rb.AddForce(jumpVelocity, ForceMode.Impulse);
-        jumpInput = false;
+        Vector3 velocity = move * moveSpeed;
+        velocity.y = _rb.velocity.y;
+        _rb.velocity = velocity;
     }
 
     private void LookAround()
     {
-        float inputMultiplier = 1f;
+        transform.Rotate(Vector3.up * _lookInput.x * lookSpeed);
 
-        if (controls.BasicActionMap.Look.activeControl != null)
-            inputMultiplier = controls.BasicActionMap.Look.activeControl.device is Mouse ? 1f : joystickScalingFactor;
+        _verticalLookRotation -= _lookInput.y * lookSpeed;
+        _verticalLookRotation = Mathf.Clamp(_verticalLookRotation, -90f, 90f);
 
-        float mouseX = lookInput.x * sensitivity * inputMultiplier * 0.01f;
-        float mouseY = lookInput.y * sensitivity * inputMultiplier * 0.01f;
-
-        playerBody.Rotate(Vector3.up * mouseX);
-
-        xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-
-        cam.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        _cameraTransform.localRotation = Quaternion.Euler(_verticalLookRotation, 0f, 0f);
     }
 
-    public void EnableCameraMovement() => canMoveCamera = true;
-    public void DisableCameraMovement() => canMoveCamera = false;
-
-    public void EnableMovement() => canMove = true;
-    public void DisableMovement() => canMove = false;
-
-    private void OnCollisionEnter(Collision collision)
+    public void TogglePlayerMovement()
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
-            isGrounded = true;
-    }
-
-    private void OnCollisionExit(Collision collision)
-    {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
-            isGrounded = false;
+        _allowedControl = false;
     }
 }
