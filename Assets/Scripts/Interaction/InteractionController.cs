@@ -16,7 +16,7 @@ public class InteractionController : MonoBehaviour
 
     private IGridCreator _gridCreator;
     private IPauseMenu _pauseMenu;
-    private PlayerControls _playerControls;
+    private PlayerInput _playerInput;
     private Camera _camera;
 
     private bool _interacting;
@@ -25,28 +25,18 @@ public class InteractionController : MonoBehaviour
 
     private void Awake()
     {
-        _playerControls = new PlayerControls();
+        _playerInput = FindAnyObjectByType<PlayerInput>();
         _camera = FindAnyObjectByType<Camera>();
         _pauseMenu = FindAnyObjectByType<PauseMenu>();
-    }
-
-    private void OnEnable()
-    {
-        _playerControls.Enable();
-    }
-
-    private void OnDisable()
-    {
-        _playerControls.Disable();
     }
 
     private void Update()
     {
         if (_gridCreator == null)
         {
-            _gridCreator = gameObject.GetComponent<IGridCreator>(); // @DW Player grid wont be stored on player, what if opening armor?
-            if (_gridCreator == null)
-                Debug.Log("Can't retrive player grid");
+            //_gridCreator = gameObject.GetComponent<IGridCreator>(); // @DW Player grid wont be stored on player, what if opening armor?
+            //if (_gridCreator == null)
+            //    Debug.Log("Can't retrive player grid");
         }
     }
 
@@ -88,8 +78,17 @@ public class InteractionController : MonoBehaviour
         }
 
         if (_pauseMenu.GetIsPaused())
+        {
+            _playerInput.SwitchCurrentActionMap("Player");
+            
+
             _pauseMenu.resume();
+        }
         else
+        {
+            _playerInput.SwitchCurrentActionMap("Default/UI");
+
             _pauseMenu.options();
+        }
     }
 }

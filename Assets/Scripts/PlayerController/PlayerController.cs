@@ -3,7 +3,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    private PlayerControls _playerControls;
+    private PlayerInput _playerInput;
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -30,23 +30,13 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        _playerControls = new PlayerControls();
-
         _cameraTransform = GetComponentInChildren<Camera>().transform;
         _rb = GetComponent<Rigidbody>();
         _allowedControl = true;
-    }
 
-    private void OnEnable()
-    {
-        _playerControls.Enable();
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
-
-    private void OnDisable()
-    {
-        _playerControls.Disable();
-    }
-
 
     float _sprintMultiplier = 1.0f;
     [SerializeField]bool _isSprinting = false;
@@ -70,7 +60,7 @@ public class PlayerController : MonoBehaviour
 
     public void OnLook(InputAction.CallbackContext context)
     {
-        _lookInput = context.ReadValue<Vector2>() * lookSensitivity;
+            _lookInput = context.ReadValue<Vector2>() * lookSensitivity;
     }
 
     public void OnJump(InputAction.CallbackContext context)
@@ -87,9 +77,9 @@ public class PlayerController : MonoBehaviour
         if (!_allowedControl)
             return;
 
-        CheckGroundStatus();
-        MovePlayer();
         LookAround();
+        MovePlayer();
+        CheckGroundStatus();
     }
 
     private void CheckGroundStatus()
@@ -110,9 +100,9 @@ public class PlayerController : MonoBehaviour
 
     private void LookAround()
     {
-        transform.Rotate(Vector3.up * _lookInput.x * lookSpeed);
+        transform.Rotate(Vector3.up * _lookInput.x * lookSpeed * Time.deltaTime);
 
-        _verticalLookRotation -= _lookInput.y * lookSpeed;
+        _verticalLookRotation -= _lookInput.y * lookSpeed * 3.5f * Time.deltaTime;
         _verticalLookRotation = Mathf.Clamp(_verticalLookRotation, -90f, 90f);
 
         _cameraTransform.localRotation = Quaternion.Euler(_verticalLookRotation, 0f, 0f);

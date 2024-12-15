@@ -65,12 +65,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": ""Look"",
-                    ""type"": ""PassThrough"",
+                    ""type"": ""Value"",
                     ""id"": ""169d2346-476a-44e6-b4c6-e4180104563e"",
                     ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
-                    ""initialStateCheck"": false
+                    ""initialStateCheck"": true
                 },
                 {
                     ""name"": ""Pause"",
@@ -194,11 +194,22 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": true
                 },
                 {
+                    ""name"": """",
+                    ""id"": ""56e18802-8cd0-4a51-9dd1-ea1d6a33ef2c"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""MainControlScheme"",
+                    ""action"": ""Look"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
                     ""name"": ""2D Vector"",
                     ""id"": ""5fc92f17-bbc4-4372-b065-e50b540216b3"",
                     ""path"": ""2DVector(mode=2)"",
                     ""interactions"": """",
-                    ""processors"": """",
+                    ""processors"": ""StickDeadzone,ScaleVector2(x=50,y=50)"",
                     ""groups"": """",
                     ""action"": ""Look"",
                     ""isComposite"": true,
@@ -247,17 +258,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""Look"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""56e18802-8cd0-4a51-9dd1-ea1d6a33ef2c"",
-                    ""path"": ""<Mouse>/delta"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Look"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
@@ -384,7 +384,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""name"": ""Point"",
                     ""type"": ""Value"",
                     ""id"": ""999187a0-1eb1-414b-af0f-de09c92152cb"",
-                    ""expectedControlType"": ""Stick"",
+                    ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -402,7 +402,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""name"": ""ScrollWheel"",
                     ""type"": ""Value"",
                     ""id"": ""4fc47d46-863f-4349-9670-dca052df8b94"",
-                    ""expectedControlType"": ""Delta"",
+                    ""expectedControlType"": ""Vector2"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": true
@@ -415,6 +415,24 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Unpause"",
+                    ""type"": ""Button"",
+                    ""id"": ""f7576589-3940-47a8-b468-6d1601418444"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Move"",
+                    ""type"": ""Value"",
+                    ""id"": ""152add9b-8be5-4378-b427-11870ac18c71"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -769,6 +787,50 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""MiddleClick"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d906720d-4cf8-4fe9-9b41-2b55727d8cc0"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Unpause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""23e6f292-a83d-41d1-a5c3-a5df4702ea44"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Unpause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""51f775b9-65a5-47e7-9e87-40f6c090c596"",
+                    ""path"": ""<Gamepad>/leftStick"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fec475df-f767-4257-bf4b-49c490673af4"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -786,6 +848,11 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                 {
                     ""devicePath"": ""<Gamepad>"",
                     ""isOptional"": true,
+                    ""isOR"": false
+                },
+                {
+                    ""devicePath"": ""<Mouse>"",
+                    ""isOptional"": false,
                     ""isOR"": false
                 }
             ]
@@ -809,6 +876,8 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_DefaultUI_Click = m_DefaultUI.FindAction("Click", throwIfNotFound: true);
         m_DefaultUI_ScrollWheel = m_DefaultUI.FindAction("ScrollWheel", throwIfNotFound: true);
         m_DefaultUI_MiddleClick = m_DefaultUI.FindAction("MiddleClick", throwIfNotFound: true);
+        m_DefaultUI_Unpause = m_DefaultUI.FindAction("Unpause", throwIfNotFound: true);
+        m_DefaultUI_Move = m_DefaultUI.FindAction("Move", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -963,6 +1032,8 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_DefaultUI_Click;
     private readonly InputAction m_DefaultUI_ScrollWheel;
     private readonly InputAction m_DefaultUI_MiddleClick;
+    private readonly InputAction m_DefaultUI_Unpause;
+    private readonly InputAction m_DefaultUI_Move;
     public struct DefaultUIActions
     {
         private @PlayerControls m_Wrapper;
@@ -974,6 +1045,8 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Click => m_Wrapper.m_DefaultUI_Click;
         public InputAction @ScrollWheel => m_Wrapper.m_DefaultUI_ScrollWheel;
         public InputAction @MiddleClick => m_Wrapper.m_DefaultUI_MiddleClick;
+        public InputAction @Unpause => m_Wrapper.m_DefaultUI_Unpause;
+        public InputAction @Move => m_Wrapper.m_DefaultUI_Move;
         public InputActionMap Get() { return m_Wrapper.m_DefaultUI; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -1004,6 +1077,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @MiddleClick.started += instance.OnMiddleClick;
             @MiddleClick.performed += instance.OnMiddleClick;
             @MiddleClick.canceled += instance.OnMiddleClick;
+            @Unpause.started += instance.OnUnpause;
+            @Unpause.performed += instance.OnUnpause;
+            @Unpause.canceled += instance.OnUnpause;
+            @Move.started += instance.OnMove;
+            @Move.performed += instance.OnMove;
+            @Move.canceled += instance.OnMove;
         }
 
         private void UnregisterCallbacks(IDefaultUIActions instance)
@@ -1029,6 +1108,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @MiddleClick.started -= instance.OnMiddleClick;
             @MiddleClick.performed -= instance.OnMiddleClick;
             @MiddleClick.canceled -= instance.OnMiddleClick;
+            @Unpause.started -= instance.OnUnpause;
+            @Unpause.performed -= instance.OnUnpause;
+            @Unpause.canceled -= instance.OnUnpause;
+            @Move.started -= instance.OnMove;
+            @Move.performed -= instance.OnMove;
+            @Move.canceled -= instance.OnMove;
         }
 
         public void RemoveCallbacks(IDefaultUIActions instance)
@@ -1073,5 +1158,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnClick(InputAction.CallbackContext context);
         void OnScrollWheel(InputAction.CallbackContext context);
         void OnMiddleClick(InputAction.CallbackContext context);
+        void OnUnpause(InputAction.CallbackContext context);
+        void OnMove(InputAction.CallbackContext context);
     }
 }
