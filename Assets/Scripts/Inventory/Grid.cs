@@ -22,7 +22,7 @@ public class Grid : MonoBehaviour, IGridCreator
     private IGridReader gridReader;
 
     private int gridId;
-    private List<((int x, int y), int itemData)> items;
+    private List<GridItem> items;
     private List<GameObject> itemSlotPrefabs = new List<GameObject>();
 
     [SerializeField] GridType gridType;

@@ -34,9 +34,9 @@ public class InteractionController : MonoBehaviour
     {
         if (_gridCreator == null)
         {
-            //_gridCreator = gameObject.GetComponent<IGridCreator>(); // @DW Player grid wont be stored on player, what if opening armor?
-            //if (_gridCreator == null)
-            //    Debug.Log("Can't retrive player grid");
+            _gridCreator = gameObject.GetComponent<IGridCreator>(); // @DW Player grid wont be stored on player, what if opening armor?
+            if (_gridCreator == null)
+                Debug.Log("Can't retrive player grid");
         }
     }
 
@@ -80,14 +80,11 @@ public class InteractionController : MonoBehaviour
         if (_pauseMenu.GetIsPaused())
         {
             _playerInput.SwitchCurrentActionMap("Player");
-            
-
             _pauseMenu.resume();
         }
         else
         {
             _playerInput.SwitchCurrentActionMap("Default/UI");
-
             _pauseMenu.options();
         }
     }
