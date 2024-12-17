@@ -116,11 +116,22 @@ public class Grid : MonoBehaviour, IGridCreator
     #region Player Grid __ NOT IMPLEMENTED
     void OpenPlayer()
     {
+        int x = 0;
+        int y = 0;
         isOpen = true;
         for (int i = 1; i <= 25; i++)
         {
+
             GameObject go = Instantiate(slotPrefab, playerLayoutGroup.transform);
+            var gs = go.GetComponent<GridSlot>();
+            gs.SetGridSlot(x,y);
             itemSlotPrefabs.Add(go);
+            x++;
+            if (x == 4)
+            {
+                y++;
+                x = 0;
+            }
         }
     }
 
