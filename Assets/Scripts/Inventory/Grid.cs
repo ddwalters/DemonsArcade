@@ -25,6 +25,8 @@ public class Grid : MonoBehaviour, IGridCreator
     private List<((int x, int y), int itemData)> items;
     private List<GameObject> itemSlotPrefabs = new List<GameObject>();
 
+    private Sprite[] spritesheet; //temporary
+
     [SerializeField] GridType gridType;
 
     //It should be a script with both the slot and list?
@@ -153,6 +155,7 @@ public class Grid : MonoBehaviour, IGridCreator
                 GameObject go = Instantiate(slotPrefab, weaponLayoutGroup.transform);
                 itemSlotPrefabs.Add(go);
             }
+
         }
     }
 
