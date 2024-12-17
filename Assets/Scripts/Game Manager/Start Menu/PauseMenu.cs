@@ -9,9 +9,9 @@ interface IPauseMenu
 {
     bool GetIsPaused();
 
-    void options();
+    void Options();
 
-    void resume();
+    void Resume();
 }
 
 public class PauseMenu : MonoBehaviour, IPauseMenu
@@ -86,7 +86,7 @@ public class PauseMenu : MonoBehaviour, IPauseMenu
 
     public bool GetIsPaused() => isOptionsMenuActive;
 
-    public void options()
+    public void Options()
     {
         optionsMenu.SetActive(true);
         Cursor.lockState = CursorLockMode.Confined;
@@ -94,7 +94,7 @@ public class PauseMenu : MonoBehaviour, IPauseMenu
         isOptionsMenuActive = true;
     }
 
-    public void resume()
+    public void Resume()
     {
         optionsMenu.SetActive(false);
         Cursor.lockState = CursorLockMode.Locked;
