@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -39,25 +40,23 @@ public class Grid : MonoBehaviour, IGridCreator
 
     private bool isOpen = false;
 
-    private void Awake()
-    {
-        gridReader = GetComponentInParent<IGridReader>();
-    }
-
     private void OnEnable()
     {
+        gridReader = GlobalReferences.GridManager;
+
         gridId = gridReader.GetNewGridId();
     }
 
     void Start()
     {
+        if (gridReader == null)
+            gridReader = GlobalReferences.GridManager;
+
         items = gridReader.GetGridItems(gridId);
         slotPrefab = gridReader.GetSlotPrefab();
 
         if (gridType == GridType.Player)
-        {
             playerLayoutGroup = GetComponentInChildren<GridLayoutGroup>();
-        }
 
         if (gridType == GridType.Equipment)
         {

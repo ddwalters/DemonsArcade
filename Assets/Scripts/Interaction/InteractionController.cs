@@ -16,6 +16,7 @@ public class InteractionController : MonoBehaviour
 
     private IGridCreator _gridCreator;
     private IPauseMenu _pauseMenu;
+    private IInventoryMenu _inventoryMenu;
     private PlayerInput _playerInput;
     private Camera _camera;
 
@@ -28,16 +29,7 @@ public class InteractionController : MonoBehaviour
         _playerInput = FindAnyObjectByType<PlayerInput>();
         _camera = FindAnyObjectByType<Camera>();
         _pauseMenu = FindAnyObjectByType<PauseMenu>();
-    }
-
-    private void Update()
-    {
-        if (_gridCreator == null)
-        {
-            _gridCreator = gameObject.GetComponent<IGridCreator>(); // @DW Player grid wont be stored on player, what if opening armor?
-            if (_gridCreator == null)
-                Debug.Log("Can't retrive player grid");
-        }
+        _inventoryMenu = gameObject.GetComponent<InventoryManager>();
     }
 
     public void OnInteract(InputAction.CallbackContext context)
@@ -64,8 +56,9 @@ public class InteractionController : MonoBehaviour
         }
         else
         {
-            _gridCreator.CloseGridMenu();
             _interacting = false;
+            _gridCreator.CloseGridMenu();
+            _gridCreator = null;
         }
     }
 
@@ -75,17 +68,39 @@ public class InteractionController : MonoBehaviour
         {
             _interacting = false;
             _gridCreator.CloseGridMenu();
+            _gridCreator = null;
         }
 
         if (_pauseMenu.GetIsPaused())
         {
             _playerInput.SwitchCurrentActionMap("Player");
-            _pauseMenu.resume();
+            _pauseMenu.Resume();
         }
         else
         {
             _playerInput.SwitchCurrentActionMap("Default/UI");
-            _pauseMenu.options();
+            _pauseMenu.Options();
+        }
+    }
+
+    public void OnInventory(InputAction.CallbackContext context)
+    {
+        if (_interacting)
+        {
+            _interacting = false;
+            _gridCreator.CloseGridMenu();
+            _gridCreator = null;
+        }
+
+        if (_inventoryMenu.GetIsOpen())
+        {
+            _playerInput.SwitchCurrentActionMap("Player");
+            _inventoryMenu.Resume();
+        }
+        else
+        {
+            _playerInput.SwitchCurrentActionMap("Default/UI");
+            _inventoryMenu.OpenInventory();
         }
     }
 }
