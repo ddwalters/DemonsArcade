@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerCombatHandler : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class PlayerCombatHandler : MonoBehaviour
 
     ItemStatsData itemStats;
     WeaponsHandler weaponsHandler;
+    PlayerModeController mode;
 
     Sword swordRightHandler;
     Axe axeRightHandler;
@@ -25,24 +27,40 @@ public class PlayerCombatHandler : MonoBehaviour
 
         swordRightHandler = GameObject.Find("RightSword").GetComponent<Sword>();
 
-        controls = FindAnyObjectByType<PlayerController>().GetNewControls();
+        var player = GetComponentInParent<PlayerController>();
+        if (player == null)
+            player = FindAnyObjectByType<PlayerController>();
+        mode = PlayerModeController.ForPlayer(player);
+        controls = player.GetNewControls();
+        controls.BasicActionMap.BasicAttack.performed += OnBasicAttack;
+        controls.BasicActionMap.BasicAttack.canceled += OnBasicAttack;
+        controls.BasicActionMap.HeavyAttack.performed += OnHeavyAttack;
+        controls.BasicActionMap.HeavyAttack.canceled += OnHeavyAttack;
     }
 
-    private void Awake()
+    private void OnDestroy()
     {
-        controls = new NewControls();
+        if (controls == null)
+            return;
 
-        controls.BasicActionMap.BasicAttack.performed += ctx => basicAttackControl = true;
-        controls.BasicActionMap.BasicAttack.canceled += ctx => basicAttackControl = false;
-
-        controls.BasicActionMap.HeavyAttack.performed += ctx => heavyAttackControl = true;
-        controls.BasicActionMap.HeavyAttack.canceled += ctx => heavyAttackControl = false;
-        
-        controls.Enable();
+        controls.BasicActionMap.BasicAttack.performed -= OnBasicAttack;
+        controls.BasicActionMap.BasicAttack.canceled -= OnBasicAttack;
+        controls.BasicActionMap.HeavyAttack.performed -= OnHeavyAttack;
+        controls.BasicActionMap.HeavyAttack.canceled -= OnHeavyAttack;
     }
+
+    private void OnBasicAttack(InputAction.CallbackContext context) =>
+        basicAttackControl = !context.canceled && mode.AllowsGameplay;
+    private void OnHeavyAttack(InputAction.CallbackContext context) =>
+        heavyAttackControl = !context.canceled && mode.AllowsGameplay;
 
     private void Update()
     {
+        if (mode == null || !mode.AllowsGameplay)
+        {
+            basicAttackControl = heavyAttackControl = false;
+            return;
+        }
         if (!canAttack || isAttacking)
             return;
 
@@ -73,9 +91,18 @@ public class PlayerCombatHandler : MonoBehaviour
 
     }
 
-    public void DamageEnemy(EnemyStats enemyStats) => StartCoroutine(enemyStats.DamageMonster(itemStats.GetDamage()));
+    public void DamageEnemy(EnemyStats enemyStats)
+    {
+        if (mode.AllowsGameplay && canAttack && itemStats != null)
+            StartCoroutine(enemyStats.DamageMonster(itemStats.GetDamage()));
+    }
     public void SetWeaponStats(ItemStatsData itemStats) => this.itemStats = itemStats;
-    public void SetAttack(bool status) => canAttack = status;
+    public void SetAttack(bool status)
+    {
+        canAttack = status;
+        if (!status)
+            EndAttack();
+    }
     public void EndAttack()
     {
         isAttacking = false;

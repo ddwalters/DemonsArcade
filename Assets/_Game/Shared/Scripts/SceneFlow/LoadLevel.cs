@@ -35,6 +35,7 @@ public class LoadLevel : MonoBehaviour
             return;
 
         isLoading = true;
+        FindAnyObjectByType<PlayerModeController>()?.SetMode(PlayerMode.Gameplay);
         Transition.SetBool("Awake", false);
         StartCoroutine(loadAsynchronously(sceneIndex));
     }

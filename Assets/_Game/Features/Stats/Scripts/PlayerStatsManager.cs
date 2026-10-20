@@ -8,11 +8,8 @@ public class PlayerStatsManager : MonoBehaviour
 {
     private const string SaveIdentifier = "gameSaveIdentifier";
     private PlayerStatsData statsData;
-    private PlayerController controller;
 
     [SerializeField, Min(0f)] private float staminaRecoveryRate = 15f;
-
-    private GameObject canvas;
 
     [SerializeField] private Image healthFill;
     [SerializeField] private Image staminaFill;
@@ -25,49 +22,36 @@ public class PlayerStatsManager : MonoBehaviour
 
     private void Awake()
     {
-        canvas = GameObject.Find("MainCanvas");
-
-        GameObject healthObject = GameObject.Find("HeartFill");
-        healthFill = healthObject.GetComponent<Image>();
-
-        GameObject staminaObject = GameObject.Find("StaminaFill");
-        staminaFill = staminaObject.GetComponent<Image>();
-
-        GameObject ManaObject = GameObject.Find("ManaFill");
-        manaFill = ManaObject.GetComponent<Image>();
-
-        BloodyScreen = GameObject.Find("DeathScreen");
-        BloodyScreenAnim = BloodyScreen.GetComponent<Animator>();
-
-        controller = gameObject.GetComponent<PlayerController>();
+        EnsureStatsInitialized();
     }
 
-    private void Start()
+    private void Start() => GetNewComponents();
+
+    private void EnsureStatsInitialized()
     {
-        LoadPlayerStats();
-        InitializeStats();
-        UpdateAllBars();
+        if (statsData == null)
+            LoadPlayerStats();
     }
 
+    // A new scene changes the view, not the live player session.
     public void GetNewComponents()
     {
-        canvas = GameObject.Find("MainCanvas");
+        BindHUD(GameObject.Find("HeartFill")?.GetComponent<Image>(),
+            GameObject.Find("StaminaFill")?.GetComponent<Image>(),
+            GameObject.Find("ManaFill")?.GetComponent<Image>(),
+            GameObject.Find("DeathScreen")?.GetComponent<Animator>());
+    }
 
-        GameObject healthObject = GameObject.Find("HeartFill");
-        healthFill = healthObject.GetComponent<Image>();
-
-        GameObject staminaObject = GameObject.Find("StaminaFill");
-        staminaFill = staminaObject.GetComponent<Image>();
-
-        GameObject ManaObject = GameObject.Find("ManaFill");
-        manaFill = ManaObject.GetComponent<Image>();
-
-        BloodyScreen = GameObject.Find("DeathScreen");
-        BloodyScreenAnim = BloodyScreen.GetComponent<Animator>();
-
-        LoadPlayerStats();
-        InitializeStats();
+    public void BindHUD(Image health, Image stamina, Image mana, Animator deathScreen)
+    {
+        healthFill = health;
+        staminaFill = stamina;
+        manaFill = mana;
+        BloodyScreenAnim = deathScreen;
+        EnsureStatsInitialized();
         UpdateAllBars();
+        if (statsData.currentHealth <= 0f)
+            PlayerDeath();
     }
 
     private void Update()
@@ -76,11 +60,15 @@ public class PlayerStatsManager : MonoBehaviour
             RegenerateStamina();
     }
 
-    private void InitializeStats()
+    public void ResetResources()
     {
         statsData.currentHealth = statsData.maxHealth;
         statsData.currentStamina = statsData.maxStamina;
         statsData.currentMana = statsData.maxMana;
+        isUsingStamina = false;
+        isRegeneratingStamina = false;
+        PlayerModeController.ForPlayer(GetComponent<PlayerController>())?.ResetToGameplay();
+        UpdateAllBars();
     }
 
     private void UpdateAllBars()
@@ -154,7 +142,8 @@ public class PlayerStatsManager : MonoBehaviour
 
     private void UpdateHealthBar()
     {
-        healthFill.fillAmount = (float)statsData.currentHealth / statsData.maxHealth;
+        if (healthFill != null)
+            healthFill.fillAmount = (float)statsData.currentHealth / statsData.maxHealth;
     }
     #endregion
 
@@ -198,7 +187,8 @@ public class PlayerStatsManager : MonoBehaviour
 
     private void UpdateStaminaBar()
     {
-        staminaFill.fillAmount = statsData.currentStamina / statsData.maxStamina;
+        if (staminaFill != null)
+            staminaFill.fillAmount = statsData.currentStamina / statsData.maxStamina;
     }
 
     public float GetStamina() => statsData.currentStamina;
@@ -236,7 +226,8 @@ public class PlayerStatsManager : MonoBehaviour
 
     private void UpdateManaBar()
     {
-        manaFill.fillAmount = (float)statsData.currentMana / statsData.maxMana;
+        if (manaFill != null)
+            manaFill.fillAmount = (float)statsData.currentMana / statsData.maxMana;
     }
     #endregion
 
@@ -265,7 +256,7 @@ public class PlayerStatsManager : MonoBehaviour
     #region Save/Load
     public PlayerStatsData GetPlayerStats()
     {
-        LoadPlayerStats();
+        EnsureStatsInitialized();
         return statsData;
     }
 
@@ -282,9 +273,9 @@ public class PlayerStatsManager : MonoBehaviour
 
     private void PlayerDeath()
     {
-        controller.DisableCameraMovement();
-        controller.DisableMovement();
-        BloodyScreenAnim.SetTrigger("Die");
+        PlayerModeController.ForPlayer(GetComponent<PlayerController>())?.SetMode(PlayerMode.Dead);
+        if (BloodyScreenAnim != null)
+            BloodyScreenAnim.SetTrigger("Die");
     }
 }
 

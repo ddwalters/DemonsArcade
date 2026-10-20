@@ -9,6 +9,7 @@ public enum WeaponType
 
 public enum ArmorType
 {
+    None = -1,
     Helmet,
     Chestpiece,
     Leggings,

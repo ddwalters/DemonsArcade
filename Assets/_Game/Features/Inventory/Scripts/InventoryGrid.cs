@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 [RequireComponent(typeof(RectTransform))]
-public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
+public class InventoryGrid : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public int id;
 
@@ -63,6 +63,15 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
         rectTransform.sizeDelta = size;
     }
 
+    public void Bind(Inventory owner, InventoryManager manager)
+    {
+        inventory = owner;
+        inventoryManager = manager;
+        if (rectTransform == null)
+            rectTransform = GetComponent<RectTransform>();
+        InitializeGrid();
+    }
+
     public void UpdateItemsMatrix(int slotX, int slotY, Item newItem, ItemSaveData itemData)
     {
         items[slotX, slotY] = newItem;
@@ -71,8 +80,7 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
 
     public void CloseGrid()
     {
-        inventory.ClosingGrid();
-        Destroy(gameObject.transform.parent.gameObject);
+        inventory.CloseAllGrids();
     }
 
     /// <summary>
@@ -82,5 +90,11 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler
     public void OnPointerEnter(PointerEventData eventData)
     {
         inventory.gridOnMouse = this;
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (inventory.gridOnMouse == this)
+            inventory.gridOnMouse = null;
     }
 }

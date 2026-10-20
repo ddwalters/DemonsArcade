@@ -10,19 +10,21 @@ public class PauseMenu : MonoBehaviour
 {
     [Header("OPTION MENU")]
     public GameObject GameManager;
-    private PlayerController playerController;
+    private PlayerModeController mode;
     public GameObject optionsMenu;
     public Button backButton;
 
     [Header("Resolution")]
     public TMP_Dropdown resolutionDropdown;
     Resolution[] resolutions;
+
     [Space]
     [Header("Volume")]
     public AudioMixer audioMixer;
     public Slider volume;
     public int Volume;
     public TMP_Text volumeText;
+
     [Header("Sensitivity")]
     public Slider sensitivity;
     public int Sensitivity;
@@ -32,11 +34,13 @@ public class PauseMenu : MonoBehaviour
 
     private void Start()
     {
-        playerController = FindAnyObjectByType<PlayerController>();
+        mode = PlayerModeController.ForPlayer(FindAnyObjectByType<PlayerController>());
+        if (mode != null)
+            mode.ModeChanged += ApplyMode;
 
         GameManager = FindAnyObjectByType<GameManager>().gameObject;
 
-        optionsMenu.SetActive(false);
+        ApplyMode(mode != null ? mode.Mode : PlayerMode.Gameplay);
 
         resolutions = Screen.resolutions;
 
@@ -64,21 +68,8 @@ public class PauseMenu : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (isOptionsMenuActive)
-            {
-                resume();
-            }
-            else
-            {
-                options();
-            }
-        }
-
         if (isOptionsMenuActive)
         {
-            // Update volume settings
             Volume = (int)volume.value;
             volumeText.text = Volume + "%";
 
@@ -86,31 +77,29 @@ public class PauseMenu : MonoBehaviour
             float mappedVolume = Map(Volume, 0, 100, -80, 0);
             audioMixer.SetFloat("volume", mappedVolume);
 
-            // Update sensitivity settings
             Sensitivity = (int)sensitivity.value;
             sensitivityText.text = Sensitivity.ToString();
         }
     }
 
-    public void options()
+    private void OnDestroy()
     {
-        optionsMenu.SetActive(true);
-        Cursor.lockState = CursorLockMode.Confined;
-        Cursor.visible = true;
-        playerController.DisableCameraMovement();
-        isOptionsMenuActive = true;
-        Cursor.visible = true;
+        if (mode != null)
+            mode.ModeChanged -= ApplyMode;
     }
+
+    private void ApplyMode(PlayerMode next)
+    {
+        isOptionsMenuActive = next == PlayerMode.Paused;
+        optionsMenu.SetActive(isOptionsMenuActive);
+    }
+
+    public void options() => mode?.SetMode(PlayerMode.Paused);
 
     public void resume()
     {
-        optionsMenu.SetActive(false);
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-        playerController.EnableCameraMovement();
-        isOptionsMenuActive = false;
-        Cursor.visible = false;
-        EventSystem.current.SetSelectedGameObject(null);
+        mode?.SetMode(PlayerMode.Gameplay);
+        EventSystem.current?.SetSelectedGameObject(null);
     }
 
     public void exit()

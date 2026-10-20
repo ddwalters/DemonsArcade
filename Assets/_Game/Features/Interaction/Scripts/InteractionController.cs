@@ -2,156 +2,126 @@ using UnityEngine;
 
 public class InteractionController : MonoBehaviour
 {
-    [Header("Data")]
+    // Retain serialized references for existing prefabs; temporary state lives on this controller.
     [SerializeField] private InteractionInputData interactionInputData;
     [SerializeField] private InteractionData interactionData;
-
-    [Header("UI")]
     [SerializeField] private InteractionUIPanel uiPanel;
     [SerializeField] private GameObject playerHud;
     [SerializeField] private GameObject playerBackpack;
-
-    [Space]
-    [Header("Ray Settings")]
     [SerializeField] private float rayDistance;
     [SerializeField] private float raySphereRadius;
     [SerializeField] private LayerMask interactableLayer;
+    private Camera playerCamera;
+    private PlayerModeController mode;
+    private InteractableBase target;
+    private bool interacting;
+    private float holdTimer;
 
-    private Camera _camera;
-
-    private bool _interacting;
-
-    private bool _lootingInteracted;
-
-    private float _holdTimer = 0f;
-
-    private void Awake()
+    private void Start()
     {
-        _camera = FindAnyObjectByType<Camera>();
-        playerBackpack = GameObject.Find("Inventory");
-        playerHud = GameObject.Find("PlayerHud");
-        uiPanel = FindAnyObjectByType<InteractionUIPanel>();
+        playerCamera = GetComponentInChildren<Camera>();
+        mode = PlayerModeController.ForPlayer(GetComponent<PlayerController>());
+        mode.ModeChanged += OnModeChanged;
+        GetNewComponents();
     }
+
+    private void OnDestroy()
+    {
+        if (mode != null)
+            mode.ModeChanged -= OnModeChanged;
+    }
+
+    private void OnDisable() => ResetTarget();
+    private void OnModeChanged(PlayerMode next) => ResetTarget();
 
     public void GetNewComponents()
     {
-        playerBackpack = GameObject.Find("Inventory");
-        playerHud = GameObject.Find("PlayerHud");
+        playerCamera = GetComponentInChildren<Camera>();
         uiPanel = FindAnyObjectByType<InteractionUIPanel>();
+        ResetTarget();
     }
 
     private void Update()
     {
-        interactionInputData.InteractClicked = Input.GetKeyDown(KeyCode.E);
-        interactionInputData.InteractRelease = Input.GetKeyUp(KeyCode.E);
-
-        if (uiPanel == null)
+        if (mode == null || !mode.AllowsGameplay || mode.ChangedFrame == Time.frameCount ||
+            playerCamera == null || uiPanel == null)
+        {
+            ResetTarget();
             return;
-        
-        CheckForInteractable();
-        CheckForInteractableInput();
+        }
+        Ray ray = new(playerCamera.transform.position, playerCamera.transform.forward);
+        InteractableBase candidate = Physics.SphereCast(ray, raySphereRadius, out var hit,
+            rayDistance, interactableLayer) ? hit.transform.GetComponentInParent<InteractableBase>() : null;
+        SetTarget(candidate);
+        ProcessInput(Input.GetKeyDown(KeyCode.E), Input.GetKeyUp(KeyCode.E), Time.deltaTime);
     }
 
-    private void CheckForInteractable()
+    private void SetTarget(InteractableBase next)
     {
-        if (_lootingInteracted)
-        {
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                var grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
-                foreach (var grid in grids)
-                    grid.CloseGrid();
-
-                Cursor.lockState = CursorLockMode.Locked;
-                _lootingInteracted = false;
-            }
-
+        if (target == next)
             return;
-        }
 
-        Ray ray = new Ray(_camera.transform.position, _camera.transform.forward);
-        bool hitSomething = Physics.SphereCast(ray, raySphereRadius, out var hit, rayDistance, interactableLayer);
-
-        if (hitSomething)
-        {
-            InteractableBase interactable = hit.transform.GetComponentInParent<InteractableBase>();
-
-            if (interactable != null)
-            {
-                if (interactionData.IsEmpty())
-                {
-                    interactionData.Interactable = interactable;
-                    uiPanel.SetToolTip(interactable.TooltipMessage);
-                }
-                else
-                {
-                    if (!interactionData.IsSameInteractable(interactable))
-                    {
-                        interactionData.Interactable = interactable;
-                        uiPanel.SetToolTip(interactable.TooltipMessage);
-                    }
-                }
-            }
-        }
-        else
+        CancelHold();
+        target = next;
+        if (uiPanel != null)
         {
             uiPanel.ResetUI();
-            interactionData.ResetData();
+            if (target != null)
+                uiPanel.SetToolTip(target.TooltipMessage);
         }
-
-        Debug.DrawRay(ray.origin, ray.direction * rayDistance, hitSomething ? Color.green : Color.red);
     }
 
-    private void CheckForInteractableInput()
+    private void ProcessInput(bool pressed, bool released, float deltaTime)
     {
-        if (interactionData.IsEmpty() || _lootingInteracted)
+        if (released)
+            CancelHold();
+
+        if (target == null || !target.IsInteractable)
         {
-            _holdTimer = 0f;
-            uiPanel.UpdateProgressBar(_holdTimer);
+            CancelHold();
             return;
         }
 
-        if (interactionInputData.InteractClicked)
+        uiPanel?.SetToolTip(target.TooltipMessage);
+        if (pressed)
         {
-            _interacting = true;
-            _holdTimer = 0f;
+            interacting = true;
+            holdTimer = 0f;
         }
 
-        if (interactionInputData.InteractRelease)
-        {
-            _interacting = false;
-            _holdTimer = 0f;
-            uiPanel.UpdateProgressBar(_holdTimer);
-        }
+        if (!interacting)
+            return;
 
-        if (_interacting)
+        if (target.HoldInteract && target.HoldDuration > 0f)
         {
-            if (!interactionData.Interactable.IsInteractable)
+            holdTimer += deltaTime;
+            uiPanel?.UpdateProgressBar(holdTimer / target.HoldDuration);
+            if (holdTimer < target.HoldDuration)
                 return;
-
-            if (interactionData.Interactable.HoldInteract)
-            {
-                _holdTimer += Time.deltaTime;
-
-                float progressTimer = _holdTimer / interactionData.Interactable.HoldDuration;
-                uiPanel.UpdateProgressBar(progressTimer);
-
-                if (progressTimer > 1f)
-                {
-                    interactionData.Interact();
-                    _interacting = false;
-                }
-            }
-            else
-            {
-                interactionData.Interact();
-                _interacting = false;
-            }
         }
+
+        var interacted = target;
+        ResetTarget();
+        interacted.OnInteract();
     }
 
-    public void SetLootingInteracted()
+    private void CancelHold()
     {
-        _lootingInteracted = true;
+        interacting = false;
+        holdTimer = 0f;
+        uiPanel?.UpdateProgressBar(0f);
     }
+
+    private void ResetTarget()
+    {
+        CancelHold();
+        target = null;
+        uiPanel?.ResetUI();
+        if (interactionData != null)
+            interactionData.ResetData();
+        if (interactionInputData != null)
+            interactionInputData.ResetInput();
+    }
+
+    public void OpenLoot(int gridId) => mode.OpenLoot(gridId);
 }

@@ -12,7 +12,7 @@ public class ItemStatsData
 
     [SerializeField] GameObject prefab;
     [SerializeField] WeaponType weaponType;
-    [SerializeField] ArmorType armorType;
+    [SerializeField] ArmorType armorType = ArmorType.None;
 
     public ItemStatsData(ItemStatsData itemStats)
     {

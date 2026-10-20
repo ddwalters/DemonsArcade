@@ -39,11 +39,13 @@ public class PlayerController : MonoBehaviour
     private float currentSpeed;
     private bool sprintCooldown;
     private bool canMove = true;
+    private PlayerModeController mode;
 
     private void Awake()
     {
         DontDestroyOnLoad(this);
         controls = new NewControls();
+        mode = PlayerModeController.ForPlayer(this);
 
         controls.BasicActionMap.Look.performed += ctx => lookInput = ctx.ReadValue<Vector2>();
         controls.BasicActionMap.Look.canceled += ctx => lookInput = Vector2.zero;
@@ -79,13 +81,13 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (canMoveCamera)
+        if (canMoveCamera && mode.AllowsGameplay)
             LookAround();
     }
 
     private void FixedUpdate()
     {
-        if (!canMove)
+        if (!canMove || !mode.AllowsGameplay)
             return;
 
         Sprint();
@@ -160,6 +162,14 @@ public class PlayerController : MonoBehaviour
 
     public void EnableMovement() => canMove = true;
     public void DisableMovement() => canMove = false;
+
+    public void StopMotion()
+    {
+        if (rb != null)
+            rb.linearVelocity = Vector3.zero;
+        GetComponent<PlayerStatsManager>()?.StopUsingStamina();
+        jumpInput = false;
+    }
 
     private void OnCollisionEnter(Collision collision)
     {

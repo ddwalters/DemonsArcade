@@ -4,159 +4,69 @@ using UnityEngine;
 public class InventoryController : MonoBehaviour
 {
     public Inventory inventory { get; private set; }
-
-    private PlayerController playerController;
-
     public GameObject goldCounter;
+    private PlayerModeController mode;
 
-    private ItemToolTip itemToolTip;
-
-    private bool gridOpen = false;
-    private bool tabKeyPressed = false;
-
-    /// <summary>
-    /// Awake is called when the script instance is being loaded.
-    /// </summary>
     private void Awake()
     {
-        playerController = FindAnyObjectByType<PlayerController>();
-
         inventory = GetComponent<Inventory>();
-        itemToolTip = inventory.GetItemTooltip();
-
         goldCounter = GameObject.Find("GoldCounter");
     }
 
-    /// <summary>
-    /// Update is called every frame, if the MonoBehaviour is enabled.
-    /// </summary>
+    private void Start()
+    {
+        mode = PlayerModeController.ForPlayer(FindAnyObjectByType<PlayerController>());
+        mode.ModeChanged += ApplyMode;
+        ApplyMode(mode.Mode);
+    }
+
+    private void OnDestroy()
+    {
+        if (mode != null)
+            mode.ModeChanged -= ApplyMode;
+    }
+
+    private void ApplyMode(PlayerMode next)
+    {
+        inventory.CloseAllGrids();
+        bool inventoryOpen = next == PlayerMode.Inventory || next == PlayerMode.Looting;
+        if (goldCounter != null)
+            goldCounter.SetActive(inventoryOpen);
+        if (!inventoryOpen)
+            return;
+
+        inventory.CreateGrid(0, true);
+        if (next == PlayerMode.Looting)
+            inventory.CreateGrid(mode.LootGridId, false);
+    }
+
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab) && !tabKeyPressed)
-        {
-            tabKeyPressed = true;
-
-            if (!gridOpen)
-            {
-                goldCounter.SetActive(true);
-                OpenInventory();
-            }
-            else
-            {
-                goldCounter.SetActive(false);
-                CloseInventory();
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape) && gridOpen)
-        {
-            CloseInventory();
-        }
-
-        if (Input.GetKeyUp(KeyCode.Tab))
-        {
-            tabKeyPressed = false;
-        }
+        if (mode == null || (mode.Mode != PlayerMode.Inventory && mode.Mode != PlayerMode.Looting))
+            return;
 
         if (Input.GetKeyDown(KeyCode.Mouse0) && inventory.gridOnMouse != null)
         {
-            if (!inventory.ReachedBoundary(inventory.GetSlotAtMouseCoords(), inventory.gridOnMouse))
+            Item overlap = inventory.GetItemAtMouseCoords();
+            if (inventory.selectedItem != null)
             {
-                if (inventory.selectedItem)
-                {
-                    Item oldSelectedItem = inventory.selectedItem;
-                    Item overlapItem = inventory.GetItemAtMouseCoords();
-
-                    if (overlapItem != null)
-                        inventory.SwapItem(overlapItem, oldSelectedItem);
-                    else
-                        inventory.MoveItem(oldSelectedItem);
-                }
+                if (overlap != null)
+                    inventory.SwapItem(overlap, inventory.selectedItem);
                 else
-                {
-                    SelectItemWithMouse();
-                }
+                    inventory.MoveItem(inventory.selectedItem);
             }
+            else if (overlap != null)
+                inventory.SelectItem(overlap);
         }
+        if (inventory.selectedItem == null)
+            return;
 
-        // Remove an item from the inventory
-        //if (Input.GetKeyDown(KeyCode.Mouse1))
-        //{
-        //    RemoveItemWithMouse();
-        //}
-
-        // move and rotate item
-        if (inventory.selectedItem != null)
-        {
-            MoveSelectedItemToMouse();
-
-            if (Input.GetKeyDown(KeyCode.R))
-                inventory.selectedItem.Rotate();
-        }
-    }
-
-    private void OpenInventory()
-    {
-        //Cursor.lockState = CursorLockMode.Confined;
-        inventory.CreateGrid(0, true);
-        gridOpen = true;
-        Cursor.lockState = CursorLockMode.Confined;
-        Cursor.visible = true;
-        playerController.DisableCameraMovement();
-    }
-
-    private void CloseInventory()
-    {
-        var grids = FindObjectsByType<InventoryGrid>(FindObjectsSortMode.None);
-        //Cursor.lockState = CursorLockMode.Locked;
-
-        foreach (var grid in grids)
-        {
-            grid.CloseGrid();
-        }
-
-        itemToolTip.HideToolTip();
-        gridOpen = false;
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-        playerController.EnableCameraMovement();
-    }
-
-    /// <summary>
-    /// Select a new item in the inventory.
-    /// </summary>
-    private void SelectItemWithMouse()
-    {
-        Item item = inventory.GetItemAtMouseCoords();
-
-        if (item != null)
-            inventory.SelectItem(item);
-    }
-
-    /// <summary>
-    /// Removes the item from the inventory that the mouse is hovering over.
-    /// </summary>
-    private void RemoveItemWithMouse()
-    {
-        Item item = inventory.GetItemAtMouseCoords();
-
-        if (item != null)
-            inventory.RemoveItem(item);
-    }
-
-    /// <summary>
-    /// Moves the currently selected object to the mouse.
-    /// </summary>
-    private void MoveSelectedItemToMouse()
-    {
-        inventory.selectedItem.rectTransform.position = new Vector3(
-                Input.mousePosition.x
-                    + (inventory.selectedItem.correctedSize.width * InventorySettings.slotSize.x / 2)
-                    - InventorySettings.slotSize.x / 2,
-                Input.mousePosition.y
-                    - (inventory.selectedItem.correctedSize.height * InventorySettings.slotSize.y / 2)
-                    + InventorySettings.slotSize.y / 2,
-                Input.mousePosition.z
-            );
+        if (Input.GetKeyDown(KeyCode.R))
+            inventory.selectedItem.Rotate();
+        var size = inventory.selectedItem.correctedSize;
+        float scale = GetComponentInParent<Canvas>().scaleFactor;
+        inventory.selectedItem.rectTransform.position = Input.mousePosition + new Vector3(
+            (size.width - 1) * InventorySettings.slotSize.x * scale / 2f,
+            -(size.height - 1) * InventorySettings.slotSize.y * scale / 2f, 0);
     }
 }

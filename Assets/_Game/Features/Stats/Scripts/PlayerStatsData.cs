@@ -21,5 +21,8 @@ public class PlayerStatsData
         maxHealth = 100f;
         maxStamina = 100f;
         maxMana = 100f;
+        currentHealth = maxHealth;
+        currentStamina = maxStamina;
+        currentMana = maxMana;
     }
 }

@@ -12,7 +12,7 @@ public class WeaponsHandler : MonoBehaviour
     [SerializeField] GameObject rightHandAxeLocation;
     [SerializeField] GameObject rightHandStaffLocation;
 
-    private void Start()
+    private void Awake()
     {
         inventoryManager = FindAnyObjectByType<InventoryManager>();
         combatHandler = GetComponent<PlayerCombatHandler>();
@@ -21,7 +21,8 @@ public class WeaponsHandler : MonoBehaviour
     #region right hand
     public void AddItemToPlayerRightHand(ItemStatsData itemStats)
     {
-        if (_hasRightHandWeapon) return;
+        if (_hasRightHandWeapon)
+            return;
 
         switch (itemStats.GetWeaponType())
         {
@@ -44,7 +45,8 @@ public class WeaponsHandler : MonoBehaviour
     }
     public void RemoveItemFromPlayerRightHand()
     {
-        if (!_hasRightHandWeapon) return;
+        if (!_hasRightHandWeapon)
+            return;
 
         if (rightHandShortSwordLocation.transform.childCount > 0)
             Destroy(rightHandShortSwordLocation.transform.GetChild(0).gameObject);
@@ -96,7 +98,7 @@ public class WeaponsHandler : MonoBehaviour
         if (!inventoryManager.GetItems(7).list.Any())
             return null;
 
-        return inventoryManager.GetItems(7).list.FirstOrDefault().PreviousItemData.itemStats;
+        return InventoryManager.Definition(inventoryManager.GetItems((int)EquipmentSlot.LeftHand).list[0]).itemStats;
     }
 
     public ItemStatsData GetCurrentRightHandItemStats()
@@ -104,6 +106,6 @@ public class WeaponsHandler : MonoBehaviour
         if (!inventoryManager.GetItems(6).list.Any())
             return null;
 
-        return inventoryManager.GetItems(6).list.FirstOrDefault().PreviousItemData.itemStats;
+        return InventoryManager.Definition(inventoryManager.GetItems((int)EquipmentSlot.RightHand).list[0]).itemStats;
     }
 }

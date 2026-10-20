@@ -34,10 +34,6 @@ public class MerchantInteractable : InteractableBase
     {
         base.OnInteract();
 
-        controller.SetLootingInteracted();
-
-        Cursor.lockState = CursorLockMode.Confined;
-        inventory.CreateGrid(0, true);
-        inventory.CreateGrid(gridId, false);
+        controller.OpenLoot(gridId);
     }
 }

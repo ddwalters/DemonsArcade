@@ -6,175 +6,64 @@ using UnityEngine.UI;
 public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public ItemSaveData saveData;
-
-    /// <summary>
-    /// Image element responsible for showing the item icon.
-    /// </summary>
     public Image icon;
-
-    /// <summary>
-    /// Image element responsible for showing the item icon background.
-    /// </summary>
     public Image background;
-
-    /// <summary>
-    /// Target rotation of the 
-    /// </summary>
-    private Vector3 rotateTarget;
-
-    /// <summary>
-    /// Boolean that indicates whether the item was rotated.
-    /// </summary>
     public bool isRotated;
-
-    /// <summary>
-    /// Rotation index, used to tell the item when to rotate at the right time.
-    /// </summary>
     public int rotateIndex;
-
-    /// <summary>
-    /// The indexed position is the position of the item relative to the grid in which the item is located.
-    /// </summary>
     public Vector2Int indexPosition { get; set; }
-
-    /// <summary>
-    /// Reference of the main inventory to which the script communicates.
-    /// </summary>
     public Inventory inventory { get; set; }
-
-    /// <summary>
-    /// Reference of the RectTransform.
-    /// </summary>
     public RectTransform rectTransform { get; set; }
-
-    /// <summary>
-    /// Grid the item is currently in.
-    /// </summary>
     public InventoryGrid inventoryGrid { get; set; }
-
-    /// <summary>
-    /// Correct position using the rotation ratio.
-    /// </summary>
+    public bool IsHeld { get; private set; }
+    private ItemToolTip tooltip;
+    private ItemData DisplayData => IsHeld ? InventoryManager.Definition(saveData) : saveData.data;
     public SizeInt correctedSize
     {
-        get => new(!isRotated ? saveData.data.size.width : saveData.data.size.height, !isRotated ? saveData.data.size.height : saveData.data.size.width);
+        get
+        {
+            Vector2Int size = InventoryPlacement.Size(DisplayData, rotateIndex);
+            return new SizeInt(size.x, size.y);
+        }
     }
 
-    private ItemToolTip tooltip;
-
-    /// <summary>
-    /// Start is called on the frame when a script is enabled just before
-    /// any of the Update methods is called the first time.
-    /// </summary>
-    private void Start()
+    public void SetHeld(bool held)
     {
+        IsHeld = held;
         tooltip = inventory.GetItemTooltip();
-        icon.sprite = saveData.data.icon;    
-        background.color = saveData.data.backgroundColor;
+        icon.sprite = !held && saveData.isSlotType ? inventory.SlotIcon(this) : DisplayData.icon;
+        background.color = DisplayData.backgroundColor;
+        rectTransform.sizeDelta = new Vector2(DisplayData.size.width * InventorySettings.slotSize.x,
+            DisplayData.size.height * InventorySettings.slotSize.y);
     }
 
-    /// <summary>
-    /// LateUpdate is called every frame, if the Behaviour is enabled.
-    /// It is called after all Update functions have been called.
-    /// </summary>
-    private void LateUpdate()
-    {
-        UpdateRotateAnimation();
-    }
-
-    public void StartRotate()
-    {
-        UpdateRotation();
-    }
-
-    /// <summary>
-    /// Rotates the item to the correct position the player needs.
-    /// </summary>
+    public void StartRotate() => isRotated = (rotateIndex & 1) != 0;
     public void Rotate()
     {
-        if (rotateIndex < 3)
-        {
-            rotateIndex++;
-        }
-        else if (rotateIndex >= 3)
-        {
-            rotateIndex = 0;
-        }
-
-        UpdateRotation();
+        rotateIndex = (rotateIndex + 1) % 4;
+        StartRotate();
     }
-
-    /// <summary>
-    /// Reset the rotate index.
-    /// </summary>
     public void ResetRotate()
     {
         rotateIndex = 0;
-        UpdateRotation();
+        StartRotate();
     }
 
-    /// <summary>
-    /// Update rotation movement.
-    /// </summary>
-    private void UpdateRotation()
+    private void LateUpdate()
     {
-        switch (rotateIndex)
-        {
-            case 0:
-                rotateTarget = new(0, 0, 0);
-                isRotated = false;
-                break;
-
-            case 1:
-                rotateTarget = new(0, 0, -90);
-                isRotated = true;
-                break;
-
-            case 2:
-                rotateTarget = new(0, 0, -180);
-                isRotated = false;
-                break;
-
-            case 3:
-                rotateTarget = new(0, 0, -270);
-                isRotated = true;
-                break;
-        }
-
-        // Might want to store rotation solely on the item data @DW
-        saveData.isRotated = isRotated;
-        saveData.rotateIndex = rotateIndex;
-    }
-
-    /// <summary>
-    /// Updates the item rotation animation.
-    /// </summary>
-    private void UpdateRotateAnimation()
-    {
-        if (rectTransform == null)
-            return;
-
-        Quaternion targetRotation = Quaternion.Euler(rotateTarget);
-        if (rectTransform.localRotation != targetRotation)
-        {
-            rectTransform.localRotation = Quaternion.Slerp(
-                rectTransform.localRotation,
-                targetRotation,
-                InventorySettings.rotationAnimationSpeed * Time.deltaTime
-            );
-        }
+        if (rectTransform != null)
+            rectTransform.localRotation = Quaternion.Slerp(rectTransform.localRotation,
+                Quaternion.Euler(0, 0, -90 * rotateIndex), InventorySettings.rotationAnimationSpeed * Time.deltaTime);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (saveData.isSlotType == true)
-            tooltip.ShowToolTip(saveData.PreviousItemData.itemStats.GetItemName(), saveData.PreviousItemData.itemStats.CreateItemDescriptionText(), saveData.PreviousItemData.rarity.rarityColor);
-        else
-            tooltip.ShowToolTip(saveData.data.itemStats.GetItemName(), saveData.data.itemStats.CreateItemDescriptionText(), saveData.data.rarity.rarityColor);
+        ItemData definition = InventoryManager.Definition(saveData);
+        if (IsHeld || tooltip == null || definition.itemStats == null)
+            return;
+
+        tooltip.ShowToolTip(definition.itemStats.GetItemName(), definition.itemStats.CreateItemDescriptionText(),
+            definition.rarity != null ? definition.rarity.rarityColor : Color.white);
     }
 
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        tooltip.HideToolTip();
-    }
+    public void OnPointerExit(PointerEventData eventData) => tooltip?.HideToolTip();
 }
