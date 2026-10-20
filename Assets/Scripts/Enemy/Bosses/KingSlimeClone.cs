@@ -121,7 +121,7 @@ public class KingSlimeClone : MonoBehaviour
 
         // Apply the calculated force to the slime ball
         Rigidbody slimeBallRB = slimeBall.GetComponent<Rigidbody>();
-        slimeBallRB.velocity = launchVelocity;
+        slimeBallRB.linearVelocity = launchVelocity;
     }
 
     private Vector3 CalculateLaunchVelocity(Vector3 start, Vector3 target, float initialSpeed)

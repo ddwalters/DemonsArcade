@@ -105,8 +105,8 @@ public class PlayerController : MonoBehaviour
 
         currentSpeed = sprintInput ? sprintSpeed : walkSpeed;
         Vector3 velocity = move * currentSpeed;
-        velocity.y = rb.velocity.y;
-        rb.velocity = velocity;
+        velocity.y = rb.linearVelocity.y;
+        rb.linearVelocity = velocity;
 
         if (sprintCooldown && statsManager.GetStamina() >= statsManager.GetMaxStamina() - 1)
             sprintCooldown = false;

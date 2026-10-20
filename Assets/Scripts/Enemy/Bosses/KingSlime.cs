@@ -269,8 +269,8 @@ public class KingSlime : MonoBehaviour
         if (((1 << other.gameObject.layer) & playerLayer) != 0)
         {
             // Reduce King Slime's horizontal velocity to fall straight down
-            Vector3 currentVelocity = rb.velocity;
-            rb.velocity = new Vector3(0, currentVelocity.y, 0); // Zero out horizontal velocity
+            Vector3 currentVelocity = rb.linearVelocity;
+            rb.linearVelocity = new Vector3(0, currentVelocity.y, 0); // Zero out horizontal velocity
 
             dealDamage(leapDamage);
         }
@@ -336,7 +336,7 @@ public class KingSlime : MonoBehaviour
 
         // Apply the calculated force to the slime ball
         Rigidbody slimeBallRB = slimeBall.GetComponent<Rigidbody>();
-        slimeBallRB.velocity = launchVelocity;
+        slimeBallRB.linearVelocity = launchVelocity;
     }
 
     // Method to calculate the launch velocity required to hit the target
