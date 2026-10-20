@@ -35,7 +35,10 @@ public class PlayerModeController : MonoBehaviour
 
     private void HandleMenuInput(bool escape, bool tab, bool interact)
     {
-        if (Mode == PlayerMode.Dead)
+        if (Mode == PlayerMode.Dead || SaveManager.Instance?.IsLoading == true)
+            return;
+
+        if (escape && UIController.Current != null && UIController.Current.HandleEscape())
             return;
 
         if (escape)
@@ -60,6 +63,11 @@ public class PlayerModeController : MonoBehaviour
         if (Mode == next || (Mode == PlayerMode.Dead && next != PlayerMode.Dead))
             return;
 
+        ApplyMode(next);
+    }
+
+    private void ApplyMode(PlayerMode next)
+    {
         if (Mode == PlayerMode.Paused)
             Time.timeScale = previousTimeScale;
 
@@ -84,13 +92,7 @@ public class PlayerModeController : MonoBehaviour
         ModeChanged?.Invoke(next);
     }
 
-    public void ResetToGameplay()
-    {
-        if (Mode == PlayerMode.Dead)
-            Mode = PlayerMode.Inventory;
-
-        SetMode(PlayerMode.Gameplay);
-    }
+    public void ResetToGameplay() => ApplyMode(PlayerMode.Gameplay);
 
     private void OnDestroy()
     {

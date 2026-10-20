@@ -16,6 +16,10 @@ public class ItemInteractable : InteractableBase
         base.OnInteract();
 
         if (inventory.AddItem(0, itemData))
+        {
+            SaveManager.Instance?.RecordCollected(GetComponent<WorldSaveObject>());
+            gameObject.SetActive(false);
             Destroy(gameObject);
+        }
     }
 }

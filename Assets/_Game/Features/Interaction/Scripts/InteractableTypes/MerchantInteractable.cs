@@ -12,6 +12,7 @@ public class MerchantInteractable : InteractableBase
     private InteractionController controller;
 
     private int gridId;
+    public int GridId => gridId;
 
     private void Awake()
     {
@@ -28,6 +29,12 @@ public class MerchantInteractable : InteractableBase
         {
             inventory.AddItem(gridId, itemData);
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (inventoryManager != null)
+            inventoryManager.RemoveGrid(gridId);
     }
 
     public override void OnInteract()

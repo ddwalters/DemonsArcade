@@ -13,7 +13,8 @@ public class InventoryGrid : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     public void Bind(Inventory owner)
     {
         inventory = owner;
-        rectTransform = GetComponent<RectTransform>();
+        if (rectTransform == null)
+            rectTransform = GetComponent<RectTransform>();
         items = new Item[gridSize.x, gridSize.y];
         rectTransform.sizeDelta = new Vector2(gridSize.x * InventorySettings.slotSize.x, gridSize.y * InventorySettings.slotSize.y);
     }

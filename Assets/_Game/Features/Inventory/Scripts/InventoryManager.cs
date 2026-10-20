@@ -12,6 +12,17 @@ public class InventoryManager : MonoBehaviour
 
     private void Awake()
     {
+        var existing = FindObjectsByType<InventoryManager>();
+        foreach (var manager in existing)
+        {
+            if (manager != this && manager.ItemDataInformation != null)
+            {
+                gameObject.SetActive(false);
+                Destroy(gameObject);
+                return;
+            }
+        }
+
         DontDestroyOnLoad(gameObject);
         Initialize(FindAnyObjectByType<PlayerStatsManager>().GetPlayerStats().inventoryType);
     }
@@ -70,6 +81,24 @@ public class InventoryManager : MonoBehaviour
     }
 
     public (List<ItemInstance> list, InventoryType type) GetItems(int id) => ItemDataInformation[id];
+
+    public void SetPlayerInventoryType(InventoryType type)
+    {
+        ItemDataInformation[0] = (GetItems(0).list, type);
+    }
+
+    public void ReplaceItems(int id, List<ItemInstance> items)
+    {
+        var list = GetItems(id).list;
+        list.Clear();
+        list.AddRange(items);
+    }
+
+    public void RebuildEquipment()
+    {
+        weaponHandler = FindAnyObjectByType<WeaponsHandler>();
+        RefreshEquipment((int)EquipmentSlot.RightHand, (int)EquipmentSlot.LeftHand);
+    }
 
     public void RemoveGrid(int id)
     {

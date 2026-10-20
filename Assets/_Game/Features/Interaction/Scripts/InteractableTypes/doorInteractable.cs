@@ -49,6 +49,20 @@ public class doorInteractable : InteractableBase
         coll.enabled = false;
     }
 
+    public void RestoreState(bool wasOpened, bool interactable)
+    {
+        opened = wasOpened;
+        if (interactable)
+            UnlockDoor();
+        else
+            LockDoor();
+
+        if (opened)
+            OpenDoor();
+        else
+            CloseDoor();
+    }
+
     public void Reopen()
     {
         if (opened == true)

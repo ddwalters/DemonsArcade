@@ -21,6 +21,7 @@ public class LoadLevel : MonoBehaviour
     public float transitionTime;
 
     private bool isLoading;
+    public bool IsLoading => isLoading;
 
     private void Awake()
     {
@@ -33,6 +34,7 @@ public class LoadLevel : MonoBehaviour
         if (isLoading)
             return;
 
+        SaveManager.Instance?.CaptureWorld();
         isLoading = true;
         FindAnyObjectByType<PlayerModeController>()?.SetMode(PlayerMode.Gameplay);
         Transition.SetBool("Awake", false);

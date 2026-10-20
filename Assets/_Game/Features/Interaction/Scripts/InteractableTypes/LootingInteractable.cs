@@ -1,4 +1,3 @@
-using NUnit.Framework.Interfaces;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,6 +18,7 @@ public class LootingInteractable : InteractableBase
     private InteractionController controller;
 
     private int gridId;
+    public int GridId => gridId;
 
     private void Awake()
     {
@@ -48,6 +48,12 @@ public class LootingInteractable : InteractableBase
         {
             inventory.AddItem(gridId, itemData);
         }
+    }
+
+    private void OnDestroy()
+    {
+        if (inventoryManager != null)
+            inventoryManager.RemoveGrid(gridId);
     }
 
     public override void OnInteract()

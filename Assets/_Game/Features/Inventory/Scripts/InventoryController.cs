@@ -59,7 +59,7 @@ public class InventoryController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
             inventory.selectedItem.Rotate();
         var size = inventory.selectedItem.Footprint;
-        float scale = GetComponentInParent<Canvas>().scaleFactor;
+        float scale = inventory.selectedItem.rectTransform.lossyScale.x;
         inventory.selectedItem.rectTransform.position = Input.mousePosition + new Vector3(
             (size.x - 1) * InventorySettings.slotSize.x * scale / 2f,
             -(size.y - 1) * InventorySettings.slotSize.y * scale / 2f, 0);

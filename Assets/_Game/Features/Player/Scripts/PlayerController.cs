@@ -38,6 +38,17 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
+        foreach (var existing in FindObjectsByType<PlayerController>())
+        {
+            if (existing != this && existing.controls != null)
+            {
+                existing.RestoreLocation(transform.position, transform.rotation);
+                gameObject.SetActive(false);
+                Destroy(gameObject);
+                return;
+            }
+        }
+
         DontDestroyOnLoad(this);
         controls = new NewControls();
         mode = PlayerModeController.ForPlayer(this);
@@ -56,8 +67,8 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    private void OnEnable() => controls.BasicActionMap.Enable();
-    private void OnDisable() => controls.BasicActionMap.Disable();
+    private void OnEnable() => controls?.BasicActionMap.Enable();
+    private void OnDisable() => controls?.BasicActionMap.Disable();
 
     private void Start()
     {
@@ -65,6 +76,7 @@ public class PlayerController : MonoBehaviour
         cam = gameObject.GetComponentInChildren<Camera>();
         rb = gameObject.GetComponent<Rigidbody>();
 
+        sensitivity = PlayerPrefs.GetFloat("Settings.Sensitivity", sensitivity);
         Cursor.lockState = CursorLockMode.Locked;
     }
 
@@ -136,6 +148,26 @@ public class PlayerController : MonoBehaviour
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
         cam.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+    }
+
+    public float LookSensitivity => sensitivity;
+
+    public void SetSensitivity(float value) => sensitivity = value;
+
+    public void RestoreLocation(Vector3 position, Quaternion rotation)
+    {
+        StopMotion();
+        transform.SetPositionAndRotation(position, rotation);
+        if (rb != null)
+        {
+            rb.position = position;
+            rb.rotation = rotation;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        xRotation = 0f;
+        if (cam != null)
+            cam.transform.localRotation = Quaternion.identity;
     }
 
     public void StopMotion()

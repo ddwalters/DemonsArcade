@@ -1,4 +1,3 @@
-using BayatGames.SaveGameFree;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -6,7 +5,6 @@ using UnityEngine.UI;
 
 public class PlayerStatsManager : MonoBehaviour
 {
-    private const string SaveIdentifier = "gameSaveIdentifier";
     private PlayerStatsData statsData;
 
     [SerializeField, Min(0f)] private float staminaRecoveryRate = 15f;
@@ -17,6 +15,8 @@ public class PlayerStatsManager : MonoBehaviour
 
     private Animator BloodyScreenAnim;
     private bool isUsingStamina;
+    private int temporaryEffects;
+    public bool HasTemporaryEffects => temporaryEffects > 0;
 
     private void Awake()
     {
@@ -28,7 +28,7 @@ public class PlayerStatsManager : MonoBehaviour
     private void EnsureStatsInitialized()
     {
         if (statsData == null)
-            LoadPlayerStats();
+            statsData = new PlayerStatsData();
     }
 
     // A new scene changes the view, not the live player session.
@@ -223,12 +223,14 @@ public class PlayerStatsManager : MonoBehaviour
 
     private IEnumerator ApplyBuffDebuff(TextMeshProUGUI textObject, Stat stat, int amount, float duration)
     {
+        temporaryEffects++;
         int originalValue = stat.Value;
         stat.Value = Mathf.Max(1, stat.Value + amount);
         textObject.text = stat.Value.ToString();
         yield return new WaitForSeconds(duration);
         stat.Value = originalValue;
         textObject.text = stat.Value.ToString();
+        temporaryEffects--;
     }
     #endregion
 
@@ -239,16 +241,16 @@ public class PlayerStatsManager : MonoBehaviour
         return statsData;
     }
 
-    public void SavePlayerStats()
-    {
-        SaveGame.Save(SaveIdentifier, statsData);
-    }
-
-    public void LoadPlayerStats()
-    {
-        statsData = SaveGame.Load<PlayerStatsData>(SaveIdentifier) ?? new PlayerStatsData();
-    }
     #endregion
+
+    public void RestoreStats(PlayerStatsData data)
+    {
+        StopAllCoroutines();
+        temporaryEffects = 0;
+        statsData = data;
+        isUsingStamina = false;
+        UpdateAllBars();
+    }
 
     private void PlayerDeath()
     {

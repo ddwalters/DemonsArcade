@@ -105,6 +105,10 @@ public static class PlayerFeatureChecks
         Set(inventory, "worldGridHolder", canvas.transform);
         inventory.CreateGrid(world, false);
         var grid = canvas.GetComponentsInChildren<InventoryGrid>(true).First(g => g.id == world);
+        var prefabSurface = inventory.inventoryType[InventoryType.SixByThreeMinimal].GetComponentsInChildren<InventoryGrid>(true)
+            .First(g => g.id == 0).rectTransform;
+        Require(grid.rectTransform.name == prefabSurface.name && grid.rectTransform.pivot == prefabSurface.pivot,
+            "Binding preserves the prefab's visible grid surface and its origin.");
         Require(grid.items[2, 1] != null && grid.items[2, 1] == grid.items[3, 1], "Reopened view occupies the same rotated cells.");
         var held = grid.items[2, 1];
         inventory.SelectItem(held);
@@ -121,6 +125,8 @@ public static class PlayerFeatureChecks
         Require(manager.TryMoveItem(world, record, (int)EquipmentSlot.RightHand, Vector2Int.zero, 0, Vector2Int.one), "Equip the original instance for view checks.");
         inventory.CreateGrid(0, true);
         var hand = canvas.GetComponentsInChildren<InventoryGrid>(true).First(g => g.id == (int)EquipmentSlot.RightHand);
+        Require(hand.rectTransform != hand.transform && hand.rectTransform.pivot == new Vector2(0f, 1f),
+            "Equipment uses its child slot surface rather than its centered layout wrapper.");
         Item equipped = hand.items[0, 0];
         Require(ReferenceEquals(equipped.Instance, record) && equipped.Footprint == Vector2Int.one, "Equipment view displays the original item in one slot.");
         inventory.SelectItem(equipped);

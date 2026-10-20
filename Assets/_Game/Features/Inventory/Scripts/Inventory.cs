@@ -99,6 +99,12 @@ public class Inventory : MonoBehaviour
             foreach (var slot in root.GetComponentsInChildren<InventoryGrid>())
                 if (slot != main && InventoryManager.IsEquipmentGrid(slot.id))
                     PopulateGrid(slot);
+
+        foreach (var entry in openGrids)
+        {
+            var layout = entry.Value.GetComponent<InventoryPanelLayout>() ?? entry.Value.AddComponent<InventoryPanelLayout>();
+            layout.Configure(canvas, entry.Key == 0, openGrids.Count > 1);
+        }
     }
 
     private void PopulateGrid(InventoryGrid grid)
