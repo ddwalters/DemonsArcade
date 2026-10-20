@@ -314,11 +314,8 @@ public class KingSlime : MonoBehaviour
                 // Calculate push direction (away from the King Slime)
                 Vector3 pushDirection = (hitCollider.transform.position - transform.position).normalized;
 
-                // Apply push force to the player
-                Rigidbody playerRB = playerController.GetComponent<Rigidbody>();
-
-                // Apply upward force to make the player jump a little
-                playerRB.AddForce(pushDirection * slimeWaveForce + Vector3.up * 5f, ForceMode.Impulse);
+                playerController.GetComponent<CharacterMotor>().AddImpulse(
+                    pushDirection * slimeWaveForce + Vector3.up * 5f);
             }
         }
     }
