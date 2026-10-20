@@ -18,6 +18,10 @@ public class InteractionUIPanel : MonoBehaviour
 
     public void UpdateProgressBar(float fillAmount)
     {
+        fillAmount = Mathf.Clamp01(fillAmount);
+        if (progressBar.fillAmount == fillAmount)
+            return;
+
         progressBar.fillAmount = fillAmount;
         isReset = false;
     }
@@ -28,6 +32,7 @@ public class InteractionUIPanel : MonoBehaviour
         {
             progressBar.fillAmount = 0;
             tooltipText.SetText("");
+            isReset = true;
         }
     }
 }

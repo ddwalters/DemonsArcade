@@ -88,8 +88,8 @@ public class PlayerController : MonoBehaviour
         if (!canMove)
             return;
 
-        HandleMovement();
         Sprint();
+        HandleMovement();
 
         if (jumpInput && isGrounded) 
             Jump();
@@ -103,19 +103,19 @@ public class PlayerController : MonoBehaviour
         float moveZ = moveInput.y;
         Vector3 move = transform.right * moveX + transform.forward * moveZ;
 
-        currentSpeed = sprintInput ? sprintSpeed : walkSpeed;
+        currentSpeed = sprintInput && !sprintCooldown ? sprintSpeed : walkSpeed;
         Vector3 velocity = move * currentSpeed;
         velocity.y = rb.linearVelocity.y;
         rb.linearVelocity = velocity;
 
-        if (sprintCooldown && statsManager.GetStamina() >= statsManager.GetMaxStamina() - 1)
-            sprintCooldown = false;
     }
 
     private void Sprint()
     {
         if (statsManager.GetStamina() <= 0)
             sprintCooldown = true;
+        else if (sprintCooldown && statsManager.GetStamina() >= statsManager.GetMaxStamina() - 1)
+            sprintCooldown = false;
 
         if (sprintInput && !sprintCooldown)
         {

@@ -21,6 +21,8 @@ public class LoadLevel : MonoBehaviour
 
     public float transitionTime;
 
+    private bool isLoading;
+
     private void Awake()
     {
         Transition.SetBool("Awake", true);
@@ -29,19 +31,29 @@ public class LoadLevel : MonoBehaviour
 
     public void loadLevel(int sceneIndex)
     {
+        if (isLoading)
+            return;
+
+        isLoading = true;
         Transition.SetBool("Awake", false);
         StartCoroutine(loadAsynchronously(sceneIndex));
     }
 
     IEnumerator loadAsynchronously(int sceneIndex)
     {
-        yield return new WaitForSeconds(transitionTime);
-        loadingScreen.SetActive(true);
-        yield return new WaitForSeconds(0.5f);
-
+        // Load while the closing animation plays, then activate behind the loading screen.
         AsyncOperation operation = SceneManager.LoadSceneAsync(sceneIndex);
+        operation.allowSceneActivation = false;
 
-        while (!operation.isDone)
+        if (transitionTime > 0f)
+            yield return new WaitForSecondsRealtime(transitionTime);
+
+        slider.value = 0f;
+        textProgress.text = "0%";
+        loadingScreen.SetActive(true);
+        yield return null;
+
+        while (operation.progress < 0.9f)
         {
             float progress;
 
@@ -53,22 +65,27 @@ public class LoadLevel : MonoBehaviour
             yield return null;
         }
 
-        yield return new WaitForSeconds(0.6f);
-
-        loadingScreen.SetActive(false);
-        Transition.SetBool("Awake", true);
+        slider.value = 1f;
+        textProgress.text = "100%";
+        operation.allowSceneActivation = true;
+        yield return operation;
 
         if (player == null)
         {
             player = FindAnyObjectByType<PlayerController>().gameObject;
-            playerController = player.GetComponent<PlayerController>();
-            playerStats = player.GetComponent<PlayerStatsManager>();
-            playerInteraction = player.GetComponent<InteractionController>();
         }
+
+        playerController = player.GetComponent<PlayerController>();
+        playerStats = player.GetComponent<PlayerStatsManager>();
+        playerInteraction = player.GetComponent<InteractionController>();
 
         playerController.GetNewComponents();
         playerStats.GetNewComponents();
         playerInteraction.GetNewComponents();
+
+        loadingScreen.SetActive(false);
+        Transition.SetBool("Awake", true);
+        isLoading = false;
     }
 
     public void DungeonComplete()

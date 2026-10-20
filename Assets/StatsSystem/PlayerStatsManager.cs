@@ -10,6 +10,8 @@ public class PlayerStatsManager : MonoBehaviour
     private PlayerStatsData statsData;
     private PlayerController controller;
 
+    [SerializeField, Min(0f)] private float staminaRecoveryRate = 15f;
+
     private GameObject canvas;
 
     [SerializeField] private Image healthFill;
@@ -169,7 +171,7 @@ public class PlayerStatsManager : MonoBehaviour
     {
         if (isUsingStamina && statsData.currentStamina > 0)
         {
-            statsData.currentStamina -= staminaAmount;
+            statsData.currentStamina = Mathf.Max(0f, statsData.currentStamina - staminaAmount);
             UpdateStaminaBar();
         }
     }
@@ -178,7 +180,8 @@ public class PlayerStatsManager : MonoBehaviour
     {
         if (!isUsingStamina && statsData.currentStamina < statsData.maxStamina)
         {
-            statsData.currentStamina += 0.25f;
+            statsData.currentStamina = Mathf.Min(statsData.maxStamina,
+                statsData.currentStamina + staminaRecoveryRate * Time.deltaTime);
             UpdateStaminaBar();
             if (statsData.currentStamina >= statsData.maxStamina)
                 isRegeneratingStamina = false;
