@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 
 public static class InventorySettings
 {
     public static readonly Vector2Int slotSize = new(72, 72);
-    public static readonly float slotScale = 1f;
     public static readonly float rotationAnimationSpeed = 30f;
 }
 
@@ -14,12 +12,9 @@ public class Inventory : MonoBehaviour
 {
     public Item itemPrefab;
     public InventoryGrid gridOnMouse { get; set; }
-    public InventoryGrid[] grids => GetComponentsInChildren<InventoryGrid>();
     public InventoryTypeCollection inventoryType;
     public Item selectedItem { get; private set; }
     public ItemToolTip tooltip;
-    public WeaponsHandler weaponsHandler;
-    public Image border;
 
     private InventoryManager inventoryManager;
     private Canvas canvas;
@@ -56,7 +51,7 @@ public class Inventory : MonoBehaviour
         prefab.GetComponentsInChildren<InventoryGrid>(true).First(g => g.id == 0);
 
     private GameObject GridPrefab(int id) => inventoryType[inventoryManager.GetItems(id).type];
-    public Vector2Int GridSize(int id) => InventoryManager.IsEquipmentGrid(id)
+    private Vector2Int GridSize(int id) => InventoryManager.IsEquipmentGrid(id)
         ? Vector2Int.one : MainGrid(GridPrefab(id)).gridSize;
 
     public bool AddItem(int gridId, ItemData definition)
@@ -74,16 +69,8 @@ public class Inventory : MonoBehaviour
                     if (!inventoryManager.CanPlace(gridId, definition, position, rotation, size))
                         continue;
 
-                    var record = new GameObject("Inventory item: " + definition.name).AddComponent<ItemSaveData>();
-                    record.data = definition;
-                    record.slotPosition = position;
-                    record.rotateIndex = rotation;
-                    record.isRotated = rotation != 0;
-                    if (inventoryManager.TryAddItem(gridId, record, size))
-                        return true;
-
-                    Destroy(record.gameObject);
-                    return false;
+                    var record = new ItemInstance(definition, position, rotation);
+                    return inventoryManager.TryAddItem(gridId, record, size);
                 }
 
         return false;
@@ -116,29 +103,20 @@ public class Inventory : MonoBehaviour
 
     private void PopulateGrid(InventoryGrid grid)
     {
-        grid.Bind(this, inventoryManager);
+        grid.Bind(this);
         foreach (var record in inventoryManager.GetItems(grid.id).list)
         {
             Item view = Instantiate(itemPrefab, grid.rectTransform);
-            view.rectTransform = view.GetComponent<RectTransform>();
-            view.rectTransform.localScale = Vector3.one;
-            view.saveData = record;
-            view.inventory = this;
-            view.inventoryGrid = grid;
-            view.indexPosition = record.slotPosition;
-            view.rotateIndex = record.rotateIndex;
-            view.StartRotate();
-            view.SetHeld(false);
-            view.rectTransform.localRotation = Quaternion.Euler(0, 0, -90 * view.rotateIndex);
+            view.Bind(record, this, grid);
             view.rectTransform.localPosition = IndexToInventoryPosition(view);
-            foreach (var cell in InventoryPlacement.Cells(record.slotPosition,
-                         InventoryPlacement.Size(record.data, record.rotateIndex)))
-                grid.UpdateItemsMatrix(cell.x, cell.y, view, record);
+            foreach (var cell in InventoryPlacement.Cells(record.Position,
+                         InventoryManager.IsEquipmentGrid(grid.id) ? Vector2Int.one : InventoryPlacement.Size(record.Definition, record.Rotation)))
+                grid.items[cell.x, cell.y] = view;
         }
     }
 
     public Sprite SlotIcon(Item item) => inventoryManager.GetSlotIcon(item.inventoryGrid.id,
-        InventoryManager.Definition(item.saveData));
+        item.Instance.Definition);
 
     public void SelectItem(Item item)
     {
@@ -154,31 +132,24 @@ public class Inventory : MonoBehaviour
         tooltip?.HideToolTip();
     }
 
-    public void MoveItem(Item item, bool deselectItemInEnd = true)
+    public void PlaceSelectedItem()
     {
-        if (gridOnMouse == null || item == null)
+        if (gridOnMouse == null || selectedItem == null)
             return;
 
-        Vector2Int position = InventoryManager.IsEquipmentGrid(gridOnMouse.id)
-            ? Vector2Int.zero : GetSlotAtMouseCoords();
-        if (!inventoryManager.TryMoveItem(item.inventoryGrid.id, item.saveData, gridOnMouse.id,
-                position, item.rotateIndex, gridOnMouse.gridSize))
-            return;
+        Item overlap = GetItemAtMouseCoords();
+        Vector2Int position = InventoryManager.IsEquipmentGrid(gridOnMouse.id) ? Vector2Int.zero : GetSlotAtMouseCoords();
+        bool moved;
+        if (overlap == null)
+            moved = inventoryManager.TryMoveItem(selectedItem.inventoryGrid.id, selectedItem.Instance,
+                gridOnMouse.id, position, selectedItem.rotateIndex, gridOnMouse.gridSize);
+        else
+            moved = inventoryManager.TrySwapItems(selectedItem.inventoryGrid.id, selectedItem.Instance,
+                gridOnMouse.id, overlap.Instance, overlap.indexPosition, selectedItem.rotateIndex,
+                selectedItem.inventoryGrid.gridSize, gridOnMouse.gridSize);
 
-        CompleteDrop();
-    }
-
-    public void SwapItem(Item overlapItem, Item heldItem)
-    {
-        if (gridOnMouse == null || overlapItem == null || heldItem == null)
-            return;
-
-        if (!inventoryManager.TrySwapItems(heldItem.inventoryGrid.id, heldItem.saveData,
-                gridOnMouse.id, overlapItem.saveData, overlapItem.indexPosition, heldItem.rotateIndex,
-                heldItem.inventoryGrid.gridSize, gridOnMouse.gridSize))
-            return;
-
-        CompleteDrop();
+        if (moved)
+            CompleteDrop();
     }
 
     private void CompleteDrop()
@@ -210,14 +181,12 @@ public class Inventory : MonoBehaviour
         tooltip?.HideToolTip();
     }
 
-    public void ClosingGrid() => CloseAllGrids();
-
     public void RemoveItem(Item item)
     {
         if (item == null)
             return;
 
-        inventoryManager.RemoveItem(item.inventoryGrid.id, item.saveData.Id);
+        inventoryManager.RemoveItem(item.inventoryGrid.id, item.Instance);
         if (selectedItem == item)
             selectedItem = null;
 
@@ -240,8 +209,8 @@ public class Inventory : MonoBehaviour
             !InventoryPlacement.Fits(position, new Vector2Int(width, height), grid.gridSize));
 
     public Vector3 IndexToInventoryPosition(Item item) => new(
-        (item.indexPosition.x + item.correctedSize.width / 2f) * InventorySettings.slotSize.x,
-        -(item.indexPosition.y + item.correctedSize.height / 2f) * InventorySettings.slotSize.y, 0);
+        (item.indexPosition.x + item.Footprint.x / 2f) * InventorySettings.slotSize.x,
+        -(item.indexPosition.y + item.Footprint.y / 2f) * InventorySettings.slotSize.y, 0);
 
     public Vector2Int GetSlotAtMouseCoords()
     {
@@ -265,5 +234,4 @@ public class Inventory : MonoBehaviour
         return ReachedBoundary(cell, gridOnMouse) ? null : gridOnMouse.items[cell.x, cell.y];
     }
 
-    public ItemToolTip GetItemTooltip() => tooltip;
 }

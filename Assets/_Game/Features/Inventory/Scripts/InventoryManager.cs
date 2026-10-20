@@ -3,17 +3,12 @@ using UnityEngine;
 
 public class InventoryManager : MonoBehaviour
 {
-    private Dictionary<int, (List<ItemSaveData> list, InventoryType type)> ItemDataInformation;
+    private Dictionary<int, (List<ItemInstance> list, InventoryType type)> ItemDataInformation;
     private WeaponsHandler weaponHandler;
     private int nextGridId = 8;
 
-    [SerializeField] private ItemData fakeHelmetData;
-    [SerializeField] private ItemData fakeChestpieceData;
-    [SerializeField] private ItemData fakeLeggingsData;
-    [SerializeField] private ItemData fakeBootsData;
-    [SerializeField] private ItemData fakeNecklaceData;
-    [SerializeField] private ItemData fakeWeaponData;
-    public Sprite[] itemType;
+    [SerializeField] private Sprite[] armorSlotIcons;
+    [SerializeField] private Sprite[] weaponIcons;
 
     private void Awake()
     {
@@ -28,14 +23,13 @@ public class InventoryManager : MonoBehaviour
         if (ItemDataInformation != null)
             return;
 
-        ItemDataInformation = new Dictionary<int, (List<ItemSaveData>, InventoryType)>();
-        ItemDataInformation.Add(0, (new List<ItemSaveData>(), playerType));
+        ItemDataInformation = new Dictionary<int, (List<ItemInstance>, InventoryType)>();
+        ItemDataInformation.Add(0, (new List<ItemInstance>(), playerType));
         for (int id = 1; id <= 7; id++)
-            ItemDataInformation.Add(id, (new List<ItemSaveData>(), InventoryType.OneByOneMinimal));
+            ItemDataInformation.Add(id, (new List<ItemInstance>(), InventoryType.OneByOneMinimal));
     }
 
     public static bool IsEquipmentGrid(int id) => id >= 1 && id <= 7;
-    public static ItemData Definition(ItemSaveData item) => item.PreviousItemData != null ? item.PreviousItemData : item.data;
 
     public static bool CanEquip(ItemData definition, EquipmentSlot slot)
     {
@@ -49,23 +43,14 @@ public class InventoryManager : MonoBehaviour
         if (slot == EquipmentSlot.LeftHand)
             return weapon == WeaponType.Shield;
 
-        // Existing weapon definitions have a default armor enum value; they are never armor.
         return weapon == WeaponType.NonWeapon && definition.itemStats.GetArmorType() == (ArmorType)((int)slot - 1);
     }
 
-    private ItemData SlotTemplate(int id) => id switch
-    {
-        1 => fakeHelmetData,
-        2 => fakeChestpieceData,
-        3 => fakeLeggingsData,
-        4 => fakeBootsData,
-        5 => fakeNecklaceData,
-        6 or 7 => fakeWeaponData,
-        _ => null
-    };
-
     public Sprite GetSlotIcon(int id, ItemData definition)
     {
+        if (id < (int)EquipmentSlot.RightHand)
+            return armorSlotIcons != null && id > 0 && id <= armorSlotIcons.Length ? armorSlotIcons[id - 1] : definition.icon;
+
         int index = id == (int)EquipmentSlot.LeftHand ? 4 : definition.itemStats.GetWeaponType() switch
         {
             WeaponType.ShortSword => 1,
@@ -74,17 +59,17 @@ public class InventoryManager : MonoBehaviour
             _ => 0
         };
 
-        return id >= 6 && itemType != null && index < itemType.Length ? itemType[index] : SlotTemplate(id)?.icon;
+        return weaponIcons != null && index < weaponIcons.Length ? weaponIcons[index] : definition.icon;
     }
 
     public int AddNewGridList(InventoryType type)
     {
         int id = nextGridId++;
-        ItemDataInformation.Add(id, (new List<ItemSaveData>(), type));
+        ItemDataInformation.Add(id, (new List<ItemInstance>(), type));
         return id;
     }
 
-    public (List<ItemSaveData> list, InventoryType type) GetItems(int id) => ItemDataInformation[id];
+    public (List<ItemInstance> list, InventoryType type) GetItems(int id) => ItemDataInformation[id];
 
     public void RemoveGrid(int id)
     {
@@ -93,13 +78,13 @@ public class InventoryManager : MonoBehaviour
     }
 
     public bool CanPlace(int gridId, ItemData definition, Vector2Int position, int rotation,
-        Vector2Int gridSize, ItemSaveData ignore = null, ItemSaveData otherIgnore = null)
+        Vector2Int gridSize, ItemInstance ignore = null, ItemInstance otherIgnore = null)
     {
         if (definition == null || !ItemDataInformation.TryGetValue(gridId, out var grid))
             return false;
 
         if (IsEquipmentGrid(gridId))
-            return SlotTemplate(gridId) != null && CanEquip(definition, (EquipmentSlot)gridId) && grid.list.TrueForAll(item => ReferenceEquals(item, ignore) || ReferenceEquals(item, otherIgnore));
+            return CanEquip(definition, (EquipmentSlot)gridId) && grid.list.TrueForAll(item => ReferenceEquals(item, ignore) || ReferenceEquals(item, otherIgnore));
 
         Vector2Int size = InventoryPlacement.Size(definition, rotation);
         if (!InventoryPlacement.Fits(position, size, gridSize))
@@ -110,45 +95,40 @@ public class InventoryManager : MonoBehaviour
             if (ReferenceEquals(item, ignore) || ReferenceEquals(item, otherIgnore))
                 continue;
 
-            if (InventoryPlacement.Overlaps(position, size, item.slotPosition, InventoryPlacement.Size(Definition(item), item.rotateIndex)))
+            if (InventoryPlacement.Overlaps(position, size, item.Position, InventoryPlacement.Size(item.Definition, item.Rotation)))
                 return false;
         }
 
         return true;
     }
 
-    private void Configure(ItemSaveData item, int gridId, Vector2Int position, int rotation)
+    private static void Configure(ItemInstance item, int gridId, Vector2Int position, int rotation)
     {
-        ItemData definition = Definition(item);
-        bool equipped = IsEquipmentGrid(gridId);
-        item.data = equipped ? SlotTemplate(gridId) : definition;
-        item.PreviousItemData = equipped ? definition : null;
-        item.isSlotType = equipped;
-        item.slotPosition = equipped ? Vector2Int.zero : position;
-        item.rotateIndex = equipped ? 0 : rotation % 4;
-        item.isRotated = (item.rotateIndex & 1) != 0;
-        item.transform.SetParent(transform);
+        item.Position = IsEquipmentGrid(gridId) ? Vector2Int.zero : position;
+        item.Rotation = IsEquipmentGrid(gridId) ? 0 : rotation % 4;
+    }
+
+    private void Transfer(int sourceId, ItemInstance item, int destinationId, Vector2Int position, int rotation)
+    {
+        GetItems(sourceId).list.Remove(item);
+        GetItems(destinationId).list.Add(item);
+        Configure(item, destinationId, position, rotation);
     }
 
     // Validation happens before either container or the item record changes.
-    public bool TryMoveItem(int sourceId, ItemSaveData item, int destinationId,
+    public bool TryMoveItem(int sourceId, ItemInstance item, int destinationId,
         Vector2Int position, int rotation, Vector2Int destinationSize)
     {
         var source = GetItems(sourceId).list;
-        if (!source.Contains(item) || !CanPlace(destinationId, Definition(item), position, rotation, destinationSize, item))
+        if (!source.Contains(item) || !CanPlace(destinationId, item.Definition, position, rotation, destinationSize, item))
             return false;
 
-        var destination = GetItems(destinationId).list;
-        source.Remove(item);
-        destination.Add(item);
-        Configure(item, destinationId, position, rotation);
-        Reindex(source);
-        Reindex(destination);
+        Transfer(sourceId, item, destinationId, position, rotation);
         RefreshEquipment(sourceId, destinationId);
         return true;
     }
 
-    public bool TrySwapItems(int sourceId, ItemSaveData item, int destinationId, ItemSaveData other,
+    public bool TrySwapItems(int sourceId, ItemInstance item, int destinationId, ItemInstance other,
         Vector2Int position, int rotation, Vector2Int sourceSize, Vector2Int destinationSize)
     {
         var source = GetItems(sourceId).list;
@@ -156,56 +136,39 @@ public class InventoryManager : MonoBehaviour
         if (ReferenceEquals(item, other) || !source.Contains(item) || !destination.Contains(other))
             return false;
 
-        Vector2Int oldPosition = item.slotPosition;
-        int otherRotation = other.rotateIndex;
-        if (!CanPlace(destinationId, Definition(item), position, rotation, destinationSize, item, other) ||
-            !CanPlace(sourceId, Definition(other), oldPosition, otherRotation, sourceSize, item, other))
+        Vector2Int oldPosition = item.Position;
+        int otherRotation = other.Rotation;
+        if (!CanPlace(destinationId, item.Definition, position, rotation, destinationSize, item, other) ||
+            !CanPlace(sourceId, other.Definition, oldPosition, otherRotation, sourceSize, item, other))
             return false;
 
         if (sourceId == destinationId && !IsEquipmentGrid(sourceId) &&
-            InventoryPlacement.Overlaps(position, InventoryPlacement.Size(Definition(item), rotation),
-                oldPosition, InventoryPlacement.Size(Definition(other), otherRotation)))
+            InventoryPlacement.Overlaps(position, InventoryPlacement.Size(item.Definition, rotation),
+                oldPosition, InventoryPlacement.Size(other.Definition, otherRotation)))
             return false;
 
-        source.Remove(item);
-        destination.Remove(other);
-        destination.Add(item);
-        source.Add(other);
-        Configure(item, destinationId, position, rotation);
-        Configure(other, sourceId, oldPosition, otherRotation);
-        Reindex(source);
-        Reindex(destination);
+        Transfer(sourceId, item, destinationId, position, rotation);
+        Transfer(destinationId, other, sourceId, oldPosition, otherRotation);
         RefreshEquipment(sourceId, destinationId);
         return true;
     }
 
-    public bool TryAddItem(int gridId, ItemSaveData item, Vector2Int gridSize)
+    public bool TryAddItem(int gridId, ItemInstance item, Vector2Int gridSize)
     {
-        if (!CanPlace(gridId, Definition(item), item.slotPosition, item.rotateIndex, gridSize))
+        if (!CanPlace(gridId, item.Definition, item.Position, item.Rotation, gridSize))
             return false;
 
-        Configure(item, gridId, item.slotPosition, item.rotateIndex);
+        Configure(item, gridId, item.Position, item.Rotation);
         var list = GetItems(gridId).list;
         list.Add(item);
-        Reindex(list);
         RefreshEquipment(gridId, gridId);
         return true;
     }
 
-    private static void Reindex(List<ItemSaveData> list)
+    public void RemoveItem(int gridId, ItemInstance item)
     {
-        for (int i = 0; i < list.Count; i++)
-            list[i].Id = i;
-    }
-
-    public void RemoveItem(int gridId, int itemId)
-    {
-        var list = GetItems(gridId).list;
-        var item = list[itemId];
-        list.RemoveAt(itemId);
-        Reindex(list);
-        RefreshEquipment(gridId, gridId);
-        Destroy(item.gameObject);
+        if (GetItems(gridId).list.Remove(item))
+            RefreshEquipment(gridId, gridId);
     }
 
     private void RefreshEquipment(int source, int destination)
@@ -219,7 +182,7 @@ public class InventoryManager : MonoBehaviour
 
             var list = GetItems((int)EquipmentSlot.RightHand).list;
             if (list.Count > 0)
-                weaponHandler.AddItemToPlayerRightHand(Definition(list[0]).itemStats);
+                weaponHandler.AddItemToPlayerRightHand(list[0].Definition.itemStats);
         }
         if (source == (int)EquipmentSlot.LeftHand || destination == (int)EquipmentSlot.LeftHand)
         {
@@ -227,7 +190,7 @@ public class InventoryManager : MonoBehaviour
 
             var list = GetItems((int)EquipmentSlot.LeftHand).list;
             if (list.Count > 0)
-                weaponHandler.AddItemToPlayerLeftHand(Definition(list[0]).itemStats);
+                weaponHandler.AddItemToPlayerLeftHand(list[0].Definition.itemStats);
         }
     }
 }

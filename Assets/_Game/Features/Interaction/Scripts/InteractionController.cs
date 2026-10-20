@@ -2,12 +2,7 @@ using UnityEngine;
 
 public class InteractionController : MonoBehaviour
 {
-    // Retain serialized references for existing prefabs; temporary state lives on this controller.
-    [SerializeField] private InteractionInputData interactionInputData;
-    [SerializeField] private InteractionData interactionData;
     [SerializeField] private InteractionUIPanel uiPanel;
-    [SerializeField] private GameObject playerHud;
-    [SerializeField] private GameObject playerBackpack;
     [SerializeField] private float rayDistance;
     [SerializeField] private float raySphereRadius;
     [SerializeField] private LayerMask interactableLayer;
@@ -19,7 +14,6 @@ public class InteractionController : MonoBehaviour
 
     private void Start()
     {
-        playerCamera = GetComponentInChildren<Camera>();
         mode = PlayerModeController.ForPlayer(GetComponent<PlayerController>());
         mode.ModeChanged += OnModeChanged;
         GetNewComponents();
@@ -117,10 +111,6 @@ public class InteractionController : MonoBehaviour
         CancelHold();
         target = null;
         uiPanel?.ResetUI();
-        if (interactionData != null)
-            interactionData.ResetData();
-        if (interactionInputData != null)
-            interactionInputData.ResetInput();
     }
 
     public void OpenLoot(int gridId) => mode.OpenLoot(gridId);

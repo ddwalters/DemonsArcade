@@ -17,28 +17,23 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float staminaUsageRate = 1f;
     [Space]
     [Header("Components")]
-    [SerializeField] private LayerMask floorMask;
     [SerializeField] private Camera cam;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Transform playerBody;
 
     public int goldAmount;
-    public GameObject goldCounter;
 
     private Vector2 moveInput;
 
     private NewControls controls;
     private Vector2 lookInput;
-    private bool canMoveCamera = true;
     private float xRotation = 0f;
 
     private bool isGrounded;
     private bool jumpInput;
 
     private bool sprintInput;
-    private float currentSpeed;
     private bool sprintCooldown;
-    private bool canMove = true;
     private PlayerModeController mode;
 
     private void Awake()
@@ -59,12 +54,6 @@ public class PlayerController : MonoBehaviour
         controls.BasicActionMap.Sprint.performed += ctx => sprintInput = true;
         controls.BasicActionMap.Sprint.canceled += ctx => sprintInput = false;
 
-        goldCounter = GameObject.Find("GoldCounter");
-    }
-
-    public void GetNewComponents()
-    {
-        goldCounter = GameObject.Find("GoldCounter");
     }
 
     private void OnEnable() => controls.BasicActionMap.Enable();
@@ -81,13 +70,13 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (canMoveCamera && mode.AllowsGameplay)
+        if (mode.AllowsGameplay)
             LookAround();
     }
 
     private void FixedUpdate()
     {
-        if (!canMove || !mode.AllowsGameplay)
+        if (!mode.AllowsGameplay)
             return;
 
         Sprint();
@@ -101,11 +90,9 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovement()
     {
-        float moveX = moveInput.x;
-        float moveZ = moveInput.y;
-        Vector3 move = transform.right * moveX + transform.forward * moveZ;
+        Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
 
-        currentSpeed = sprintInput && !sprintCooldown ? sprintSpeed : walkSpeed;
+        float currentSpeed = sprintInput && !sprintCooldown ? sprintSpeed : walkSpeed;
         Vector3 velocity = move * currentSpeed;
         velocity.y = rb.linearVelocity.y;
         rb.linearVelocity = velocity;
@@ -119,17 +106,11 @@ public class PlayerController : MonoBehaviour
         else if (sprintCooldown && statsManager.GetStamina() >= statsManager.GetMaxStamina() - 1)
             sprintCooldown = false;
 
-        if (sprintInput && !sprintCooldown)
-        {
-            cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, sprintFOV, Time.deltaTime * fovLerpSpeed);
-            statsManager.StartUsingStamina();
+        bool sprinting = sprintInput && !sprintCooldown;
+        cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, sprinting ? sprintFOV : normalFOV, Time.deltaTime * fovLerpSpeed);
+        statsManager.SetStaminaUse(sprinting);
+        if (sprinting)
             statsManager.UseStamina(staminaUsageRate * Time.deltaTime);
-        }
-        else
-        {
-            cam.fieldOfView = Mathf.Lerp(cam.fieldOfView, normalFOV, Time.deltaTime * fovLerpSpeed);
-            statsManager.StopUsingStamina();
-        }
     }
 
     private void Jump()
@@ -157,17 +138,11 @@ public class PlayerController : MonoBehaviour
         cam.transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
     }
 
-    public void EnableCameraMovement() => canMoveCamera = true;
-    public void DisableCameraMovement() => canMoveCamera = false;
-
-    public void EnableMovement() => canMove = true;
-    public void DisableMovement() => canMove = false;
-
     public void StopMotion()
     {
         if (rb != null)
             rb.linearVelocity = Vector3.zero;
-        GetComponent<PlayerStatsManager>()?.StopUsingStamina();
+        GetComponent<PlayerStatsManager>()?.SetStaminaUse(false);
         jumpInput = false;
     }
 

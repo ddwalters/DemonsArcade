@@ -884,14 +884,10 @@ MonoBehaviour:
   normalFOV: 75
   fovLerpSpeed: 5
   staminaUsageRate: 40
-  floorMask:
-    serializedVersion: 2
-    m_Bits: 64
   cam: {fileID: 7534581174159498519}
   rb: {fileID: 2578407542080586197}
   playerBody: {fileID: 3223157730553495151}
   goldAmount: 0
-  goldCounter: {fileID: 0}
 --- !u!114 &1094290876629132184
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -904,11 +900,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 468710559fd99d04c85ed3a71c4ba3b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  interactionInputData: {fileID: 11400000, guid: 1436bdda2babf5b4296169e9cef4b3b2, type: 2}
-  interactionData: {fileID: 11400000, guid: ed9d6ee0b61208f4cbb1e11b0bf16f98, type: 2}
   uiPanel: {fileID: 0}
-  playerHud: {fileID: 0}
-  playerBackpack: {fileID: 0}
   rayDistance: 5
   raySphereRadius: 0.3
   interactableLayer:
@@ -929,7 +921,6 @@ MonoBehaviour:
   healthFill: {fileID: 0}
   staminaFill: {fileID: 0}
   manaFill: {fileID: 0}
-  BloodyScreen: {fileID: 0}
 --- !u!1 &2273555626443796363
 GameObject:
   m_ObjectHideFlags: 0

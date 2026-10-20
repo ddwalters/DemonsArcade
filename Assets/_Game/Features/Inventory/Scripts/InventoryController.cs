@@ -47,26 +47,21 @@ public class InventoryController : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Mouse0) && inventory.gridOnMouse != null)
         {
-            Item overlap = inventory.GetItemAtMouseCoords();
             if (inventory.selectedItem != null)
-            {
-                if (overlap != null)
-                    inventory.SwapItem(overlap, inventory.selectedItem);
-                else
-                    inventory.MoveItem(inventory.selectedItem);
-            }
-            else if (overlap != null)
-                inventory.SelectItem(overlap);
+                inventory.PlaceSelectedItem();
+            else
+                inventory.SelectItem(inventory.GetItemAtMouseCoords());
         }
+
         if (inventory.selectedItem == null)
             return;
 
         if (Input.GetKeyDown(KeyCode.R))
             inventory.selectedItem.Rotate();
-        var size = inventory.selectedItem.correctedSize;
+        var size = inventory.selectedItem.Footprint;
         float scale = GetComponentInParent<Canvas>().scaleFactor;
         inventory.selectedItem.rectTransform.position = Input.mousePosition + new Vector3(
-            (size.width - 1) * InventorySettings.slotSize.x * scale / 2f,
-            -(size.height - 1) * InventorySettings.slotSize.y * scale / 2f, 0);
+            (size.x - 1) * InventorySettings.slotSize.x * scale / 2f,
+            -(size.y - 1) * InventorySettings.slotSize.y * scale / 2f, 0);
     }
 }

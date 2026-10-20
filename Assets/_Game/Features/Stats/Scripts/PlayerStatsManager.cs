@@ -15,10 +15,8 @@ public class PlayerStatsManager : MonoBehaviour
     [SerializeField] private Image staminaFill;
     [SerializeField] private Image manaFill;
 
-    [SerializeField] private GameObject BloodyScreen;
     private Animator BloodyScreenAnim;
     private bool isUsingStamina;
-    private bool isRegeneratingStamina;
 
     private void Awake()
     {
@@ -56,8 +54,7 @@ public class PlayerStatsManager : MonoBehaviour
 
     private void Update()
     {
-        if (isRegeneratingStamina)
-            RegenerateStamina();
+        RegenerateStamina();
     }
 
     public void ResetResources()
@@ -66,7 +63,6 @@ public class PlayerStatsManager : MonoBehaviour
         statsData.currentStamina = statsData.maxStamina;
         statsData.currentMana = statsData.maxMana;
         isUsingStamina = false;
-        isRegeneratingStamina = false;
         PlayerModeController.ForPlayer(GetComponent<PlayerController>())?.ResetToGameplay();
         UpdateAllBars();
     }
@@ -148,13 +144,7 @@ public class PlayerStatsManager : MonoBehaviour
     #endregion
 
     #region Stamina
-    public void StartUsingStamina() => isUsingStamina = true;
-
-    public void StopUsingStamina()
-    {
-        isUsingStamina = false;
-        isRegeneratingStamina = true;
-    }
+    public void SetStaminaUse(bool inUse) => isUsingStamina = inUse;
 
     public void UseStamina(float staminaAmount)
     {
@@ -172,8 +162,6 @@ public class PlayerStatsManager : MonoBehaviour
             statsData.currentStamina = Mathf.Min(statsData.maxStamina,
                 statsData.currentStamina + staminaRecoveryRate * Time.deltaTime);
             UpdateStaminaBar();
-            if (statsData.currentStamina >= statsData.maxStamina)
-                isRegeneratingStamina = false;
         }
     }
 
@@ -205,15 +193,6 @@ public class PlayerStatsManager : MonoBehaviour
             return true;
         }
         return false;
-    }
-
-    private void RegenerateMana()
-    {
-        if (statsData.currentMana < statsData.maxMana)
-        {
-            statsData.currentMana++;
-            UpdateManaBar();
-        }
     }
 
     private void IncreaseManaStat()

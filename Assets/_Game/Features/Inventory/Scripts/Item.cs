@@ -5,65 +5,58 @@ using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform))]
 public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public ItemSaveData saveData;
     public Image icon;
     public Image background;
-    public bool isRotated;
-    public int rotateIndex;
-    public Vector2Int indexPosition { get; set; }
-    public Inventory inventory { get; set; }
-    public RectTransform rectTransform { get; set; }
-    public InventoryGrid inventoryGrid { get; set; }
+    public ItemInstance Instance { get; private set; }
+    public Inventory inventory { get; private set; }
+    public InventoryGrid inventoryGrid { get; private set; }
+    public RectTransform rectTransform { get; private set; }
+    public Vector2Int indexPosition => Instance.Position;
+    public int rotateIndex { get; private set; }
     public bool IsHeld { get; private set; }
-    private ItemToolTip tooltip;
-    private ItemData DisplayData => IsHeld ? InventoryManager.Definition(saveData) : saveData.data;
-    public SizeInt correctedSize
+    private bool IsEquipment => InventoryManager.IsEquipmentGrid(inventoryGrid.id);
+    public Vector2Int Footprint => IsEquipment && !IsHeld ? Vector2Int.one : InventoryPlacement.Size(Instance.Definition, rotateIndex);
+
+    public void Bind(ItemInstance instance, Inventory owner, InventoryGrid grid)
     {
-        get
-        {
-            Vector2Int size = InventoryPlacement.Size(DisplayData, rotateIndex);
-            return new SizeInt(size.x, size.y);
-        }
+        Instance = instance;
+        inventory = owner;
+        inventoryGrid = grid;
+        rectTransform = GetComponent<RectTransform>();
+        rectTransform.localScale = Vector3.one;
+        rotateIndex = instance.Rotation;
+        SetHeld(false);
+        rectTransform.localRotation = Quaternion.Euler(0, 0, -90 * rotateIndex);
     }
 
     public void SetHeld(bool held)
     {
         IsHeld = held;
-        tooltip = inventory.GetItemTooltip();
-        icon.sprite = !held && saveData.isSlotType ? inventory.SlotIcon(this) : DisplayData.icon;
-        background.color = DisplayData.backgroundColor;
-        rectTransform.sizeDelta = new Vector2(DisplayData.size.width * InventorySettings.slotSize.x,
-            DisplayData.size.height * InventorySettings.slotSize.y);
+        ItemData definition = Instance.Definition;
+        bool slotView = IsEquipment && !held;
+        icon.sprite = slotView ? inventory.SlotIcon(this) : definition.icon;
+        background.color = slotView ? Color.clear : definition.backgroundColor;
+        Vector2Int size = slotView ? Vector2Int.one : InventoryPlacement.Size(definition, 0);
+        rectTransform.sizeDelta = new Vector2(size.x * InventorySettings.slotSize.x, size.y * InventorySettings.slotSize.y);
     }
 
-    public void StartRotate() => isRotated = (rotateIndex & 1) != 0;
-    public void Rotate()
-    {
-        rotateIndex = (rotateIndex + 1) % 4;
-        StartRotate();
-    }
-    public void ResetRotate()
-    {
-        rotateIndex = 0;
-        StartRotate();
-    }
+    public void Rotate() => rotateIndex = (rotateIndex + 1) % 4;
 
     private void LateUpdate()
     {
-        if (rectTransform != null)
-            rectTransform.localRotation = Quaternion.Slerp(rectTransform.localRotation,
-                Quaternion.Euler(0, 0, -90 * rotateIndex), InventorySettings.rotationAnimationSpeed * Time.deltaTime);
+        rectTransform.localRotation = Quaternion.Slerp(rectTransform.localRotation,
+            Quaternion.Euler(0, 0, -90 * rotateIndex), InventorySettings.rotationAnimationSpeed * Time.deltaTime);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        ItemData definition = InventoryManager.Definition(saveData);
-        if (IsHeld || tooltip == null || definition.itemStats == null)
+        ItemData definition = Instance.Definition;
+        if (IsHeld || inventory.tooltip == null || definition.itemStats == null)
             return;
 
-        tooltip.ShowToolTip(definition.itemStats.GetItemName(), definition.itemStats.CreateItemDescriptionText(),
+        inventory.tooltip.ShowToolTip(definition.itemStats.GetItemName(), definition.itemStats.CreateItemDescriptionText(),
             definition.rarity != null ? definition.rarity.rarityColor : Color.white);
     }
 
-    public void OnPointerExit(PointerEventData eventData) => tooltip?.HideToolTip();
+    public void OnPointerExit(PointerEventData eventData) => inventory.tooltip?.HideToolTip();
 }

@@ -98,7 +98,7 @@ public class WeaponsHandler : MonoBehaviour
         if (!inventoryManager.GetItems(7).list.Any())
             return null;
 
-        return InventoryManager.Definition(inventoryManager.GetItems((int)EquipmentSlot.LeftHand).list[0]).itemStats;
+        return inventoryManager.GetItems((int)EquipmentSlot.LeftHand).list[0].Definition.itemStats;
     }
 
     public ItemStatsData GetCurrentRightHandItemStats()
@@ -106,6 +106,6 @@ public class WeaponsHandler : MonoBehaviour
         if (!inventoryManager.GetItems(6).list.Any())
             return null;
 
-        return InventoryManager.Definition(inventoryManager.GetItems((int)EquipmentSlot.RightHand).list[0]).itemStats;
+        return inventoryManager.GetItems((int)EquipmentSlot.RightHand).list[0].Definition.itemStats;
     }
 }

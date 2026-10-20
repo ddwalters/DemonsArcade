@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
@@ -11,7 +10,6 @@ using Object = UnityEngine.Object;
 public static class PlayerFeatureChecks
 {
     private static int checks;
-    private static readonly List<Object> temporaryAssets = new();
 
     [MenuItem("Tools/Validation/Player Features")]
     public static void RunAll()
@@ -33,9 +31,6 @@ public static class PlayerFeatureChecks
         finally
         {
             Object.DestroyImmediate(fixture);
-            foreach (Object asset in temporaryAssets)
-                Object.DestroyImmediate(asset);
-            temporaryAssets.Clear();
             Time.timeScale = oldTimeScale;
             Cursor.lockState = oldLock;
             Cursor.visible = oldCursor;
@@ -49,49 +44,55 @@ public static class PlayerFeatureChecks
         ItemData sword = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/_Game/Features/Inventory/Data/Items/ShortSword.asset");
         ItemData shield = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/_Game/Features/Inventory/Data/Items/Shield.asset");
         ItemData apple = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/_Game/Features/Inventory/Data/Items/Apple.asset");
-        var slot = ScriptableObject.CreateInstance<ItemData>();
-        slot.size = new SizeInt(1, 1);
-        temporaryAssets.Add(slot);
-        foreach (string name in new[] { "fakeHelmetData", "fakeChestpieceData", "fakeLeggingsData", "fakeBootsData", "fakeNecklaceData", "fakeWeaponData" })
-            Set(manager, name, slot);
         Require(InventoryManager.CanEquip(sword, EquipmentSlot.RightHand), "Sword fits the right hand.");
         Require(!InventoryManager.CanEquip(sword, EquipmentSlot.Helmet), "Sword is not a helmet despite its old armor enum value.");
         Require(!InventoryManager.CanEquip(sword, EquipmentSlot.LeftHand), "Left hand rejects swords.");
         Require(InventoryManager.CanEquip(shield, EquipmentSlot.LeftHand), "Shield fits the left hand.");
         Require(!InventoryManager.CanEquip(shield, EquipmentSlot.RightHand), "Right hand rejects shields.");
         Require(!InventoryManager.CanEquip(apple, EquipmentSlot.Helmet), "Ordinary loot cannot become armor.");
+        var playerPackage = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Game/Features/Player/Prefabs/PlayerPackage.prefab");
+        var serializedManager = new SerializedObject(playerPackage.GetComponentInChildren<InventoryManager>(true));
+        var armorIcons = serializedManager.FindProperty("armorSlotIcons");
+        var weaponIcons = serializedManager.FindProperty("weaponIcons");
+        Require(armorIcons.arraySize == 5 && weaponIcons.arraySize == 5, "Player package retains migrated equipment icons.");
+        Require(armorIcons.GetArrayElementAtIndex(0).objectReferenceValue != null &&
+            weaponIcons.GetArrayElementAtIndex(1).objectReferenceValue != null, "Migrated armor and weapon icons resolve.");
         Require(InventoryPlacement.Cells(new Vector2Int(2, 0), InventoryPlacement.Size(sword, 1))
             .SequenceEqual(new[] { new Vector2Int(2, 0), new Vector2Int(3, 0) }), "Rotated cells preserve their origin.");
         Require(!InventoryPlacement.Fits(Vector2Int.zero, new Vector2Int(5, 1), new Vector2Int(4, 4)), "Oversized items fail even in an empty grid.");
 
+        Require(!typeof(Object).IsAssignableFrom(typeof(ItemInstance)), "Item instances have no Unity object lifetime.");
+
         int world = manager.AddNewGridList(InventoryType.SixByThreeMinimal);
-        var record = Record(fixture, sword, Vector2Int.zero);
+        var record = new ItemInstance( sword, Vector2Int.zero);
         Require(manager.TryAddItem(0, record, new Vector2Int(4, 4)), "Add initial record.");
-        var blocker = Record(fixture, apple, new Vector2Int(4, 0));
+        var blocker = new ItemInstance( apple, new Vector2Int(4, 0));
         Require(manager.TryAddItem(world, blocker, new Vector2Int(6, 3)), "Add destination blocker.");
         Require(!manager.TryMoveItem(0, record, world, new Vector2Int(4, 0), 1, new Vector2Int(6, 3)), "Blocked transfer fails.");
-        Require(manager.GetItems(0).list.Contains(record) && record.slotPosition == Vector2Int.zero && record.rotateIndex == 0,
+        Require(manager.GetItems(0).list.Contains(record) && record.Position == Vector2Int.zero && record.Rotation == 0,
             "Failed transfer preserves its source record and rotation.");
         Require(manager.TryMoveItem(0, record, world, new Vector2Int(2, 0), 1, new Vector2Int(6, 3)), "Transfer to the requested cells.");
-        Require(ReferenceEquals(manager.GetItems(world).list[1], record) && record.slotPosition == new Vector2Int(2, 0) && record.rotateIndex == 1,
+        Require(ReferenceEquals(manager.GetItems(world).list[1], record) && record.Position == new Vector2Int(2, 0) && record.Rotation == 1,
             "Transfer preserves identity, exact coordinates, and rotation.");
         Require(!manager.TryMoveItem(world, record, (int)EquipmentSlot.Helmet, Vector2Int.zero, 0, Vector2Int.one), "Invalid equipment drop fails.");
-        Require(record.data == sword && !record.isSlotType && manager.GetItems(world).list.Contains(record), "Failed equip does not convert/remove the item.");
+        Require(record.Definition == sword && manager.GetItems(world).list.Contains(record), "Failed equip does not convert/remove the item.");
         Require(manager.TryMoveItem(world, record, (int)EquipmentSlot.RightHand, Vector2Int.zero, 0, Vector2Int.one), "Equip right hand.");
-        Require(InventoryManager.Definition(record) == sword && record.isSlotType, "Equipped representation retains its original definition.");
+        Require(record.Definition == sword, "Equipping retains the same item definition.");
         Require(manager.TryMoveItem((int)EquipmentSlot.RightHand, record, world, new Vector2Int(2, 0), 1, new Vector2Int(6, 3)), "Unequip at requested rotation.");
-        Require(manager.GetItems((int)EquipmentSlot.RightHand).list.Count == 0 && record.data == sword && record.PreviousItemData == null,
-            "Unequipping clears the correct slot and restores the real definition.");
+        Require(manager.GetItems((int)EquipmentSlot.RightHand).list.Count == 0 && record.Definition == sword,
+            "Unequipping clears the correct slot without replacing the item.");
 
-        var other = Record(fixture, apple, Vector2Int.zero);
+        var other = new ItemInstance( apple, Vector2Int.zero);
         Require(manager.TryAddItem(0, other, new Vector2Int(4, 4)), "Add swap partner.");
         Require(!manager.TrySwapItems(world, record, 0, other, new Vector2Int(3, 3), 1,
             new Vector2Int(6, 3), new Vector2Int(4, 4)), "Invalid swap fails atomically.");
         Require(manager.GetItems(world).list.Contains(record) && manager.GetItems(0).list.Contains(other), "Failed swap preserves both owners.");
         Require(manager.TrySwapItems(world, record, 0, other, Vector2Int.zero, 1,
             new Vector2Int(6, 3), new Vector2Int(4, 4)), "Valid cross-container swap.");
-        Require(record.slotPosition == Vector2Int.zero && other.slotPosition == new Vector2Int(2, 0), "Swap commits both requested positions.");
+        Require(record.Position == Vector2Int.zero && other.Position == new Vector2Int(2, 0), "Swap commits both requested positions.");
         Require(manager.TryMoveItem(0, record, world, new Vector2Int(2, 1), 1, new Vector2Int(6, 3)), "Move back for view reconstruction.");
+
+        Require(fixture.transform.childCount == 0, "Adding, equipping, and moving items create no holder GameObjects.");
 
         var canvas = new GameObject("Fixture canvas", typeof(RectTransform), typeof(Canvas));
         canvas.transform.SetParent(fixture.transform);
@@ -108,14 +109,26 @@ public static class PlayerFeatureChecks
         var held = grid.items[2, 1];
         inventory.SelectItem(held);
         held.Rotate();
-        Require(record.rotateIndex == 1, "Drag rotation remains a preview.");
+        Require(record.Rotation == 1, "Drag rotation remains a preview.");
         inventory.CloseAllGrids();
-        Require(inventory.selectedItem == null && record.slotPosition == new Vector2Int(2, 1) && record.rotateIndex == 1,
+        Require(inventory.selectedItem == null && record.Position == new Vector2Int(2, 1) && record.Rotation == 1,
             "Closing a drag cancels it without changing inventory data.");
         inventory.CreateGrid(world, false);
         grid = canvas.GetComponentsInChildren<InventoryGrid>(true).First(g => g.id == world);
         Require(grid.items[2, 1] != null && grid.items[3, 1] != null, "Cancelled item reconstructs correctly on reopen.");
         inventory.CloseAllGrids();
+
+        Require(manager.TryMoveItem(world, record, (int)EquipmentSlot.RightHand, Vector2Int.zero, 0, Vector2Int.one), "Equip the original instance for view checks.");
+        inventory.CreateGrid(0, true);
+        var hand = canvas.GetComponentsInChildren<InventoryGrid>(true).First(g => g.id == (int)EquipmentSlot.RightHand);
+        Item equipped = hand.items[0, 0];
+        Require(ReferenceEquals(equipped.Instance, record) && equipped.Footprint == Vector2Int.one, "Equipment view displays the original item in one slot.");
+        inventory.SelectItem(equipped);
+        Require(equipped.Footprint == new Vector2Int(1, 2), "Dragging equipment restores its real footprint.");
+        equipped.Rotate();
+        inventory.CloseAllGrids();
+        Require(record.Definition == sword && record.Rotation == 0 && manager.GetItems((int)EquipmentSlot.RightHand).list[0] == record,
+            "Cancelling an equipment drag preserves identity, owner, and rotation.");
     }
 
     private static void CheckStats(GameObject fixture)
@@ -137,6 +150,11 @@ public static class PlayerFeatureChecks
         Require(ReferenceEquals(stats.GetPlayerStats(), data) && data.currentXP == 123, "HUD binding/getter preserve the live session object and XP.");
         Require(data.currentHealth == 37f && data.currentStamina == 22f && data.currentMana == 13f, "HUD binding does not refill resources.");
         Require(Mathf.Approximately(health.fillAmount, .37f) && Mathf.Approximately(stamina.fillAmount, .22f) && Mathf.Approximately(mana.fillAmount, .13f), "Rebound bars reflect current values.");
+        stats.SetStaminaUse(true);
+        stats.UseStamina(1000f);
+        Call(stats, "RegenerateStamina");
+        Require(data.currentStamina == 0f, "Active stamina use blocks recovery and clamps consumption.");
+        stats.SetStaminaUse(false);
         stats.ResetResources();
         Require(data.currentHealth == data.maxHealth && data.currentStamina == data.maxStamina && data.currentMana == data.maxMana, "Explicit resource reset still works.");
     }
@@ -206,15 +224,6 @@ public static class PlayerFeatureChecks
         Require(mode.AllowsGameplay, "Explicit new-life reset returns to gameplay.");
     }
 
-    private static ItemSaveData Record(GameObject fixture, ItemData data, Vector2Int position)
-    {
-        var go = new GameObject("Item record");
-        go.transform.SetParent(fixture.transform);
-        var record = go.AddComponent<ItemSaveData>();
-        record.data = data;
-        record.slotPosition = position;
-        return record;
-    }
     private static void Set(object target, string name, object value, Type type = null) =>
         (type ?? target.GetType()).GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).SetValue(target, value);
     private static object Call(object target, string name, params object[] args) =>

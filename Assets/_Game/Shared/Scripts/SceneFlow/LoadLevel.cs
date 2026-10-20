@@ -9,7 +9,6 @@ public class LoadLevel : MonoBehaviour
     public Animator Transition;
 
     public GameObject player;
-    private PlayerController playerController;
     private PlayerStatsManager playerStats;
     private InteractionController playerInteraction;
 
@@ -76,11 +75,9 @@ public class LoadLevel : MonoBehaviour
             player = FindAnyObjectByType<PlayerController>().gameObject;
         }
 
-        playerController = player.GetComponent<PlayerController>();
         playerStats = player.GetComponent<PlayerStatsManager>();
         playerInteraction = player.GetComponent<InteractionController>();
 
-        playerController.GetNewComponents();
         playerStats.GetNewComponents();
         playerInteraction.GetNewComponents();
 

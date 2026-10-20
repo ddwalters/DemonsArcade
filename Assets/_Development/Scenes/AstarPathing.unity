@@ -8036,7 +8036,6 @@ MonoBehaviour:
   itemPrefab: {fileID: 6969914677378755897, guid: 1d326d966bd18764589627f54c258ba3, type: 3}
   inventoryType: {fileID: 11400000, guid: 0fee3a5fa20b29d42aa33f52f053137b, type: 2}
   tooltip: {fileID: 2121153326}
-  weaponsHandler: {fileID: 1133847707}
 --- !u!1 &1055667438698432261
 GameObject:
   m_ObjectHideFlags: 0
@@ -8066,12 +8065,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponHandler: {fileID: 1133847707}
-  fakeHelmetData: {fileID: 11400000, guid: f6df0a7a3d049d94c82751e14c5587ba, type: 2}
-  fakeChestpieceData: {fileID: 11400000, guid: 913fa0ccbb30af744b00163b6588ea35, type: 2}
-  fakeLeggingsData: {fileID: 11400000, guid: f54448847877b4c4b88831b82a15e8d4, type: 2}
-  fakeBootsData: {fileID: 11400000, guid: bb0cc8868c089e948a2983759102a53d, type: 2}
-  fakeNecklaceData: {fileID: 11400000, guid: 83d8afdee50daa343a916962dfea52d1, type: 2}
-  fakeWeaponData: {fileID: 11400000, guid: dd491ac729206494ea20b564e12cea43, type: 2}
+  armorSlotIcons:
+  - {fileID: 21300000, guid: 06dc4ee3447345b49afff9136b73dfaa, type: 3}
+  - {fileID: 21300000, guid: 06dc4ee3447345b49afff9136b73dfaa, type: 3}
+  - {fileID: 21300000, guid: 06dc4ee3447345b49afff9136b73dfaa, type: 3}
+  - {fileID: 21300000, guid: 06dc4ee3447345b49afff9136b73dfaa, type: 3}
+  - {fileID: 21300000, guid: 06dc4ee3447345b49afff9136b73dfaa, type: 3}
+  weaponIcons:
+  - {fileID: 21300000, guid: 7972dd97521bb1c44ba8e3774391b996, type: 3}
+  - {fileID: 21300000, guid: 4db017c43d4194c40a3e3b8a8aac2bc6, type: 3}
+  - {fileID: 21300000, guid: 13e73449f6f655f4ebfcb716d3ba6a3c, type: 3}
+  - {fileID: 21300000, guid: 2af50a61d6ec0e145a6d64a6c218abd1, type: 3}
+  - {fileID: 21300000, guid: c69ca7414435e1c449b7d358d79a064e, type: 3}
 --- !u!1 &1590824358730488120
 GameObject:
   m_ObjectHideFlags: 0
