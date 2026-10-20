@@ -2927,6 +2927,7 @@ GameObject:
   - component: {fileID: 692546350}
   - component: {fileID: 692546348}
   - component: {fileID: 692546349}
+  - component: {fileID: 692546351}
   m_Layer: 0
   m_Name: Test scene camera
   m_TagString: Untagged
@@ -3044,6 +3045,14 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!81 &692546351
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 692546347}
+  m_Enabled: 1
 --- !u!1 &701016672
 GameObject:
   m_ObjectHideFlags: 0
@@ -4378,6 +4387,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4653287045592061665, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7534581174159498519, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
       propertyPath: m_Enabled
       value: 0
@@ -4960,7 +4973,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: WASD / Shift / Space / Mouse  |  Escape releases cursor
+  m_text: 'WASD / Shift / Space / Mouse  |  F5: switch player view  |  Camera button:
+    player / overview'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

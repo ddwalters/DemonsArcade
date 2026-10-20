@@ -34,10 +34,25 @@ public class CharacterMotor : MonoBehaviour
     private float jumpRequestedTime = float.NegativeInfinity;
     private float lastJumpTime = float.NegativeInfinity;
     private bool movementAllowed;
+    private bool actionMovesWhenBlocked;
 
     public bool IsGrounded { get; private set; }
     public Vector2 AnimationInput => animationInput;
     public Animator Animator => animator;
+    public bool IsActionActive { get; private set; }
+
+    // An authored action keeps its root travel but owns the movement input until recovery.
+    public void SetActionMotion(bool active, bool allowWhenMovementBlocked = false)
+    {
+        IsActionActive = active;
+        actionMovesWhenBlocked = active && allowWhenMovementBlocked;
+        if (active)
+        {
+            animationInput = Vector2.zero;
+            blendVelocity = Vector2.zero;
+            jumpRequestedTime = float.NegativeInfinity;
+        }
+    }
 
     private void Awake() => controller = GetComponent<CharacterController>();
 
@@ -50,7 +65,7 @@ public class CharacterMotor : MonoBehaviour
             return;
 
         movementAllowed = allowsMovement;
-        input = allowsMovement ? Vector2.ClampMagnitude(input, 1f) : Vector2.zero;
+        input = allowsMovement && !IsActionActive ? Vector2.ClampMagnitude(input, 1f) : Vector2.zero;
         UpdateGrounding();
 
         Vector2 target = input * (sprinting ? 2f : 1f);
@@ -64,7 +79,7 @@ public class CharacterMotor : MonoBehaviour
             verticalVelocity = -2f;
         }
 
-        if (allowsMovement && Time.time - jumpRequestedTime <= jumpBufferTime &&
+        if (allowsMovement && !IsActionActive && Time.time - jumpRequestedTime <= jumpBufferTime &&
             Time.time - lastGroundedTime <= coyoteTime)
         {
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
@@ -112,7 +127,7 @@ public class CharacterMotor : MonoBehaviour
             return;
 
         displacement.y = 0f;
-        if (!movementAllowed)
+        if (!movementAllowed && !actionMovesWhenBlocked)
         {
             displacement = Vector3.zero;
             airVelocity = Vector3.zero;

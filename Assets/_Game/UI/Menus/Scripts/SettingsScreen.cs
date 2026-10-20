@@ -8,13 +8,26 @@ public class SettingsScreen : MonoBehaviour
 {
     public TMP_Dropdown resolutionDropdown;
     public TMP_Dropdown qualityDropdown;
+    public TMP_Dropdown cameraViewDropdown;
     public Toggle fullscreenToggle;
     public AudioMixer audioMixer;
     public Slider volume;
     public TMP_Text volumeText;
     public Slider sensitivity;
     public TMP_Text sensitivityText;
+    public Slider firstPersonFov;
+    public TMP_Text firstPersonFovText;
+    public Slider thirdPersonFov;
+    public TMP_Text thirdPersonFovText;
     private readonly List<Resolution> resolutions = new();
+
+    private void OnEnable()
+    {
+        if (cameraViewDropdown != null)
+            cameraViewDropdown.SetValueWithoutNotify(PlayerPrefs.GetInt(PlayerCameraRig.PreferenceKey, 0));
+        RefreshFieldOfView(firstPersonFov, firstPersonFovText, false);
+        RefreshFieldOfView(thirdPersonFov, thirdPersonFovText, true);
+    }
 
     public void ApplySavedSettings()
     {
@@ -68,11 +81,46 @@ public class SettingsScreen : MonoBehaviour
         sensitivity.SetValueWithoutNotify(PlayerPrefs.GetFloat("Settings.Sensitivity", currentSensitivity));
         volume.onValueChanged.AddListener(SetVolume);
         sensitivity.onValueChanged.AddListener(SetSensitivity);
+        if (cameraViewDropdown != null)
+            cameraViewDropdown.onValueChanged.AddListener(SetCameraView);
+        if (firstPersonFov != null)
+            firstPersonFov.onValueChanged.AddListener(SetFirstPersonFov);
+        if (thirdPersonFov != null)
+            thirdPersonFov.onValueChanged.AddListener(SetThirdPersonFov);
         SetVolume(volume.value);
         SetSensitivity(sensitivity.value);
     }
 
     private void OnDisable() => PlayerPrefs.Save();
+
+    private static void RefreshFieldOfView(Slider slider, TMP_Text label, bool thirdPerson)
+    {
+        if (slider == null)
+            return;
+
+        float value = PlayerCameraRig.GetSavedFieldOfView(thirdPerson);
+        slider.SetValueWithoutNotify(value);
+        label.text = value.ToString("0") + "°";
+    }
+
+    public void SetFirstPersonFov(float value) => SetFieldOfView(value, false, firstPersonFovText);
+    public void SetThirdPersonFov(float value) => SetFieldOfView(value, true, thirdPersonFovText);
+
+    private void SetFieldOfView(float value, bool thirdPerson, TMP_Text label)
+    {
+        PlayerCameraRig.SaveFieldOfView(thirdPerson, value);
+        FindAnyObjectByType<PlayerCameraRig>()?.ApplyFieldOfView();
+        label.text = PlayerCameraRig.GetSavedFieldOfView(thirdPerson).ToString("0") + "°";
+    }
+
+    public void SetCameraView(int value)
+    {
+        var rig = FindAnyObjectByType<PlayerCameraRig>();
+        if (rig != null)
+            rig.SetThirdPerson(value == 1, true);
+        else
+            PlayerPrefs.SetInt(PlayerCameraRig.PreferenceKey, value == 1 ? 1 : 0);
+    }
 
     public void SetVolume(float value)
     {

@@ -91,6 +91,7 @@ public class WeaponsHandler : MonoBehaviour
         weapon.transform.SetParent(prefabLocation.transform);
         weapon.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         combatHandler.SetWeaponStats(itemStats);
+        GetComponentInParent<PlayerCameraRig>()?.RefreshFirstPersonRenderers();
     }
 
     public ItemStatsData GetCurrentLeftHandItemStats()

@@ -115,6 +115,7 @@ public static class PlayerAnimationSceneSetup
         EditorSceneManager.SaveScene(scene, ScenePath);
         AssetDatabase.SaveAssets();
         Debug.Log($"[Animation Test Scene] Saved {ScenePath} with {previews.Length} animation previews.");
+        PlayerCameraSetup.Run();
         PlayerAnimationShowcaseSetup.Run();
     }
 

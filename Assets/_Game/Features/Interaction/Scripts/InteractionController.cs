@@ -7,6 +7,7 @@ public class InteractionController : MonoBehaviour
     [SerializeField] private float raySphereRadius;
     [SerializeField] private LayerMask interactableLayer;
     private Camera playerCamera;
+    private PlayerCameraRig cameraRig;
     private PlayerModeController mode;
     private InteractableBase target;
     private bool interacting;
@@ -31,6 +32,7 @@ public class InteractionController : MonoBehaviour
     public void GetNewComponents()
     {
         playerCamera = GetComponentInChildren<Camera>();
+        cameraRig = GetComponent<PlayerCameraRig>();
         uiPanel = FindAnyObjectByType<InteractionUIPanel>();
         ResetTarget();
     }
@@ -43,11 +45,30 @@ public class InteractionController : MonoBehaviour
             ResetTarget();
             return;
         }
-        Ray ray = new(playerCamera.transform.position, playerCamera.transform.forward);
-        InteractableBase candidate = Physics.SphereCast(ray, raySphereRadius, out var hit,
-            rayDistance, interactableLayer) ? hit.transform.GetComponentInParent<InteractableBase>() : null;
-        SetTarget(candidate);
+        SetTarget(FindTarget());
         ProcessInput(Input.GetKeyDown(KeyCode.E), Input.GetKeyUp(KeyCode.E), Time.deltaTime);
+    }
+
+    private InteractableBase FindTarget()
+    {
+        Vector3 eye = cameraRig != null ? cameraRig.EyePosition : playerCamera.transform.position;
+        Ray ray = new(playerCamera.transform.position, playerCamera.transform.forward);
+        float cameraDistance = Vector3.Distance(ray.origin, eye);
+        if (!Physics.SphereCast(ray, raySphereRadius, out var hit, rayDistance + cameraDistance,
+            interactableLayer, QueryTriggerInteraction.Collide))
+            return null;
+
+        var candidate = hit.transform.GetComponentInParent<InteractableBase>();
+        if (candidate == null || Vector3.Distance(eye, hit.point) > rayDistance ||
+            Vector3.Dot(hit.point - eye, ray.direction) < -raySphereRadius)
+            return null;
+
+        int obstructionMask = ~((1 << gameObject.layer) | (1 << 2) | (1 << 5));
+        if (Physics.Linecast(eye, hit.point, out var obstruction, obstructionMask, QueryTriggerInteraction.Ignore) &&
+            obstruction.transform.GetComponentInParent<InteractableBase>() != candidate)
+            return null;
+
+        return candidate;
     }
 
     private void SetTarget(InteractableBase next)

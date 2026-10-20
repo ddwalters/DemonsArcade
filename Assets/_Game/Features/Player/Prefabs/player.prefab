@@ -38,7 +38,7 @@ Transform:
   - {fileID: 5857843418080092636}
   - {fileID: 6382089100034545769}
   - {fileID: 7696836035131651132}
-  m_Father: {fileID: 150419203806236947}
+  m_Father: {fileID: 9210062032661298754}
   m_LocalEulerAnglesHint: {x: 270, y: 270, z: 0}
 --- !u!114 &4255391819816955752
 MonoBehaviour:
@@ -621,12 +621,11 @@ Transform:
   m_GameObject: {fileID: 1057663531677651918}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 5965878646411091363}
-  m_Father: {fileID: 3223157730553495151}
+  m_Children: []
+  m_Father: {fileID: 9210062032661298754}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &7534581174159498519
 Camera:
@@ -687,6 +686,39 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1057663531677651918}
   m_Enabled: 1
+--- !u!1 &1918770253428344871
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 9210062032661298754}
+  m_Layer: 0
+  m_Name: ViewPivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &9210062032661298754
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1918770253428344871}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 5965878646411091363}
+  - {fileID: 150419203806236947}
+  m_Father: {fileID: 3223157730553495151}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2199924824673124817
 GameObject:
   m_ObjectHideFlags: 0
@@ -702,6 +734,7 @@ GameObject:
   - component: {fileID: 6467257779549542023}
   - component: {fileID: 2996050365954852486}
   - component: {fileID: 9201864158812724305}
+  - component: {fileID: 7869586009327930913}
   m_Layer: 9
   m_Name: player
   m_TagString: Untagged
@@ -722,10 +755,10 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 150419203806236947}
   - {fileID: 4544887378659102359}
   - {fileID: 4592543753034335859}
   - {fileID: 8414682403803150178}
+  - {fileID: 9210062032661298754}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6326895746567198878
@@ -772,11 +805,7 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   sensitivity: 10
   joystickScalingFactor: 20
-  sprintFOV: 100
-  normalFOV: 75
-  fovLerpSpeed: 5
   staminaUsageRate: 40
-  cam: {fileID: 7534581174159498519}
   goldAmount: 0
 --- !u!114 &1094290876629132184
 MonoBehaviour:
@@ -863,6 +892,30 @@ MonoBehaviour:
   airSpeed: 2.5
   airAcceleration: 4
   knockbackBraking: 8
+--- !u!114 &7869586009327930913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2199924824673124817}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92276a676dad0f5488ee6342d678b4d3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerCameraRig
+  viewCamera: {fileID: 7534581174159498519}
+  viewPivot: {fileID: 9210062032661298754}
+  firstPersonRig: {fileID: 5965878646411091363}
+  thirdPerson: 0
+  thirdPersonOffset: {x: 0.45, y: 0.2, z: -3.25}
+  transitionTime: 0.18
+  obstructionReturnTime: 0.22
+  collisionRadius: 0.2
+  collisionPadding: 0.05
+  collisionMask:
+    serializedVersion: 2
+    m_Bits: 4294966747
 --- !u!1 &2273555626443796363
 GameObject:
   m_ObjectHideFlags: 0

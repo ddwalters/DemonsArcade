@@ -29,6 +29,7 @@ public static class PlayerLocomotionSetup
         var controller = BuildController();
         ConfigurePrefab(controller);
         RefineBlending();
+        PlayerCameraSetup.ConfigurePrefab();
         AssetDatabase.SaveAssets();
         Debug.Log("[Player Locomotion] Configured yBot, Humanoid locomotion clips, controller and player prefab.");
     }

@@ -1,6 +1,6 @@
 # Player locomotion prototype
 
-This pass implements the imported player body and basic locomotion. Combat, camera switching, NPCs and enemy animation conversion remain later steps.
+This pass implements the imported player body, basic locomotion and first/third-person camera switching. Full-body combat, NPCs and enemy animation conversion remain later steps.
 
 ## Asset setup
 
@@ -23,7 +23,8 @@ The imported test body receives project-owned URP materials to avoid incompatibl
 
 ## Runtime responsibilities
 
-- `PlayerController` keeps input, looking, sprint stamina and FOV. It supplies movement intent and jump requests to the motor. It retains the entry points used by saves, menus, settings and HUD code.
+- `PlayerController` keeps input and sprint stamina. It supplies look input to the camera rig, and movement intent and jump requests to the motor. It retains the entry points used by saves, menus, settings and HUD code.
+- `PlayerCameraRig` owns pitch, per-view FOV, view transitions, camera obstruction and local body/weapon visibility. Looking turns the player in both views; movement therefore remains forward/backward/strafe relative to facing. The camera does not freely orbit an independently facing character in this pass.
 - `CharacterMotor` owns the CharacterController capsule and motion. It smooths animation input, probes the ground, handles gravity/jumps, projects movement onto walkable slopes, resolves walls/steps through CharacterController.Move, and applies explicit knockback.
 - `CharacterRootMotion` lives beside the body's Animator. OnAnimatorMove forwards the frame's animation displacement to the motor. The motor applies it once; no Rigidbody or navigation component also moves the player.
 
@@ -41,9 +42,15 @@ The slime boss now applies knockback through CharacterMotor.AddImpulse instead o
 
 The existing `player.prefab` remains the source used by Town and Dungeon. Its old visible capsule, CapsuleCollider and dynamic Rigidbody are replaced by a CharacterController plus the imported `BodyModel` child. The root's identity and existing gameplay components remain in place. The model's feet are offset to the capsule bottom; the camera stays independent of the animated head.
 
-This pass keeps the existing first-person camera and weapon rig. The body is on the Player layer and excluded from that camera to prevent viewing the inside of its head/torso. It is visible in Unity's Scene view and from other cameras. The Animator is set to Always Animate so hiding it in first person cannot stop root-motion movement.
+The existing `PlayerCamera` and its AudioListener remain the single gameplay camera. `ViewPivot` is a new child at the previous eye location; both the camera and legacy `Hands` rig are children of that pivot. Pitch rotates the pivot. The camera pulls back in third person while Hands stays at the eye, preserving existing weapon travel and hitbox reach. The camera stays independent of the animated head.
 
-To inspect the animation while moving, enter Play Mode and observe/select the player's BodyModel in Scene view, or inspect the Animator window. The dedicated development scene also provides an external camera. A polished gameplay third-person camera and view toggle are the next separate step.
+Press **F5** or **right-stick click** to switch views, or choose **Camera view** in Settings from the main menu or pause menu. The Settings selector refreshes on opening and uses the same local preference as the hotkey. First person hides the local body through the camera's Player-layer mask. Third person shows the body and hides the legacy first-person weapon renderers without disabling their gameplay objects. Newly equipped weapons refresh that visibility. Full-body weapon attachment/attack presentation is still part of the upcoming combat pass.
+
+Third person defaults to a slight right shoulder offset, 3.25 metres behind the pivot. View changes ease over time. A sphere probe retracts the camera immediately around solid geometry, including the floor; it eases back after clearance. An obstructed pivot falls back to the eye position. If clearance puts the camera inside the body, the body is hidden before it can fill the view. Trigger volumes and the Player/UI/Ignore Raycast layers do not obstruct the camera. Third-person pitch is limited to 60 degrees up and 70 down; first person retains the existing 89-degree limits. Settings provides separate first-person and third-person FOV sliders (60–110 degrees, default 80). Sprinting never changes FOV. Active-view slider changes apply immediately, including while paused; the other value is used on switching views. Values are local preferences (`Settings.FirstPersonFov` and `Settings.ThirdPersonFov`), retained across save/load and independent of character saves. Sensitivity still applies to the same camera.
+
+View switching is blocked while inventory, pause, loot or death controls own input. The choice is stored locally as `Settings.ThirdPerson`, alongside the existing local settings, so save/load and new player instances retain it. It is not part of a character save. Teleport/save restoration resets pitch and camera placement against the new geometry.
+
+Interaction still aims from the gameplay camera, but its five-metre reach is checked from the player's eye pivot. Moving the camera back cannot extend reach. An obstruction between the player and the selected object blocks interaction.
 
 ## Reusable animation test scene
 
@@ -51,21 +58,28 @@ Open `Assets/_Development/Scenes/PlayerLocomotionTest.unity` and press Play. It 
 
 Live movement uses the normal player input and actual root-motion motor. Escape releases the mouse so the development buttons can be clicked. Live movement/reset returns to ordinary controls. Walk/run demo buttons drive the same motor automatically. Previous/next clip buttons preview all 34 imported animations on yBot, with the existing sword mesh shown for the relevant weapon poses.
 
+The **Camera: overview / player** button selects the development follow camera or the actual gameplay camera. In player view, use F5 to compare first/third person. Only one camera and AudioListener are enabled at a time. The animation showcase and individual clip previews return to the overview automatically.
+
 Pose previews intentionally suppress world movement and damage. Their purpose is to review retargeting and pose quality. They do not implement root-motion combat, bow combat, death behavior, or door interactions. The caption distinguishes pose previews from live locomotion. Returning to live movement restores the original locomotion controller and motor.
 
 The test-only script is `Assets/_Development/Prototypes/PlayerAnimationTest.cs`. Scene generation lives in `PlayerAnimationSceneSetup.cs`; the normal player prefab does not include this development interface or camera.
 
 ## Testing controls
 
-Existing bindings remain: movement, look, sprint, jump, inventory and pause. Sprint now consumes stamina only when moving forward. Idle/walking/running can be inspected in the Animator parameters MoveX/MoveY; Grounded selects the ground/air state.
+Existing bindings remain: movement, look, sprint, jump, inventory and pause. F5/right-stick click toggles the view. Sprint now consumes stamina only when moving forward. Idle/walking/running can be inspected in the Animator parameters MoveX/MoveY; Grounded selects the ground/air state.
 
 Useful Inspector settings on the player:
 
 - CharacterMotor: movement/stopping blend response times, jump height, gravity, ground probe, air control and knockback braking.
 - CharacterController: height/radius, slope limit, step offset and skin width.
-- PlayerController: sensitivity, sprint stamina rate and FOV settings.
+- PlayerController: sensitivity and sprint stamina rate.
+- PlayerCameraRig: third-person offset, transition/clearance return times, collision probe radius/padding and obstruction mask.
 
 `Tools/Validation/Player Locomotion Assets` checks the saved prefab connections. `Tools/Validation/Player Locomotion (Play Mode)` uses an isolated temporary scene and character to exercise movement/collision without touching real saves. The setup command `Tools/Player/Rebuild Locomotion Setup` is an explicit asset-generation command; use it only when intentionally regenerating the baseline controller/body setup, since it replaces the generated controller states and body child.
+
+`Tools/Validation/First and Third Person Cameras` checks actual F5 input, mode gating, visibility, wall/ground clearance, camera recovery, teleport and interaction reach/occlusion in the development scene. Camera checks restore the previous local view preference and Input System settings. Save/menu checks also verify Town display output and that save/load retains the local view preference.
+
+Latest regression validation: 33 camera checks, 11 prefab checks, 58 player-feature checks, 42 save-data checks and 48 save/menu Play Mode checks passed (192 total). This includes real sprint input preserving each view's FOV, separate sliders from both Settings screens, immediate paused changes, and save/load persistence. The first/third-person baseline also passed a Windows build of the three enabled game scenes with 0 errors and the existing 16 warnings; the FOV follow-up was compiled and checked in Unity Play Mode. Temporary build and recording files were removed. Review images and validation summaries are under `Logs/PlayerCameraReview/` outside version control.
 
 ## Review boundaries and next steps
 
@@ -81,11 +95,11 @@ This choreography uses the separate development-only `AnimationShowcase.controll
 
 `Tools/Player/Configure Animation Showcase` rebuilds the test controller and connects the test scene. It changes the action-clip import settings to non-looping (except combat idle and sword run), bakes vertical travel into the pose, and retains horizontal travel. Walking turns retain root rotation. `Build Animation Test Scene` also configures the showcase. These are explicit commands, never automatic scene mutations.
 
-The legacy first-person sword animations and damage behavior are retained, not converted to the full body. There is no networking, camera toggle, foot IK, motion warping, dedicated start/stop animation, authored jump takeoff/landing or root-motion combat yet.
+The legacy first-person sword animations and damage behavior are retained, not converted to the full body. There is no networking, foot IK, motion warping, gameplay start/stop animation, authored gameplay jump takeoff/landing or root-motion combat yet.
 
 After reviewing the movement foundation:
 
-1. Add first/third-person camera presentation around the same gameplay actor, with camera collision and body-facing rules.
+1. Review first/third-person view feel in Town and the test scene; tune camera offsets and response settings if needed.
 2. Build one full-body sword attack with windup/active/recovery phases, collision-constrained root travel, stamina, input buffering and per-swing hit tracking.
 3. Integrate one skeleton and one NPC with the shared movement/action pattern, coordinating navigation with root motion.
 4. Expand and polish the animation set once those examples feel good.

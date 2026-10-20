@@ -31,6 +31,7 @@ public class PlayerAnimationTest : MonoBehaviour
     private bool driving;
     private bool previewing;
     private int selected;
+    private bool playerView;
 
     public PlayerAnimationShowcase showcase;
 
@@ -56,6 +57,8 @@ public class PlayerAnimationTest : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (playerView)
+            return;
         Vector3 offset = previewing ? new Vector3(2.8f, 1f, 3.6f) : new Vector3(-3.6f, 1.7f, -4.2f);
         sceneCamera.fieldOfView = previewing ? 38f : 45f;
         sceneCamera.transform.position = player.transform.position + offset;
@@ -71,7 +74,7 @@ public class PlayerAnimationTest : MonoBehaviour
         player.enabled = true;
         PlayerModeController.ForPlayer(player).ResetToGameplay();
         caption.text = "PLAYER MOVEMENT TEST";
-        details.text = "WASD  |  Shift: run forward  |  Space: jump  |  Mouse: turn  |  Escape: release cursor";
+        details.text = "WASD / Shift / Space / Mouse  |  F5: first / third person  |  Camera button: player / overview";
     }
 
     private void RestoreLocomotion()
@@ -104,6 +107,7 @@ public class PlayerAnimationTest : MonoBehaviour
 
     public void BeginShowcase(RuntimeAnimatorController controller)
     {
+        SetPlayerView(false);
         RestoreLocomotion();
         player.enabled = false;
         animator.runtimeAnimatorController = controller;
@@ -127,6 +131,7 @@ public class PlayerAnimationTest : MonoBehaviour
 
     public void ShowClip(int index)
     {
+        SetPlayerView(false);
         if (showcase != null)
             showcase.Cancel();
         Time.timeScale = 1f;
@@ -149,7 +154,7 @@ public class PlayerAnimationTest : MonoBehaviour
 
     private void OnGUI()
     {
-        GUI.Box(new Rect(12, 100, 230, 218), "Development controls");
+        GUI.Box(new Rect(12, 100, 230, 252), "Development controls");
         if (GUI.Button(new Rect(24, 130, 206, 28), "Live movement / reset"))
             LiveMovement();
         if (GUI.Button(new Rect(24, 164, 100, 28), "Previous clip"))
@@ -163,6 +168,24 @@ public class PlayerAnimationTest : MonoBehaviour
         GUI.Label(new Rect(24, 236, 210, 35), "Escape releases the mouse.");
         if (showcase != null && GUI.Button(new Rect(24, 276, 206, 28), "Movement + death showcase"))
             showcase.Play();
+        if (GUI.Button(new Rect(24, 310, 206, 28), playerView ? "Camera: player (click for overview)" : "Camera: overview (click for player)"))
+        {
+            LiveMovement();
+            SetPlayerView(!playerView);
+        }
+    }
+
+    public void SetPlayerView(bool value)
+    {
+        playerView = value;
+        var camera = player.GetComponent<PlayerCameraRig>().ViewCamera;
+        camera.enabled = value;
+        camera.GetComponent<AudioListener>().enabled = value;
+        sceneCamera.enabled = !value;
+        var overviewListener = sceneCamera.GetComponent<AudioListener>();
+        if (overviewListener != null)
+            overviewListener.enabled = !value;
+        caption.canvas.worldCamera = value ? camera : sceneCamera;
     }
 
     private void OnDestroy()
