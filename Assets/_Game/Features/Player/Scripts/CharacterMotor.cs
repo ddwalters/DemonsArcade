@@ -58,21 +58,18 @@ public class CharacterMotor : MonoBehaviour
     [SerializeField] private JumpAnimationPhases sprintJumpPhases =
         new JumpAnimationPhases(2f / 27f, 10f / 27f, 19f / 27f, 1f);
 
-    private static readonly int MoveX = Animator.StringToHash("MoveX");
     private static readonly int MoveY = Animator.StringToHash("MoveY");
     private static readonly int Grounded = Animator.StringToHash("Grounded");
     private static readonly int Jumping = Animator.StringToHash("Jumping");
     private static readonly int SprintJump = Animator.StringToHash("SprintJump");
-    private static readonly int VerticalVelocityParameter = Animator.StringToHash("VerticalVelocity");
     private static readonly int JumpTime = Animator.StringToHash("JumpTime");
     private static readonly int LandingActive = Animator.StringToHash("LandingActive");
 
     private CharacterController controller;
-    private Vector2 animationInput;
+    private float animationGait;
     private Vector3 planarVelocity;
     private Vector3 externalVelocity;
     private float verticalVelocity;
-    private float actualPlanarSpeed;
     private float animationBlendVelocity;
     private float coyoteTimeRemaining;
     private float jumpRequestAge;
@@ -94,15 +91,6 @@ public class CharacterMotor : MonoBehaviour
     private Vector3 walkableGroundContactNormal = Vector3.up;
 
     public bool IsGrounded { get; private set; }
-    public Vector2 AnimationInput => animationInput;
-    public Animator Animator => animator;
-    public Vector3 PlanarVelocity => planarVelocity;
-    public float PlanarSpeed => planarVelocity.magnitude;
-    public float ActualPlanarSpeed => actualPlanarSpeed;
-    public float VerticalVelocity => verticalVelocity;
-    public float JumpAnimationTime => jumpAnimationTime;
-    public bool IsJumpAnimationActive => jumpAnimationActive;
-    public bool IsLandingAnimationActive => landingAnimationActive;
 
     private void Awake()
     {
@@ -316,7 +304,7 @@ public class CharacterMotor : MonoBehaviour
 
         Vector3 resolvedPlanarTravel = Vector3.ProjectOnPlane(
             actualDisplacement - externalDisplacement, Vector3.up);
-        actualPlanarSpeed = planarVelocity.sqrMagnitude > 0.0001f
+        float actualPlanarSpeed = planarVelocity.sqrMagnitude > 0.0001f
             ? Mathf.Clamp(Vector3.Dot(resolvedPlanarTravel, planarVelocity.normalized) / deltaTime,
                 0f, planarVelocity.magnitude)
             : 0f;
@@ -452,20 +440,18 @@ public class CharacterMotor : MonoBehaviour
     {
         float blendTime = Mathf.Max(0.01f, animationBlendTime);
         float nextGait = deltaTime > 0f
-            ? Mathf.SmoothDamp(animationInput.y, gaitValue, ref animationBlendVelocity,
+            ? Mathf.SmoothDamp(animationGait, gaitValue, ref animationBlendVelocity,
                 blendTime, Mathf.Infinity, deltaTime)
             : gaitValue;
-        animationInput = new Vector2(0f, nextGait);
+        animationGait = nextGait;
 
         if (animator == null || !animator.isActiveAndEnabled)
             return;
 
-        animator.SetFloat(MoveX, 0f);
-        animator.SetFloat(MoveY, animationInput.y);
+        animator.SetFloat(MoveY, animationGait);
         animator.SetBool(Grounded, grounded);
         animator.SetBool(Jumping, jumpAnimationActive);
         animator.SetBool(SprintJump, sprintJumpAnimation);
-        animator.SetFloat(VerticalVelocityParameter, verticalVelocity);
         animator.SetFloat(JumpTime, jumpAnimationTime);
         animator.SetBool(LandingActive, landingAnimationActive);
     }
@@ -492,8 +478,7 @@ public class CharacterMotor : MonoBehaviour
         planarVelocity = Vector3.zero;
         externalVelocity = Vector3.zero;
         verticalVelocity = 0f;
-        actualPlanarSpeed = 0f;
-        animationInput = Vector2.zero;
+        animationGait = 0f;
         animationBlendVelocity = 0f;
         coyoteTimeRemaining = 0f;
         jumpRequestAge = 0f;
@@ -515,12 +500,10 @@ public class CharacterMotor : MonoBehaviour
 
         if (animator != null && animator.isActiveAndEnabled)
         {
-            animator.SetFloat(MoveX, 0f);
             animator.SetFloat(MoveY, 0f);
             animator.SetBool(Grounded, IsGrounded);
             animator.SetBool(Jumping, false);
             animator.SetBool(SprintJump, false);
-            animator.SetFloat(VerticalVelocityParameter, 0f);
             animator.SetFloat(JumpTime, 0f);
             animator.SetBool(LandingActive, false);
         }

@@ -24,8 +24,6 @@ public class PlayerCameraRig : MonoBehaviour
     public Camera ViewCamera => viewCamera;
     public Vector3 EyePosition => viewPivot.position;
     public bool IsThirdPerson => true;
-    public float Pitch => pitch;
-    public Ray AimRay => new Ray(viewCamera.transform.position, viewCamera.transform.forward);
 
     private void Awake()
     {

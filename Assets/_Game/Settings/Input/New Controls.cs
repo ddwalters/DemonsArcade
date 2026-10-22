@@ -93,15 +93,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
             ""id"": ""5369dc1e-125e-4f09-a0ff-a6274e2a43d0"",
             ""actions"": [
                 {
-                    ""name"": ""Toggle View"",
-                    ""type"": ""Button"",
-                    ""id"": ""94c609a2-6714-4b98-936b-46fcd69cc236"",
-                    ""expectedControlType"": ""Button"",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Jump"",
                     ""type"": ""Button"",
                     ""id"": ""18e0fcb3-6414-4e13-9e4d-e78e392e2a23"",
@@ -166,28 +157,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
                 }
             ],
             ""bindings"": [
-                {
-                    ""name"": """",
-                    ""id"": ""673d443a-0951-4794-9444-62c7f7e31ef3"",
-                    ""path"": ""<Keyboard>/f5"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard & Mouse"",
-                    ""action"": ""Toggle View"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""23e29c86-a13d-44f9-a5e8-9951770aca58"",
-                    ""path"": ""<Gamepad>/rightStickPress"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Gamepad"",
-                    ""action"": ""Toggle View"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
                 {
                     ""name"": """",
                     ""id"": ""2294b721-a1f5-49d4-91ca-871cde82139a"",
@@ -1069,7 +1038,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
 }");
         // BasicActionMap
         m_BasicActionMap = asset.FindActionMap("BasicActionMap", throwIfNotFound: true);
-        m_BasicActionMap_ToggleView = m_BasicActionMap.FindAction("Toggle View", throwIfNotFound: true);
         m_BasicActionMap_Jump = m_BasicActionMap.FindAction("Jump", throwIfNotFound: true);
         m_BasicActionMap_Movement = m_BasicActionMap.FindAction("Movement", throwIfNotFound: true);
         m_BasicActionMap_Sprint = m_BasicActionMap.FindAction("Sprint", throwIfNotFound: true);
@@ -1170,7 +1138,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
     // BasicActionMap
     private readonly InputActionMap m_BasicActionMap;
     private List<IBasicActionMapActions> m_BasicActionMapActionsCallbackInterfaces = new List<IBasicActionMapActions>();
-    private readonly InputAction m_BasicActionMap_ToggleView;
     private readonly InputAction m_BasicActionMap_Jump;
     private readonly InputAction m_BasicActionMap_Movement;
     private readonly InputAction m_BasicActionMap_Sprint;
@@ -1189,10 +1156,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
         /// Construct a new instance of the input action map wrapper class.
         /// </summary>
         public BasicActionMapActions(@NewControls wrapper) { m_Wrapper = wrapper; }
-        /// <summary>
-        /// Provides access to the underlying input action "BasicActionMap/ToggleView".
-        /// </summary>
-        public InputAction @ToggleView => m_Wrapper.m_BasicActionMap_ToggleView;
         /// <summary>
         /// Provides access to the underlying input action "BasicActionMap/Jump".
         /// </summary>
@@ -1247,9 +1210,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_BasicActionMapActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_BasicActionMapActionsCallbackInterfaces.Add(instance);
-            @ToggleView.started += instance.OnToggleView;
-            @ToggleView.performed += instance.OnToggleView;
-            @ToggleView.canceled += instance.OnToggleView;
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
@@ -1282,9 +1242,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
         /// <seealso cref="BasicActionMapActions" />
         private void UnregisterCallbacks(IBasicActionMapActions instance)
         {
-            @ToggleView.started -= instance.OnToggleView;
-            @ToggleView.performed -= instance.OnToggleView;
-            @ToggleView.canceled -= instance.OnToggleView;
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
@@ -1567,13 +1524,6 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
     /// <seealso cref="BasicActionMapActions.RemoveCallbacks(IBasicActionMapActions)" />
     public interface IBasicActionMapActions
     {
-        /// <summary>
-        /// Method invoked when associated input action "Toggle View" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnToggleView(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Jump" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
