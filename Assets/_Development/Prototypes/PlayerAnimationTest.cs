@@ -10,7 +10,6 @@ public class PlayerAnimationTest : MonoBehaviour
     {
         public string name;
         public AnimationClip clip;
-        public bool sword;
     }
 
     public PlayerController player;
@@ -18,9 +17,9 @@ public class PlayerAnimationTest : MonoBehaviour
     public RuntimeAnimatorController previewController;
     public AnimationClip previewBaseClip;
     public Preview[] previews;
-    public GameObject sword;
     public TMP_Text caption;
     public TMP_Text details;
+    public PlayerAnimationShowcase showcase;
 
     private CharacterMotor motor;
     private Animator animator;
@@ -32,8 +31,6 @@ public class PlayerAnimationTest : MonoBehaviour
     private bool previewing;
     private int selected;
     private bool playerView;
-
-    public PlayerAnimationShowcase showcase;
 
     public Animator Animator => animator;
 
@@ -67,14 +64,13 @@ public class PlayerAnimationTest : MonoBehaviour
 
     public void LiveMovement()
     {
-        if (showcase != null)
-            showcase.Cancel();
+        showcase?.Stop();
         RestoreLocomotion();
         driving = false;
         player.enabled = true;
         PlayerModeController.ForPlayer(player).ResetToGameplay();
         caption.text = "PLAYER MOVEMENT TEST";
-        details.text = "WASD / Shift / Space / Mouse  |  F5: first / third person  |  Camera button: player / overview";
+        details.text = "WASD / Shift / Space / Mouse  |  Third-person camera  |  Camera button: player / overview";
     }
 
     private void RestoreLocomotion()
@@ -83,14 +79,12 @@ public class PlayerAnimationTest : MonoBehaviour
         motor.enabled = true;
         if (animator.runtimeAnimatorController != locomotionController)
             animator.runtimeAnimatorController = locomotionController;
-        sword.SetActive(false);
         Time.timeScale = 1f;
     }
 
     public void Drive(Vector2 input, bool sprint, string label)
     {
-        if (showcase != null)
-            showcase.Cancel();
+        showcase?.Stop();
         RestoreLocomotion();
         player.enabled = false;
         driveInput = input;
@@ -105,14 +99,16 @@ public class PlayerAnimationTest : MonoBehaviour
 
     public void Jump() => motor.RequestJump();
 
-    public void BeginShowcase(RuntimeAnimatorController controller)
+    public void BeginShowcase()
     {
         SetPlayerView(false);
         RestoreLocomotion();
         player.enabled = false;
-        animator.runtimeAnimatorController = controller;
+        PlayerModeController.ForPlayer(player).ResetToGameplay();
+        driveInput = Vector2.zero;
+        sprinting = false;
         driving = true;
-        SetDrive(Vector2.zero, false);
+        motor.Teleport(new Vector3(0f, 1.04f, -2f), Quaternion.identity);
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
@@ -123,17 +119,10 @@ public class PlayerAnimationTest : MonoBehaviour
         sprinting = sprint;
     }
 
-    public void SetAuthoredAction(bool active)
-    {
-        driving = !active;
-        motor.enabled = !active;
-    }
-
     public void ShowClip(int index)
     {
+        showcase?.Stop();
         SetPlayerView(false);
-        if (showcase != null)
-            showcase.Cancel();
         Time.timeScale = 1f;
         player.enabled = false;
         driving = false;
@@ -145,11 +134,10 @@ public class PlayerAnimationTest : MonoBehaviour
         previewOverride[previewBaseClip] = previews[selected].clip;
         animator.runtimeAnimatorController = previewOverride;
         animator.Play("Preview", 0, 0f);
-        sword.SetActive(previews[selected].sword);
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         caption.text = $"{selected + 1:00} / {previews.Length:00}   {previews[selected].name}";
-        details.text = "Imported animation retargeted onto yBot  |  Pose preview; combat is not connected";
+        details.text = "Imported locomotion animation retargeted onto yBot";
     }
 
     private void OnGUI()
@@ -166,7 +154,7 @@ public class PlayerAnimationTest : MonoBehaviour
         if (GUI.Button(new Rect(130, 198, 100, 28), "Run demo"))
             Drive(Vector2.up, true, "RUNNING");
         GUI.Label(new Rect(24, 236, 210, 35), "Escape releases the mouse.");
-        if (showcase != null && GUI.Button(new Rect(24, 276, 206, 28), "Movement + death showcase"))
+        if (showcase != null && GUI.Button(new Rect(24, 276, 206, 28), "Movement blend showcase"))
             showcase.Play();
         if (GUI.Button(new Rect(24, 310, 206, 28), playerView ? "Camera: player (click for overview)" : "Camera: overview (click for player)"))
         {

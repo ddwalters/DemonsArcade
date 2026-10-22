@@ -9,7 +9,7 @@ public static class PlayerCameraSetup
 {
     private const string PrefabPath = "Assets/_Game/Features/Player/Prefabs/player.prefab";
 
-    [MenuItem("Tools/Player/Configure First and Third Person Cameras")]
+    [MenuItem("Tools/Player/Configure Third Person Camera")]
     public static void Run()
     {
         if (EditorApplication.isPlaying)
@@ -23,10 +23,10 @@ public static class PlayerCameraSetup
         if (demo.sceneCamera.GetComponent<AudioListener>() == null)
             demo.sceneCamera.gameObject.AddComponent<AudioListener>();
         demo.player.GetComponent<PlayerCameraRig>().ViewCamera.GetComponent<AudioListener>().enabled = false;
-        demo.details.text = "WASD / Shift / Space / Mouse  |  F5: switch player view  |  Camera button: player / overview";
+        demo.details.text = "WASD / Shift / Space / Mouse  |  Third-person camera | Camera button: player / overview";
         EditorSceneManager.SaveScene(scene);
         AssetDatabase.SaveAssets();
-        Debug.Log("[Player Camera Setup] Configured one camera, view pivot and separate legacy weapon rig.");
+        Debug.Log("[Player Camera Setup] Configured one gameplay camera and view pivot.");
     }
 
     public static void ConfigurePrefab()
@@ -41,9 +41,6 @@ public static class PlayerCameraSetup
                 pivot = new GameObject("ViewPivot").transform;
                 pivot.SetParent(root.transform, false);
                 pivot.localPosition = camera.transform.localPosition;
-                var hands = camera.transform.Find("Hands");
-                if (hands != null)
-                    hands.SetParent(pivot, false);
                 camera.transform.SetParent(pivot, false);
                 camera.transform.localPosition = Vector3.zero;
                 camera.transform.localRotation = Quaternion.identity;
@@ -52,7 +49,6 @@ public static class PlayerCameraSetup
             var data = new SerializedObject(rig);
             data.FindProperty("viewCamera").objectReferenceValue = camera;
             data.FindProperty("viewPivot").objectReferenceValue = pivot;
-            data.FindProperty("firstPersonRig").objectReferenceValue = pivot.Find("Hands");
             data.ApplyModifiedPropertiesWithoutUndo();
             PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
         }
@@ -72,36 +68,7 @@ public static class PlayerCameraSetup
             {
                 var settings = root.GetComponentsInChildren<SettingsScreen>(true)
                     .Single(screen => screen.GetType() == typeof(SettingsScreen));
-                if (settings.cameraViewDropdown == null)
-                {
-                    var dropdown = Object.Instantiate(settings.qualityDropdown, settings.transform);
-                    dropdown.name = "CameraView";
-                    dropdown.onValueChanged = new TMP_Dropdown.DropdownEvent();
-                    dropdown.ClearOptions();
-                    dropdown.AddOptions(new System.Collections.Generic.List<string> { "First person", "Third person" });
-                    dropdown.SetValueWithoutNotify(0);
-                    dropdown.RefreshShownValue();
-                    var label = Object.Instantiate(settings.GetComponentsInChildren<TMP_Text>(true)
-                        .Single(text => text.transform.parent == settings.transform && text.text == "Quality"), settings.transform);
-                    label.name = "CameraViewLabel";
-                    label.text = "Camera view";
-                    label.rectTransform.anchoredPosition = new Vector2(-450f, 0f);
-                    ((RectTransform)dropdown.transform).anchoredPosition = new Vector2(130f, 0f);
-                    settings.cameraViewDropdown = dropdown;
-                    foreach (RectTransform child in settings.transform)
-                    {
-                        float y = child.anchoredPosition.y;
-                        float nextY = y;
-                        if (Mathf.Approximately(y, 70f))
-                            nextY = 90f;
-                        else if (Mathf.Approximately(y, -50f))
-                            nextY = -90f;
-                        else if (Mathf.Approximately(y, -160f))
-                            nextY = -180f;
-                        child.anchoredPosition = new Vector2(child.anchoredPosition.x, nextY);
-                    }
-                }
-                if (settings.firstPersonFov == null)
+                if (settings.thirdPersonFov == null)
                 {
                     foreach (RectTransform child in settings.transform)
                     {
@@ -121,8 +88,7 @@ public static class PlayerCameraSetup
                             nextY = -285f;
                         child.anchoredPosition = new Vector2(child.anchoredPosition.x, nextY);
                     }
-                    settings.firstPersonFov = FovSlider(settings, "FirstPersonFov", "First-person FOV", 15f, out settings.firstPersonFovText);
-                    settings.thirdPersonFov = FovSlider(settings, "ThirdPersonFov", "Third-person FOV", -60f, out settings.thirdPersonFovText);
+                    settings.thirdPersonFov = FovSlider(settings, "ThirdPersonFov", "Camera FOV", -60f, out settings.thirdPersonFovText);
                 }
                 PrefabUtility.SaveAsPrefabAsset(root, path);
             }

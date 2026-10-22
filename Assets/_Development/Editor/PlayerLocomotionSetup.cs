@@ -176,8 +176,8 @@ public static class PlayerLocomotionSetup
         try
         {
             var data = new SerializedObject(root.GetComponent<CharacterMotor>());
-            data.FindProperty("movementBlendTime").floatValue = 0.25f;
-            data.FindProperty("stoppingBlendTime").floatValue = 0.14f;
+            data.FindProperty("movementBlendTime").floatValue = 0.08f;
+            data.FindProperty("stoppingBlendTime").floatValue = 0.08f;
             data.ApplyModifiedPropertiesWithoutUndo();
             PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
         }
@@ -265,7 +265,7 @@ public static class PlayerLocomotionSetup
             relayData.FindProperty("motor").objectReferenceValue = motor;
             relayData.ApplyModifiedPropertiesWithoutUndo();
 
-            // Retain the existing first-person camera and weapon rig. The new body is visible in Scene view.
+            // Keep the gameplay camera independent from the new animated body.
             var camera = root.GetComponentInChildren<Camera>();
             camera.cullingMask &= ~(1 << root.layer);
             camera.nearClipPlane = 0.05f;

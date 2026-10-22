@@ -32,7 +32,7 @@ public static class PlayerLocomotionChecks
         Require(prefab.GetComponent<MeshRenderer>() == null, "Old visible capsule is removed.");
         Require(animator != null && animator.avatar.isHuman && animator.avatar.isValid, "Player has a valid Humanoid body.");
         Require(animator.applyRootMotion && animator.cullingMode == AnimatorCullingMode.AlwaysAnimate,
-            "Root motion evaluates even when first-person rendering hides the body.");
+            "Animator stays active to provide root motion.");
         Require(animator.GetComponent<CharacterRootMotion>() != null && animator.runtimeAnimatorController != null,
             "The body has a controller and root-motion relay.");
         Require(new SerializedObject(motor).FindProperty("animator").objectReferenceValue == animator,
@@ -40,10 +40,10 @@ public static class PlayerLocomotionChecks
         Require(new SerializedObject(animator.GetComponent<CharacterRootMotion>()).FindProperty("motor").objectReferenceValue == motor,
             "Relay references this player's motor.");
         Require((prefab.GetComponentInChildren<Camera>().cullingMask & (1 << prefab.layer)) == 0,
-            "First-person camera does not render inside the body.");
+            "Camera initially avoids drawing the player before the third-person boom is placed.");
         Require(prefab.transform.Find("BodyModel").localPosition == Vector3.down, "Body feet align with the capsule bottom.");
-        Require(prefab.GetComponentInChildren<WeaponsHandler>(true) != null && prefab.GetComponentInChildren<Sword>(true) != null,
-            "Existing first-person weapon rig is retained.");
+        Require(prefab.GetComponent<PlayerCameraRig>() != null && prefab.GetComponent<PlayerCameraRig>().IsThirdPerson,
+            "Player camera remains in third person.");
         Debug.Log($"[Player Locomotion Assets] PASS: {checks} checks.");
     }
 

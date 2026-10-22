@@ -24,7 +24,10 @@ public static class PlayerAnimationSceneSetup
             throw new InvalidOperationException("Exit Play Mode before building the test scene.");
 
         string[] paths = Directory.GetFiles(ClipRoot, "*.fbx", SearchOption.AllDirectories)
-            .Select(path => path.Replace('\\', '/')).OrderBy(path => path, StringComparer.Ordinal).ToArray();
+            .Select(path => path.Replace('\\', '/'))
+            .Where(path => path.Contains("/Locomotion/") || path.Contains("Death"))
+            .Where(path => !path.Contains("With Sword"))
+            .OrderBy(path => path, StringComparer.Ordinal).ToArray();
         foreach (string path in paths)
         {
             var importer = (ModelImporter)AssetImporter.GetAtPath(path);
@@ -42,8 +45,7 @@ public static class PlayerAnimationSceneSetup
         {
             name = Path.GetFileNameWithoutExtension(path),
             clip = AssetDatabase.LoadAllAssetsAtPath(path).OfType<AnimationClip>()
-                .First(clip => !clip.name.StartsWith("__preview__")),
-            sword = path.Contains("Sword") || path.Contains("Melee") || path.Contains("Heavy Weapon") || path.Contains("CombatIdle")
+                .First(clip => !clip.name.StartsWith("__preview__"))
         }).ToArray();
         AnimationClip idle = previews.First(preview => preview.name == "CalmIdle").clip;
         var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(PreviewController);
@@ -94,12 +96,13 @@ public static class PlayerAnimationSceneSetup
         camera.gameObject.AddComponent<UniversalAdditionalCameraData>();
 
         var demo = new GameObject("Animation test controls").AddComponent<PlayerAnimationTest>();
+        demo.showcase = demo.gameObject.AddComponent<PlayerAnimationShowcase>();
+        demo.showcase.demo = demo;
         demo.player = playerObject.GetComponent<PlayerController>();
         demo.sceneCamera = camera;
         demo.previewController = controller;
         demo.previewBaseClip = idle;
         demo.previews = previews;
-        demo.sword = CreateSword(demo.player.GetComponent<CharacterMotor>().Animator);
         var canvas = new GameObject("Test captions", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler)).GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceCamera;
         canvas.worldCamera = camera;
@@ -116,7 +119,6 @@ public static class PlayerAnimationSceneSetup
         AssetDatabase.SaveAssets();
         Debug.Log($"[Animation Test Scene] Saved {ScenePath} with {previews.Length} animation previews.");
         PlayerCameraSetup.Run();
-        PlayerAnimationShowcaseSetup.Run();
     }
 
     private static GameObject Cube(string name, Vector3 position, Vector3 scale, Material material, bool collision = true)
@@ -161,29 +163,4 @@ public static class PlayerAnimationSceneSetup
         return material;
     }
 
-    private static GameObject CreateSword(Animator animator)
-    {
-        var definition = AssetDatabase.LoadAssetAtPath<ItemData>("Assets/_Game/Features/Inventory/Data/Items/ShortSword.asset");
-        var sword = Object.Instantiate(definition.itemStats.GetPrefab());
-        sword.name = "Sword pose preview (no damage)";
-        foreach (var script in sword.GetComponentsInChildren<MonoBehaviour>(true))
-            Object.DestroyImmediate(script);
-        foreach (var collider in sword.GetComponentsInChildren<Collider>(true))
-            Object.DestroyImmediate(collider);
-        foreach (var body in sword.GetComponentsInChildren<Rigidbody>(true))
-            Object.DestroyImmediate(body);
-        sword.transform.SetParent(animator.GetBoneTransform(HumanBodyBones.RightHand), false);
-        sword.transform.localPosition = Vector3.zero;
-        sword.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
-        var renderers = sword.GetComponentsInChildren<Renderer>();
-        if (renderers.Length > 0)
-        {
-            Bounds bounds = renderers[0].bounds;
-            foreach (var renderer in renderers)
-                bounds.Encapsulate(renderer.bounds);
-            sword.transform.localScale *= 0.85f / Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
-        }
-        sword.SetActive(false);
-        return sword;
-    }
 }

@@ -1,20 +1,20 @@
 # Character movement and animation plan
 
-Status: proposal, 2026-10-20. Gameplay implementation has not started. Only animation folder scaffolding and the inactive default for the unused gameplay RenderTexture overlay were changed. No commits are authorized.
+Status: revised 2026-10-20. Third-person root-motion locomotion is implemented. The recent combat and first-person presentation prototype was removed for later redesign.
 
 ## Direction
 
 Use animation-authored horizontal movement for grounded locomotion and committed combat actions. Route it through one character motor that owns collision-resolved movement. Code controls gravity, grounding, jumping, external forces, and when an action may move or rotate the actor. This is controlled root motion: animation proposes a displacement; gameplay decides how much is allowed.
 
-Root motion is compatible with both camera views, but neither view requires it. The main benefit here is matching visible steps and attacks to movement. It does not automatically fix acceleration, collision handling, foot placement, or responsiveness.
+The game is currently third-person only. Root motion helps the player's visible steps match ground travel; it does not automatically fix acceleration, collision handling, foot placement, or responsiveness.
 
-Start with one humanoid character, a small animation set, and one attack. Validate these in both views before expanding the library or converting every enemy.
+Keep the next review focused on one humanoid character and its locomotion set. Redesign combat after movement and animation feel right.
 
 ## What exists now
 
-- PlayerController writes horizontal Rigidbody.linearVelocity directly each physics step. Movement has no acceleration/braking stage. Jumping uses an impulse; grounding is toggled by collision enter/exit with the Ground layer. Looking, movement, stamina, and FOV share this component.
-- The player prefab currently has a capsule body and camera-relative Hands/weapon holders, with no full-body humanoid Animator. A suitable rigged body and compatible motion clips are prerequisites.
-- PlayerCombatHandler delegates sword attacks to Sword. Sword plays its own Animator, chooses an attack randomly, and polls the idle clip name to end attacks. WeaponCollisionCheck enables damage at attack start. This is separate from body motion and needs explicit attack phases before full-body combat.
+- The player prefab has a CharacterController, a Humanoid BodyModel, a CharacterMotor, and a root-motion relay. Movement blends the imported grounded and airborne motions.
+- The camera freely orbits independently of the player's facing. Movement is camera-relative and the character turns toward travel. Its FOV setting is independent of character saves. The player CharacterMotor animation speed defaults to 1.3 and is available in the Inspector.
+- The recent combat prototype and custom hand-mounted weapon presentation were removed for a later redesign. Inventory equipment data remains, but the player has no attack handler or held weapon model.
 - SkeletonAI lets NavMeshAgent move and rotate the actor, derives animation speed from agent velocity, and rotates the Transform separately when facing the target. Several enemy prefabs have Apply Root Motion enabled already. That checkbox alone does not establish a coordinated animation-driven motor; the clips and hierarchy need auditing before conversion.
 - Slime bosses have special Rigidbody impulses and apply forces to the player's Rigidbody. These callers must be adapted if the player switches to CharacterController. Nonhumanoid creatures can retain specialized locomotion where it suits them.
 
@@ -35,7 +35,7 @@ Recommended import conventions:
 - Attacks/dodges: retain intentional XZ movement. Retain root rotation only for actions allowed to own turning. Do not loop these clips.
 - Turning clips may intentionally retain rotation. Jump takeoff/flight/landing start with code-driven vertical movement; fully authored traversal is a later exception.
 - Check loop boundaries, feet alignment, strafe orientation and measured travel speed. Animation retargeting and root motion do not guarantee zero foot sliding.
-- Animator must continue evaluating whenever its root motion drives gameplay, including when the body is hidden in first person or off camera. Do not let renderer-based culling silently stop a gameplay motor.
+- Animator must continue evaluating whenever its root motion drives gameplay, including when the body is off camera. Do not let renderer-based culling silently stop a gameplay motor.
 
 ## Shared actor responsibilities
 
@@ -45,7 +45,7 @@ Keep a few focused components instead of a large character framework:
 2. CharacterMotor owns the collision capsule, grounding, gravity, slopes, steps and external motion. Prefer CharacterController for the first prototype because this game needs deliberate character control rather than a freely tumbling physics body. Root motion also works with Rigidbody; this is a project recommendation, not a Unity requirement.
 3. CharacterAnimation maps movement/action state to Animator parameters and forwards root motion to the motor. It coordinates movement locks, turning limits and small speed corrections.
 4. CharacterCombat owns action choice, stamina checks, phase timing, interruptions, damage windows and per-swing hit tracking. An action definition can hold the animation reference/state, movement policy, timing and damage data.
-5. PlayerCamera handles first/third-person presentation and does not own the actor's attack state or world movement.
+5. PlayerCamera handles third-person presentation and does not own the actor's attack state or world movement.
 
 Suggested hierarchy:
 
@@ -64,11 +64,11 @@ The Animator can remain on a child imported model. Its root-motion callback forw
 
 ### 1. Establish one body and a small compatible motion set
 
-Choose a humanoid player rig and verify the existing skeleton clips' rig/import compatibility. Minimum useful locomotion: idle, forward walk/run, backward walk and left/right strafe. Add one full-body sword attack, a hit reaction and a death animation. Starts/stops and dedicated turn clips improve quality later; they are not prerequisites for the first working prototype.
+The humanoid body and idle/walk/run/jump set are in place. Review their blend and movement feel. Add backward/strafe/turn clips only if play reveals a need. Leave combat animation for its later redesign.
 
-Measure clip travel distance and duration. Pick a camera-relative third-person exploration scheme and camera/aim-facing first-person scheme as prototype defaults. Combat can use facing/strafe movement in both views.
+Measure the locomotion clip travel and duration. Keep the current shoulder camera and tune player movement, collision, and facing together.
 
-Acceptance: the previewed body travels at the intended scale, loops without drifting, and holds its weapon correctly.
+Acceptance: the body travels at the intended scale, loops without drifting, and blends between idle, walk, run, and jump cleanly.
 
 ### 2. Replace movement behind the existing gameplay integrations
 
@@ -78,13 +78,11 @@ Use directional blend trees for grounded root-motion locomotion. Keep ordinary t
 
 Acceptance: slopes, stairs, diagonal movement, jumping, walls, knockback, pause and save/load work. Compare walking/stopping feel at different frame rates. Body and collision capsule stay together.
 
-### 3. Add the second view before expanding combat
+### 3. Tune third-person movement and camera
 
-Use one gameplay actor and one authoritative weapon/hit definition for both views. Start with a full-body rig, stable first-person camera reference, and local head visibility control. Do not directly parent the camera to the animated head: running/attacking head motion can make looking unpleasant. Eye pitch stays responsive and separate from full-body attack turns. Third person needs camera collision and deliberate body-facing rules.
+Keep the game in third person. Tune the orbit distance, shoulder offset, camera collision, FOV, and body-facing response while testing the locomotion blend. Leave combat animations and weapon placement for a separate redesign.
 
-Use separate first-person arm poses or presentation clips later if the shared body produces poor weapon framing. Those visuals must follow the same action clock, without generating another set of damage hits or root movement.
-
-Acceptance: switching views does not teleport the player, restart attacks, alter reach, or move the collision capsule. Inspect weapon clipping and looking up/down.
+Acceptance: camera collision keeps the view clear, the camera stays responsive while the body turns, and changing camera settings does not change movement or saved character data.
 
 ### 4. Build one complete root-motion sword attack
 
@@ -92,7 +90,7 @@ Use explicit windup, active and recovery phases. Define when movement/turning ar
 
 Animation events are useful for sound/VFX and initially marking phases, but gameplay must have explicit timing/state and cleanup on interruption, death or unequip. Do not infer combat completion from a clip-name string. Collision, stamina and damage rules stay in gameplay. Limited target-facing assistance can come later; start without target-snapping lunges or complex motion warping.
 
-Acceptance: the feet/body and attack travel agree; walls stop the lunge; windup/recovery do not damage; repeated colliders do not multiply hits; interruption always closes the damage window. Both camera views have identical combat outcomes.
+Acceptance: the feet/body and attack travel agree; walls stop the lunge; windup/recovery do not damage; repeated colliders do not multiply hits; interruption always closes the damage window. Combat remains deferred until its animations and weapon presentation are redesigned.
 
 ### 5. Apply the pattern to one skeleton and one NPC
 
@@ -118,8 +116,8 @@ Assets/_Game/
     Controllers/
     Masks/
   Features/Player/Animations/
-    Clips/FirstPerson/
     Controllers/
+    Clips/Locomotion/
     Overrides/
   Features/Enemies/Animations/
     Clips/Creatures/
@@ -132,7 +130,7 @@ Assets/_Game/
 
 Existing enemy Controllers/Clips and Combat/Animations are retained. Shared full-body clips belong under Shared; player-only view clips belong under Player; creature-specific clips belong under Enemies. Overrides adapt a compatible shared controller to an actor's clip set; use separate controllers for meaningfully different movement, not overrides everywhere. Existing masks remain in place to preserve references. Keep purchased packages under ThirdParty and reference their imported clips rather than copying their entire libraries. Native DCC working files can live outside Assets; use Source for project-owned Unity imports. Remove .gitkeep files when a leaf folder gets its first real asset if desired.
 
-Use descriptive names such as Humanoid_Walk_Forward_RM, Humanoid_Sword_Attack01_RM and Player_FP_Sword_Attack01_IP. RM means exported root travel; IP means in-place. Naming is an aid, not a substitute for checking import settings. FBX subclips can stay inside their source file; extraction into separate .anim files is optional.
+Use descriptive names such as Humanoid_Walk_Forward_RM. RM means exported root travel. Naming is an aid, not a substitute for checking import settings. FBX subclips can stay inside their source file; extraction into separate .anim files is optional.
 
 ## Future multiplayer note
 

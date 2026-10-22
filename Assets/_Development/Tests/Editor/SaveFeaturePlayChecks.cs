@@ -26,14 +26,6 @@ public static class SaveFeaturePlayChecks
         if (EditorApplication.isPlaying || !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
             return;
 
-        SessionState.SetBool("SaveFeaturePlayChecks.HadViewPreference", PlayerPrefs.HasKey(PlayerCameraRig.PreferenceKey));
-        SessionState.SetInt("SaveFeaturePlayChecks.ViewPreference", PlayerPrefs.GetInt(PlayerCameraRig.PreferenceKey));
-        SessionState.SetBool("SaveFeaturePlayChecks.RestoreViewPreference", true);
-        foreach (string key in new[] { PlayerCameraRig.FirstPersonFovKey, PlayerCameraRig.ThirdPersonFovKey })
-        {
-            SessionState.SetBool("SaveFeaturePlayChecks.Has." + key, PlayerPrefs.HasKey(key));
-            SessionState.SetFloat("SaveFeaturePlayChecks.Value." + key, PlayerPrefs.GetFloat(key));
-        }
         SessionState.SetBool(Running, true);
         SessionState.SetString("SaveFeaturePlayChecks.Directory", Path.GetFullPath("Temp/MenuPlayChecks/" + Guid.NewGuid().ToString("N")));
         EditorSceneManager.OpenScene("Assets/_Game/Scenes/Menus/_StartScreen.unity");
@@ -94,22 +86,6 @@ public static class SaveFeaturePlayChecks
 
     private static void Finish(bool passed)
     {
-        if (SessionState.GetBool("SaveFeaturePlayChecks.RestoreViewPreference", false))
-        {
-            if (SessionState.GetBool("SaveFeaturePlayChecks.HadViewPreference", false))
-                PlayerPrefs.SetInt(PlayerCameraRig.PreferenceKey, SessionState.GetInt("SaveFeaturePlayChecks.ViewPreference", 0));
-            else
-                PlayerPrefs.DeleteKey(PlayerCameraRig.PreferenceKey);
-            foreach (string key in new[] { PlayerCameraRig.FirstPersonFovKey, PlayerCameraRig.ThirdPersonFovKey })
-            {
-                if (SessionState.GetBool("SaveFeaturePlayChecks.Has." + key, false))
-                    PlayerPrefs.SetFloat(key, SessionState.GetFloat("SaveFeaturePlayChecks.Value." + key, 0f));
-                else
-                    PlayerPrefs.DeleteKey(key);
-            }
-            PlayerPrefs.Save();
-            SessionState.SetBool("SaveFeaturePlayChecks.RestoreViewPreference", false);
-        }
         EditorApplication.update -= Tick;
         SessionState.SetBool("SaveFeaturePlayChecks.Passed", passed);
         EditorApplication.isPlaying = false;
@@ -127,16 +103,9 @@ public static class SaveFeaturePlayChecks
         while (Time.frameCount < startSettingsFrame)
             yield return null;
         var startSettings = UIController.Current.settingsScreen;
-        Require(startSettings.cameraViewDropdown != null && startSettings.cameraViewDropdown.options.Count == 2,
-            "Main-menu Settings has first/third-person choices.");
-        int nextView = startSettings.cameraViewDropdown.value == 0 ? 1 : 0;
-        startSettings.cameraViewDropdown.value = nextView;
-        Require(PlayerPrefs.GetInt(PlayerCameraRig.PreferenceKey) == nextView,
-            "Main-menu camera setting updates the preference without a player present.");
-        startSettings.firstPersonFov.value = 87f;
         startSettings.thirdPersonFov.value = 96f;
-        Require(PlayerCameraRig.GetSavedFieldOfView(false) == 87f && PlayerCameraRig.GetSavedFieldOfView(true) == 96f,
-            "Main-menu FOV sliders save separate choices without a player present.");
+        Require(PlayerCameraRig.GetSavedFieldOfView() == 96f,
+            "Main-menu FOV slider saves the third-person value without a player present.");
         UIController.Current.HandleEscape();
         saves.NewGame();
         double deadline = EditorApplication.timeSinceStartup + 120;
@@ -152,7 +121,6 @@ public static class SaveFeaturePlayChecks
         var stats = player.GetComponent<PlayerStatsManager>();
         var mode = PlayerModeController.ForPlayer(player);
         var view = player.GetComponent<PlayerCameraRig>();
-        view.SetThirdPerson(true, true);
         Require(view.ViewCamera.enabled && view.ViewCamera.targetTexture == null && view.IsThirdPerson,
             "Town uses the display camera with third-person view available.");
         mode.SetMode(PlayerMode.Inventory);
@@ -218,7 +186,7 @@ public static class SaveFeaturePlayChecks
             player.GetComponent<PlayerCameraRig>().ViewCamera.targetTexture == null,
             "Save/load retains the local view preference and display camera.");
         Require(Mathf.Approximately(player.GetComponent<PlayerCameraRig>().ViewCamera.fieldOfView,
-            PlayerCameraRig.GetSavedFieldOfView(player.GetComponent<PlayerCameraRig>().IsThirdPerson)),
+            PlayerCameraRig.GetSavedFieldOfView()),
             "Save/load applies the saved FOV for the selected view.");
         if (pickupId != null)
             Require(!Object.FindObjectsByType<WorldSaveObject>().Any(target => target.SaveId == pickupId), "Collected pickups stay removed after loading.");
@@ -300,8 +268,7 @@ public static class SaveFeaturePlayChecks
         float oldVolume = settings.volume.value;
         var cameraRig = player.GetComponent<PlayerCameraRig>();
         bool oldView = cameraRig.IsThirdPerson;
-        float oldFirstPersonFov = PlayerCameraRig.GetSavedFieldOfView(false);
-        float oldThirdPersonFov = PlayerCameraRig.GetSavedFieldOfView(true);
+        float oldThirdPersonFov = PlayerCameraRig.GetSavedFieldOfView();
         int oldQuality = QualitySettings.GetQualityLevel();
         bool hadVolume = PlayerPrefs.HasKey("Settings.Volume");
         bool hadSensitivity = PlayerPrefs.HasKey("Settings.Sensitivity");
@@ -311,25 +278,9 @@ public static class SaveFeaturePlayChecks
         int savedQuality = PlayerPrefs.GetInt("Settings.Quality");
         try
         {
-            settings.firstPersonFov.value = 73f;
-            Require(Mathf.Approximately(cameraRig.ViewCamera.fieldOfView, oldThirdPersonFov),
-                "Changing inactive first-person FOV leaves third-person FOV unchanged.");
             settings.thirdPersonFov.value = 104f;
             Require(Mathf.Approximately(cameraRig.ViewCamera.fieldOfView, 104f) && settings.thirdPersonFovText.text == "104°",
                 "Third-person FOV slider applies immediately while paused and updates its label.");
-            settings.cameraViewDropdown.value = 0;
-            Require(!cameraRig.IsThirdPerson && PlayerPrefs.GetInt(PlayerCameraRig.PreferenceKey) == 0,
-                "Camera setting applies first-person view while paused.");
-            Require(Mathf.Approximately(cameraRig.ViewCamera.fieldOfView, 73f) && settings.firstPersonFovText.text == "73°",
-                "Switching to first person applies its own FOV.");
-            settings.cameraViewDropdown.value = 1;
-            Require(cameraRig.IsThirdPerson && PlayerPrefs.GetInt(PlayerCameraRig.PreferenceKey) == 1,
-                "Camera setting applies third-person view while paused.");
-            settings.gameObject.SetActive(false);
-            cameraRig.SetThirdPerson(false, true);
-            settings.gameObject.SetActive(true);
-            Require(settings.cameraViewDropdown.value == 0,
-                "Reopening Settings refreshes the camera choice after a view change.");
             settings.volume.value = 37f;
             Require(settings.volumeText.text == "37%" && settings.audioMixer.GetFloat("volume", out float decibels) &&
                 Mathf.Abs(decibels - Mathf.Log10(0.37f) * 20f) < 0.01f, "Volume slider changes the mixer and label.");
@@ -344,12 +295,8 @@ public static class SaveFeaturePlayChecks
         }
         finally
         {
-            PlayerCameraRig.SaveFieldOfView(false, oldFirstPersonFov);
-            PlayerCameraRig.SaveFieldOfView(true, oldThirdPersonFov);
-            settings.firstPersonFov.SetValueWithoutNotify(oldFirstPersonFov);
+            PlayerCameraRig.SaveFieldOfView(oldThirdPersonFov);
             settings.thirdPersonFov.SetValueWithoutNotify(oldThirdPersonFov);
-            cameraRig.SetThirdPerson(oldView, true);
-            settings.cameraViewDropdown.SetValueWithoutNotify(oldView ? 1 : 0);
             settings.volume.value = oldVolume;
             settings.sensitivity.value = oldSensitivity;
             if (settings.qualityDropdown != null)

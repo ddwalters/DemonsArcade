@@ -2466,96 +2466,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &626495453
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 626495456}
-  - component: {fileID: 626495455}
-  - component: {fileID: 626495454}
-  m_Layer: 7
-  m_Name: Sword pose preview (no damage)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!23 &626495454
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 626495453}
-  m_Enabled: 1
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RayTracingAccelStructBuildFlagsOverride: 0
-  m_RayTracingAccelStructBuildFlags: 1
-  m_SmallMeshCulling: 1
-  m_ForceMeshLod: -1
-  m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 3f5823ded15649c4fac92d391610bda5, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_MaskInteraction: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &626495455
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 626495453}
-  m_Mesh: {fileID: -1550514412580984892, guid: e0a8e43e83a17a44e89b9b09991983ae, type: 3}
---- !u!4 &626495456
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 626495453}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.5069194, y: 2.5069194, z: 2.5069194}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1072748682}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &634476328
 GameObject:
   m_ObjectHideFlags: 0
@@ -4397,10 +4307,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: 7708439245349465921, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 626495456}
+    m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
 --- !u!4 &1072748682 stripped
@@ -4973,7 +4880,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'WASD / Shift / Space / Mouse  |  F5: switch player view  |  Camera button:
+  m_text: 'WASD / Shift / Space / Mouse  |  Third-person camera  |  Camera button:
     player / overview'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5965,7 +5872,6 @@ RectTransform:
   m_Children:
   - {fileID: 1131988716}
   - {fileID: 1199140017}
-  - {fileID: 1534909701}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -6603,81 +6509,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1534909700
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1534909701}
-  - component: {fileID: 1534909703}
-  - component: {fileID: 1534909702}
-  m_Layer: 0
-  m_Name: Scenario fade
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1534909701
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1534909700}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1426149276}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1534909702
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1534909700}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
-  m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0}
-  m_RaycastTarget: 0
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
---- !u!222 &1534909703
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1534909700}
-  m_CullTransparentMesh: 1
 --- !u!1 &1534929793
 GameObject:
   m_ObjectHideFlags: 0
@@ -8625,109 +8456,48 @@ MonoBehaviour:
   previewController: {fileID: 9100000, guid: 02c5f0a2fc7cf834cb4d46eab070fca2, type: 2}
   previewBaseClip: {fileID: -203655887218126122, guid: 040e45c034f5e2344a614c808d648c4b, type: 3}
   previews:
-  - name: CombatIdle
-    clip: {fileID: -203655887218126122, guid: 96ef17549f469d246b15db46c1407b05, type: 3}
-    sword: 1
   - name: Falling Back Death
     clip: {fileID: -203655887218126122, guid: eee93b4300060d740b522f1ff2424653, type: 3}
-    sword: 0
   - name: Falling Forward Death
     clip: {fileID: -203655887218126122, guid: 1ea007948221e7e4fb74222032bb5efe, type: 3}
-    sword: 0
   - name: Flying Back Death
     clip: {fileID: -203655887218126122, guid: 827807eda1032f540b64467cd17103c7, type: 3}
-    sword: 0
-  - name: Heavy Weapon Swing
-    clip: {fileID: -203655887218126122, guid: 2240bae271f5d3a4293543277508f2b9, type: 3}
-    sword: 1
-  - name: Sheathing Sword
-    clip: {fileID: -203655887218126122, guid: 8a14910b3699a724cb7b10017c3b19d8, type: 3}
-    sword: 1
-  - name: Shooting Arrow
-    clip: {fileID: -203655887218126122, guid: 52203a914a58344439556798aeacad57, type: 3}
-    sword: 0
-  - name: Stable Sword Outward Slash
-    clip: {fileID: -203655887218126122, guid: 51e9bdda77944854a84949ed54cb666b, type: 3}
-    sword: 1
-  - name: Standing Melee Attack 360 High
-    clip: {fileID: -203655887218126122, guid: ddff47c49f645ee4daa8b967aec2befd, type: 3}
-    sword: 1
-  - name: Standing Melee Run Jump Attack
-    clip: {fileID: -203655887218126122, guid: bf5aaa1e166d5d74c80f40273a3b9bd4, type: 3}
-    sword: 1
-  - name: Withdrawing Sword
-    clip: {fileID: -203655887218126122, guid: 67731c49520c74a42b49d18f09ad6b92, type: 3}
-    sword: 1
-  - name: Open Door Outwards
-    clip: {fileID: -203655887218126122, guid: 396b8c4105a952d4087fe9ed73c8cfed, type: 3}
-    sword: 0
-  - name: Opening Door Inwards
-    clip: {fileID: -203655887218126122, guid: 17ad1ed0f291c0d469242aaf9d789266, type: 3}
-    sword: 0
   - name: Action Idle To Standing Idle
     clip: {fileID: -203655887218126122, guid: 704eec28c1e34f241a5e89644ec9c64e, type: 3}
-    sword: 0
   - name: CalmIdle
     clip: {fileID: -203655887218126122, guid: 040e45c034f5e2344a614c808d648c4b, type: 3}
-    sword: 0
   - name: Falling Idle
     clip: {fileID: -203655887218126122, guid: eb03eb9916e07ab4298b460042c644db, type: 3}
-    sword: 0
   - name: Falling To Landing
     clip: {fileID: -203655887218126122, guid: 33a29f57fe940054fb3912254f2b2be7, type: 3}
-    sword: 0
   - name: Jump Backward
     clip: {fileID: -203655887218126122, guid: 59134223ce2a4cc41ac7f694c053edf0, type: 3}
-    sword: 0
   - name: Jumping Down
     clip: {fileID: -203655887218126122, guid: 6ed4d559bb7c54048a65c5adbaa0d374, type: 3}
-    sword: 0
   - name: Jumping
     clip: {fileID: -203655887218126122, guid: f08b3ac3c8cb5824197cae0f67b2bbbc, type: 3}
-    sword: 0
   - name: Left Strafe Walking
     clip: {fileID: -203655887218126122, guid: 1954926d6c120ed4db5cbcfa08b59fec, type: 3}
-    sword: 0
   - name: Right Strafe Walking
     clip: {fileID: -203655887218126122, guid: ec9f124ff0cba5f419f9885662d41d92, type: 3}
-    sword: 0
-  - name: Run With Sword
-    clip: {fileID: -203655887218126122, guid: 7553816f2bf6f1947a4f3874534264e2, type: 3}
-    sword: 1
   - name: Running Jump
     clip: {fileID: -203655887218126122, guid: 984a8f10f50cbd9479f05625013712ba, type: 3}
-    sword: 0
   - name: Running Right Turn
     clip: {fileID: -203655887218126122, guid: 27e0504c8313f094095916225e9c30eb, type: 3}
-    sword: 0
   - name: Running Turn 180
     clip: {fileID: -203655887218126122, guid: 0310c01cecd35474f983252704b169eb, type: 3}
-    sword: 0
   - name: Running
     clip: {fileID: -203655887218126122, guid: 58208a198f4a20c42a6f7a15ab34cf15, type: 3}
-    sword: 0
   - name: Start Walking
     clip: {fileID: -203655887218126122, guid: d1fc18650107d3e418388f8d3ba22c9c, type: 3}
-    sword: 0
   - name: Stop Walking
     clip: {fileID: -203655887218126122, guid: 9a8cd88ab987c8d44bf0c6f4a61e516c, type: 3}
-    sword: 0
   - name: Walking Backwards
     clip: {fileID: -203655887218126122, guid: babd134629ba36043b85f50be88ab258, type: 3}
-    sword: 0
   - name: Walking Turn 180
     clip: {fileID: -203655887218126122, guid: 1319e6e7791b7fd41aa172d771b6761b, type: 3}
-    sword: 0
   - name: Walking
     clip: {fileID: -203655887218126122, guid: 274cd33e1cb3be245a70cbb9c1fd2c28, type: 3}
-    sword: 0
-  - name: Sad Idle
-    clip: {fileID: -203655887218126122, guid: 776fb855294b5aa468650c6c920ef0c1, type: 3}
-    sword: 0
-  - name: Yawn
-    clip: {fileID: -203655887218126122, guid: 3027d57317559c7478933e5f48eb09b5, type: 3}
-    sword: 0
-  sword: {fileID: 626495453}
   caption: {fileID: 1131988717}
   details: {fileID: 1199140018}
   showcase: {fileID: 2062908064}
@@ -8759,8 +8529,6 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerAnimationShowcase
   demo: {fileID: 2062908062}
-  controller: {fileID: 9100000, guid: eff85b2b073dd6b4e894bf49f336c167, type: 2}
-  fadeOverlay: {fileID: 1534909702}
 --- !u!1 &2113735160
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,8 +5,10 @@ public class CharacterMotor : MonoBehaviour
 {
     [Header("Ground movement")]
     [SerializeField] private Animator animator;
-    [SerializeField, Min(0.01f)] private float movementBlendTime = 0.25f;
-    [SerializeField, Min(0.01f)] private float stoppingBlendTime = 0.14f;
+    [SerializeField, Min(0.1f), Tooltip("Scales animation playback and grounded root-motion travel.")]
+    private float animationSpeedMultiplier = 1.3f;
+    [SerializeField, Min(0.01f)] private float movementBlendTime = 0.08f;
+    [SerializeField, Min(0.01f)] private float stoppingBlendTime = 0.08f;
     [SerializeField] private LayerMask groundMask = ~((1 << 9) | (1 << 5));
     [SerializeField, Min(0f)] private float groundProbeDistance = 0.15f;
 
@@ -29,6 +31,7 @@ public class CharacterMotor : MonoBehaviour
     private Vector3 airVelocity;
     private Vector3 externalVelocity;
     private Vector3 groundNormal = Vector3.up;
+    private Vector3? locomotionDirection;
     private float verticalVelocity;
     private float lastGroundedTime = float.NegativeInfinity;
     private float jumpRequestedTime = float.NegativeInfinity;
@@ -54,18 +57,29 @@ public class CharacterMotor : MonoBehaviour
         }
     }
 
-    private void Awake() => controller = GetComponent<CharacterController>();
+    private void Awake()
+    {
+        controller = GetComponent<CharacterController>();
+        if (animator != null)
+            animator.speed = animationSpeedMultiplier;
+    }
 
     public void RequestJump() => jumpRequestedTime = Time.time;
 
     // Input selects and blends motion. The animation supplies the actual ground displacement.
-    public void Tick(Vector2 input, bool sprinting, bool allowsMovement, float deltaTime)
+    public void Tick(Vector2 input, bool sprinting, bool allowsMovement, float deltaTime,
+        Vector3? worldMovement = null)
     {
         if (deltaTime <= 0f || !controller.enabled)
             return;
 
         movementAllowed = allowsMovement;
         input = allowsMovement && !IsActionActive ? Vector2.ClampMagnitude(input, 1f) : Vector2.zero;
+        if (!worldMovement.HasValue)
+            locomotionDirection = null;
+        else if (worldMovement.Value.sqrMagnitude > 0.001f)
+            // Keep this direction while the gait blends to a stop after releasing input.
+            locomotionDirection = worldMovement.Value.normalized;
         UpdateGrounding();
 
         Vector2 target = input * (sprinting ? 2f : 1f);
@@ -92,7 +106,10 @@ public class CharacterMotor : MonoBehaviour
         if (!IsGrounded)
         {
             verticalVelocity += gravity * deltaTime;
-            Vector3 targetVelocity = transform.TransformDirection(new Vector3(input.x, 0f, input.y)) * airSpeed;
+            Vector3 steering = worldMovement.HasValue
+                ? worldMovement.Value.normalized * input.magnitude
+                : transform.TransformDirection(new Vector3(input.x, 0f, input.y));
+            Vector3 targetVelocity = steering * airSpeed;
             airVelocity = Vector3.MoveTowards(airVelocity, targetVelocity, airAcceleration * deltaTime);
         }
 
@@ -134,6 +151,9 @@ public class CharacterMotor : MonoBehaviour
         }
         else if (IsGrounded)
         {
+            // Exploration keeps the authored stride distance while facing catches up to steering.
+            if (!IsActionActive && locomotionDirection.HasValue)
+                displacement = locomotionDirection.Value * displacement.magnitude;
             airVelocity = displacement / deltaTime;
             displacement = Vector3.ProjectOnPlane(displacement, groundNormal);
         }
@@ -162,6 +182,7 @@ public class CharacterMotor : MonoBehaviour
     public void Stop()
     {
         movementAllowed = false;
+        locomotionDirection = null;
         animationInput = Vector2.zero;
         blendVelocity = Vector2.zero;
         airVelocity = Vector3.zero;
