@@ -86,6 +86,11 @@ public class WeaponsHandler : MonoBehaviour
     {
         GameObject weapon;
         weapon = Instantiate(itemStats.GetPrefab());
+
+        WorldSaveObject worldSave = weapon.GetComponent<WorldSaveObject>();
+        if (worldSave != null)
+            DestroyImmediate(worldSave);
+
         Destroy(weapon.GetComponent<Rigidbody>());
         Destroy(weapon.GetComponent<MeshCollider>());
         weapon.transform.SetParent(prefabLocation.transform);

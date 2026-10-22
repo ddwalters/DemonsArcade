@@ -30,7 +30,9 @@ public class PlayerModeController : MonoBehaviour
 
     private void Update()
     {
-        HandleMenuInput(Input.GetKeyDown(KeyCode.Escape), Input.GetKeyDown(KeyCode.Tab), Input.GetKeyDown(KeyCode.E));
+        NewControls controls = GetComponent<PlayerController>()?.GetNewControls();
+        bool interactPressed = controls != null && controls.BasicActionMap.Interact.WasPressedThisFrame();
+        HandleMenuInput(MenuInput.PausePressed, MenuInput.InventoryPressed, interactPressed);
     }
 
     private void HandleMenuInput(bool escape, bool tab, bool interact)

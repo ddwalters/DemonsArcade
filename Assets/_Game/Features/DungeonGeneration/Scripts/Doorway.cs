@@ -58,10 +58,10 @@ public class Doorway : MonoBehaviour
     {
         List<GameObject> activeWalls = new List<GameObject>();
 
-        if (plusX.active) activeWalls.Add(torchPlusX);
-        if (minX.active) activeWalls.Add(torchMinX);
-        if (plusZ.active) activeWalls.Add(torchPlusZ);
-        if (minZ.active) activeWalls.Add(torchMinZ);
+        if (plusX.activeSelf) activeWalls.Add(torchPlusX);
+        if (minX.activeSelf) activeWalls.Add(torchMinX);
+        if (plusZ.activeSelf) activeWalls.Add(torchPlusZ);
+        if (minZ.activeSelf) activeWalls.Add(torchMinZ);
 
         foreach (GameObject torch in activeWalls)
         {

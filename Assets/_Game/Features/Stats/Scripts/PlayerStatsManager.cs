@@ -1,17 +1,12 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerStatsManager : MonoBehaviour
 {
     private PlayerStatsData statsData;
 
     [SerializeField, Min(0f)] private float staminaRecoveryRate = 1.5f;
-
-    [SerializeField] private Image healthFill;
-    [SerializeField] private Image staminaFill;
-    [SerializeField] private Image manaFill;
 
     private Animator BloodyScreenAnim;
     private bool isUsingStamina;
@@ -34,20 +29,13 @@ public class PlayerStatsManager : MonoBehaviour
     // A new scene changes the view, not the live player session.
     public void GetNewComponents()
     {
-        BindHUD(GameObject.Find("HeartFill")?.GetComponent<Image>(),
-            GameObject.Find("StaminaFill")?.GetComponent<Image>(),
-            GameObject.Find("ManaFill")?.GetComponent<Image>(),
-            GameObject.Find("DeathScreen")?.GetComponent<Animator>());
+        BindHUD(GameObject.Find("DeathScreen")?.GetComponent<Animator>());
     }
 
-    public void BindHUD(Image health, Image stamina, Image mana, Animator deathScreen)
+    public void BindHUD(Animator deathScreen)
     {
-        healthFill = health;
-        staminaFill = stamina;
-        manaFill = mana;
         BloodyScreenAnim = deathScreen;
         EnsureStatsInitialized();
-        UpdateAllBars();
         if (statsData.currentHealth <= 0f)
             PlayerDeath();
     }
@@ -64,14 +52,6 @@ public class PlayerStatsManager : MonoBehaviour
         statsData.currentMana = statsData.maxMana;
         isUsingStamina = false;
         PlayerModeController.ForPlayer(GetComponent<PlayerController>())?.ResetToGameplay();
-        UpdateAllBars();
-    }
-
-    private void UpdateAllBars()
-    {
-        UpdateHealthBar();
-        UpdateStaminaBar();
-        UpdateManaBar();
     }
 
     #region Core Stats
@@ -116,7 +96,6 @@ public class PlayerStatsManager : MonoBehaviour
     public void DamagePlayer(float damageAmount)
     {
         statsData.currentHealth = Mathf.Max(0, statsData.currentHealth - damageAmount);
-        UpdateHealthBar();
         if (statsData.currentHealth == 0)
         {
             PlayerDeath();
@@ -126,20 +105,12 @@ public class PlayerStatsManager : MonoBehaviour
     public void HealPlayer(int healAmount)
     {
         statsData.currentHealth = Mathf.Min(statsData.maxHealth, statsData.currentHealth + healAmount);
-        UpdateHealthBar();
     }
 
     private void IncreaseHealthStat()
     {
         statsData.maxHealth += statsData.lvl / 10f;
         statsData.currentHealth = statsData.maxHealth;
-        UpdateHealthBar();
-    }
-
-    private void UpdateHealthBar()
-    {
-        if (healthFill != null)
-            healthFill.fillAmount = (float)statsData.currentHealth / statsData.maxHealth;
     }
     #endregion
 
@@ -151,7 +122,6 @@ public class PlayerStatsManager : MonoBehaviour
         if (isUsingStamina && statsData.currentStamina > 0)
         {
             statsData.currentStamina = Mathf.Max(0f, statsData.currentStamina - staminaAmount);
-            UpdateStaminaBar();
         }
     }
 
@@ -161,7 +131,6 @@ public class PlayerStatsManager : MonoBehaviour
         {
             statsData.currentStamina = Mathf.Min(statsData.maxStamina,
                 statsData.currentStamina + staminaRecoveryRate * Time.deltaTime);
-            UpdateStaminaBar();
         }
     }
 
@@ -170,13 +139,6 @@ public class PlayerStatsManager : MonoBehaviour
         float increase = Mathf.RoundToInt(statsData.lvl * 1.35f) / 10f;
         statsData.maxStamina += increase;
         statsData.currentStamina = statsData.maxStamina;
-        UpdateStaminaBar();
-    }
-
-    private void UpdateStaminaBar()
-    {
-        if (staminaFill != null)
-            staminaFill.fillAmount = statsData.currentStamina / statsData.maxStamina;
     }
 
     public float GetStamina() => statsData.currentStamina;
@@ -189,7 +151,6 @@ public class PlayerStatsManager : MonoBehaviour
         if (statsData.currentMana >= manaAmount)
         {
             statsData.currentMana -= manaAmount;
-            UpdateManaBar();
             return true;
         }
         return false;
@@ -200,13 +161,6 @@ public class PlayerStatsManager : MonoBehaviour
         float increase = Mathf.RoundToInt(statsData.lvl * 0.35f) / 20f;
         statsData.maxMana += increase;
         statsData.currentMana = statsData.maxMana;
-        UpdateManaBar();
-    }
-
-    private void UpdateManaBar()
-    {
-        if (manaFill != null)
-            manaFill.fillAmount = (float)statsData.currentMana / statsData.maxMana;
     }
     #endregion
 
@@ -250,7 +204,6 @@ public class PlayerStatsManager : MonoBehaviour
         statsData = data ?? new PlayerStatsData();
         MigrateResourceScale();
         isUsingStamina = false;
-        UpdateAllBars();
     }
 
     private void MigrateResourceScale()

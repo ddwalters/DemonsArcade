@@ -93,7 +93,8 @@ public class KingSlimeClone : MonoBehaviour
     private void AvoidOtherSlimes()
     {
         // Find all other slimes in the scene
-        KingSlimeClone[] allSlimes = FindObjectsOfType<KingSlimeClone>();
+        KingSlimeClone[] allSlimes = FindObjectsByType<KingSlimeClone>();
+        System.Array.Sort(allSlimes, (left, right) => left.GetEntityId().CompareTo(right.GetEntityId()));
 
         foreach (var slime in allSlimes)
         {

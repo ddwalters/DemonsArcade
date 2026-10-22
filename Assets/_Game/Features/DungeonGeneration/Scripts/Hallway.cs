@@ -38,22 +38,22 @@ public class Hallway : MonoBehaviour
 
     public void placeTorches()
     {
-        if (plusX.active)
+        if (plusX.activeSelf)
         {
             bool rand = Random.value < 0.5f; // 65% chance
             torchPlusX.SetActive(rand);
         }
-        if (minX.active)
+        if (minX.activeSelf)
         {
             bool rand = Random.value < 0.5f; // 65% chance
             torchMinX.SetActive(rand);
         }
-        if (plusZ.active)
+        if (plusZ.activeSelf)
         {
             bool rand = Random.value < 0.5f; // 65% chance
             torchPlusZ.SetActive(rand);
         }
-        if (minZ.active)
+        if (minZ.activeSelf)
         {
             bool rand = Random.value < 0.5f; // 65% chance
             torchMinZ.SetActive(rand);

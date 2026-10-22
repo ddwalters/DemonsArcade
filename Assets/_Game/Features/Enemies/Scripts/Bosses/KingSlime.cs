@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.Serialization;
 using UnityEngine;
 
 public class KingSlime : MonoBehaviour
@@ -57,7 +58,8 @@ public class KingSlime : MonoBehaviour
     [Header("Components")]
     public GameObject Player;
     private PlayerStatsManager playerStats;
-    public BoxCollider collider;
+    [FormerlySerializedAs("collider")]
+    public BoxCollider boxCollider;
     [SerializeField] Slider mainSlider;
     [SerializeField] Animator sliderAnim;
     [SerializeField] bool hasMultipleBars;

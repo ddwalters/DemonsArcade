@@ -45,7 +45,7 @@ public class InventoryController : MonoBehaviour
         if (mode == null || (mode.Mode != PlayerMode.Inventory && mode.Mode != PlayerMode.Looting))
             return;
 
-        if (Input.GetKeyDown(KeyCode.Mouse0) && inventory.gridOnMouse != null)
+        if (MenuInput.SelectPressed && inventory.gridOnMouse != null)
         {
             if (inventory.selectedItem != null)
                 inventory.PlaceSelectedItem();
@@ -56,11 +56,11 @@ public class InventoryController : MonoBehaviour
         if (inventory.selectedItem == null)
             return;
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (MenuInput.RotateItemPressed)
             inventory.selectedItem.Rotate();
         var size = inventory.selectedItem.Footprint;
         float scale = inventory.selectedItem.rectTransform.lossyScale.x;
-        inventory.selectedItem.rectTransform.position = Input.mousePosition + new Vector3(
+        inventory.selectedItem.rectTransform.position = (Vector3)MenuInput.PointerPosition + new Vector3(
             (size.x - 1) * InventorySettings.slotSize.x * scale / 2f,
             -(size.y - 1) * InventorySettings.slotSize.y * scale / 2f, 0);
     }

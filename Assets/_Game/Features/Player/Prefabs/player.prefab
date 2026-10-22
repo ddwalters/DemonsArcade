@@ -751,12 +751,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 468710559fd99d04c85ed3a71c4ba3b0, type: 3}
   m_Name:
   m_EditorClassIdentifier:
-  uiPanel: {fileID: 0}
-  rayDistance: 5
-  raySphereRadius: 0.3
+  interactionDistance: 2
+  interactionHalfAngle: 60
   interactableLayer:
     serializedVersion: 2
     m_Bits: 128
+  headYawLimit: 35
+  headPitchLimit: 20
+  headLookWeight: 0.55
+  headLookSmoothness: 8
 --- !u!114 &6467257779549542023
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -770,9 +773,6 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier:
   staminaRecoveryRate: 1.5
-  healthFill: {fileID: 0}
-  staminaFill: {fileID: 0}
-  manaFill: {fileID: 0}
 --- !u!143 &2996050365954852486
 CharacterController:
   m_ObjectHideFlags: 0
@@ -810,7 +810,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fc830973e67751c4ab207d8ececaf238, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterMotor
-  animator: {fileID: 2460893685413801240}
   walkSpeed: 2.2
   sprintSpeed: 5
   acceleration: 30
@@ -832,6 +831,8 @@ MonoBehaviour:
   jumpAnimationFallGrace: 0.12
   groundProbeContactTolerance: 0.02
   fallPresentationGrace: 0.07
+  fullFallAnimationTime: 1
+  jumpApexPoseWeight: 0.65
   jumpContactPhaseLead: 0.002
   normalJumpPhases:
     takeoff: 0.28070176

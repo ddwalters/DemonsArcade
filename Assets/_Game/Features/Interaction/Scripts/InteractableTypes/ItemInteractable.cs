@@ -4,6 +4,30 @@ public class ItemInteractable : InteractableBase
 {
     [SerializeField] ItemData itemData;
 
+    public override string DisplayName
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(ConfiguredDisplayName))
+                return ConfiguredDisplayName.Trim();
+
+            string itemName = itemData != null && itemData.itemStats != null
+                ? itemData.itemStats.GetItemName()
+                : null;
+            if (!string.IsNullOrWhiteSpace(itemName))
+                return itemName.Trim();
+
+            if (string.IsNullOrWhiteSpace(TooltipMessage))
+                return base.DisplayName;
+
+            const string pickupPrefix = "Pick up ";
+            string tooltipName = TooltipMessage.Trim();
+            return tooltipName.StartsWith(pickupPrefix, System.StringComparison.OrdinalIgnoreCase)
+                ? tooltipName.Substring(pickupPrefix.Length).Trim()
+                : tooltipName;
+        }
+    }
+
     Inventory inventory;
 
     private void Awake()

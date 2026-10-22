@@ -154,6 +154,15 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Interact"",
+                    ""type"": ""Button"",
+                    ""id"": ""8022c024-7caa-43c9-9da1-871c585e3022"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -484,6 +493,138 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": ""Gamepad"",
                     ""action"": ""Basic Attack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a4d86cd2-17f7-412e-b2ab-84792a772fc1"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard & Mouse"",
+                    ""action"": ""Interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8a491bd8-4da7-463d-9452-4c5654bddd07"",
+                    ""path"": ""<Gamepad>/buttonWest"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
+            ""name"": ""MenuActionMap"",
+            ""id"": ""42dd15d1-e434-415e-ab56-a95acb671492"",
+            ""actions"": [
+                {
+                    ""name"": ""Pause"",
+                    ""type"": ""Button"",
+                    ""id"": ""f6484cdb-6f85-4327-b6d9-ef6bbe58c7ab"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Inventory"",
+                    ""type"": ""Button"",
+                    ""id"": ""9fe5fcc8-274c-4210-8686-d941e4de235b"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Select"",
+                    ""type"": ""Button"",
+                    ""id"": ""3a572505-bdef-414a-ad87-609666a2ceef"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RotateItem"",
+                    ""type"": ""Button"",
+                    ""id"": ""7664c82e-de5e-48e3-96c4-788f04ba1e63"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""55abf439-401d-488f-a5d7-607ee25f4340"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard & Mouse"",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""dd4236ad-e482-4a96-b57c-54c6c2b1d790"",
+                    ""path"": ""<Gamepad>/start"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Pause"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""51ff96bb-7be5-47b9-a138-55b8dfc6f966"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard & Mouse"",
+                    ""action"": ""Inventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""47cc198f-ff98-40a6-a8d2-86654ac36620"",
+                    ""path"": ""<Gamepad>/select"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Gamepad"",
+                    ""action"": ""Inventory"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""798c2126-5480-4da4-a854-228726c181dc"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard & Mouse"",
+                    ""action"": ""Select"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1a75522b-e121-48af-b7ab-77c779d82f6c"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": ""Keyboard & Mouse"",
+                    ""action"": ""RotateItem"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1045,6 +1186,13 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
         m_BasicActionMap_BasicAttack = m_BasicActionMap.FindAction("Basic Attack", throwIfNotFound: true);
         m_BasicActionMap_HeavyAttack = m_BasicActionMap.FindAction("Heavy Attack", throwIfNotFound: true);
         m_BasicActionMap_SkillSelector = m_BasicActionMap.FindAction("Skill Selector", throwIfNotFound: true);
+        m_BasicActionMap_Interact = m_BasicActionMap.FindAction("Interact", throwIfNotFound: true);
+        // MenuActionMap
+        m_MenuActionMap = asset.FindActionMap("MenuActionMap", throwIfNotFound: true);
+        m_MenuActionMap_Pause = m_MenuActionMap.FindAction("Pause", throwIfNotFound: true);
+        m_MenuActionMap_Inventory = m_MenuActionMap.FindAction("Inventory", throwIfNotFound: true);
+        m_MenuActionMap_Select = m_MenuActionMap.FindAction("Select", throwIfNotFound: true);
+        m_MenuActionMap_RotateItem = m_MenuActionMap.FindAction("RotateItem", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1062,6 +1210,7 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
     ~@NewControls()
     {
         UnityEngine.Debug.Assert(!m_BasicActionMap.enabled, "This will cause a leak and performance issues, NewControls.BasicActionMap.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_MenuActionMap.enabled, "This will cause a leak and performance issues, NewControls.MenuActionMap.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_UI.enabled, "This will cause a leak and performance issues, NewControls.UI.Disable() has not been called.");
     }
 
@@ -1145,6 +1294,7 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_BasicActionMap_BasicAttack;
     private readonly InputAction m_BasicActionMap_HeavyAttack;
     private readonly InputAction m_BasicActionMap_SkillSelector;
+    private readonly InputAction m_BasicActionMap_Interact;
     /// <summary>
     /// Provides access to input actions defined in input action map "BasicActionMap".
     /// </summary>
@@ -1184,6 +1334,10 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "BasicActionMap/SkillSelector".
         /// </summary>
         public InputAction @SkillSelector => m_Wrapper.m_BasicActionMap_SkillSelector;
+        /// <summary>
+        /// Provides access to the underlying input action "BasicActionMap/Interact".
+        /// </summary>
+        public InputAction @Interact => m_Wrapper.m_BasicActionMap_Interact;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1231,6 +1385,9 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
             @SkillSelector.started += instance.OnSkillSelector;
             @SkillSelector.performed += instance.OnSkillSelector;
             @SkillSelector.canceled += instance.OnSkillSelector;
+            @Interact.started += instance.OnInteract;
+            @Interact.performed += instance.OnInteract;
+            @Interact.canceled += instance.OnInteract;
         }
 
         /// <summary>
@@ -1263,6 +1420,9 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
             @SkillSelector.started -= instance.OnSkillSelector;
             @SkillSelector.performed -= instance.OnSkillSelector;
             @SkillSelector.canceled -= instance.OnSkillSelector;
+            @Interact.started -= instance.OnInteract;
+            @Interact.performed -= instance.OnInteract;
+            @Interact.canceled -= instance.OnInteract;
         }
 
         /// <summary>
@@ -1296,6 +1456,135 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="BasicActionMapActions" /> instance referencing this action map.
     /// </summary>
     public BasicActionMapActions @BasicActionMap => new BasicActionMapActions(this);
+
+    // MenuActionMap
+    private readonly InputActionMap m_MenuActionMap;
+    private List<IMenuActionMapActions> m_MenuActionMapActionsCallbackInterfaces = new List<IMenuActionMapActions>();
+    private readonly InputAction m_MenuActionMap_Pause;
+    private readonly InputAction m_MenuActionMap_Inventory;
+    private readonly InputAction m_MenuActionMap_Select;
+    private readonly InputAction m_MenuActionMap_RotateItem;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "MenuActionMap".
+    /// </summary>
+    public struct MenuActionMapActions
+    {
+        private @NewControls m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public MenuActionMapActions(@NewControls wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "MenuActionMap/Pause".
+        /// </summary>
+        public InputAction @Pause => m_Wrapper.m_MenuActionMap_Pause;
+        /// <summary>
+        /// Provides access to the underlying input action "MenuActionMap/Inventory".
+        /// </summary>
+        public InputAction @Inventory => m_Wrapper.m_MenuActionMap_Inventory;
+        /// <summary>
+        /// Provides access to the underlying input action "MenuActionMap/Select".
+        /// </summary>
+        public InputAction @Select => m_Wrapper.m_MenuActionMap_Select;
+        /// <summary>
+        /// Provides access to the underlying input action "MenuActionMap/RotateItem".
+        /// </summary>
+        public InputAction @RotateItem => m_Wrapper.m_MenuActionMap_RotateItem;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_MenuActionMap; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="MenuActionMapActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(MenuActionMapActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="MenuActionMapActions" />
+        public void AddCallbacks(IMenuActionMapActions instance)
+        {
+            if (instance == null || m_Wrapper.m_MenuActionMapActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_MenuActionMapActionsCallbackInterfaces.Add(instance);
+            @Pause.started += instance.OnPause;
+            @Pause.performed += instance.OnPause;
+            @Pause.canceled += instance.OnPause;
+            @Inventory.started += instance.OnInventory;
+            @Inventory.performed += instance.OnInventory;
+            @Inventory.canceled += instance.OnInventory;
+            @Select.started += instance.OnSelect;
+            @Select.performed += instance.OnSelect;
+            @Select.canceled += instance.OnSelect;
+            @RotateItem.started += instance.OnRotateItem;
+            @RotateItem.performed += instance.OnRotateItem;
+            @RotateItem.canceled += instance.OnRotateItem;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="MenuActionMapActions" />
+        private void UnregisterCallbacks(IMenuActionMapActions instance)
+        {
+            @Pause.started -= instance.OnPause;
+            @Pause.performed -= instance.OnPause;
+            @Pause.canceled -= instance.OnPause;
+            @Inventory.started -= instance.OnInventory;
+            @Inventory.performed -= instance.OnInventory;
+            @Inventory.canceled -= instance.OnInventory;
+            @Select.started -= instance.OnSelect;
+            @Select.performed -= instance.OnSelect;
+            @Select.canceled -= instance.OnSelect;
+            @RotateItem.started -= instance.OnRotateItem;
+            @RotateItem.performed -= instance.OnRotateItem;
+            @RotateItem.canceled -= instance.OnRotateItem;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="MenuActionMapActions.UnregisterCallbacks(IMenuActionMapActions)" />.
+        /// </summary>
+        /// <seealso cref="MenuActionMapActions.UnregisterCallbacks(IMenuActionMapActions)" />
+        public void RemoveCallbacks(IMenuActionMapActions instance)
+        {
+            if (m_Wrapper.m_MenuActionMapActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="MenuActionMapActions.AddCallbacks(IMenuActionMapActions)" />
+        /// <seealso cref="MenuActionMapActions.RemoveCallbacks(IMenuActionMapActions)" />
+        /// <seealso cref="MenuActionMapActions.UnregisterCallbacks(IMenuActionMapActions)" />
+        public void SetCallbacks(IMenuActionMapActions instance)
+        {
+            foreach (var item in m_Wrapper.m_MenuActionMapActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_MenuActionMapActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="MenuActionMapActions" /> instance referencing this action map.
+    /// </summary>
+    public MenuActionMapActions @MenuActionMap => new MenuActionMapActions(this);
 
     // UI
     private readonly InputActionMap m_UI;
@@ -1573,6 +1862,49 @@ public partial class @NewControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSkillSelector(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Interact" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnInteract(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "MenuActionMap" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="MenuActionMapActions.AddCallbacks(IMenuActionMapActions)" />
+    /// <seealso cref="MenuActionMapActions.RemoveCallbacks(IMenuActionMapActions)" />
+    public interface IMenuActionMapActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "Pause" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnPause(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Inventory" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnInventory(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Select" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSelect(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "RotateItem" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnRotateItem(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

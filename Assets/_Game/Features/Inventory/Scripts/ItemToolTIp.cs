@@ -21,7 +21,7 @@ public class ItemToolTip : MonoBehaviour
             parentCanvasRectTransform.sizeDelta.x / Screen.width,
             parentCanvasRectTransform.sizeDelta.y / Screen.height);
 
-        GetComponent<RectTransform>().anchoredPosition = Input.mousePosition * mergedFactors;
+        GetComponent<RectTransform>().anchoredPosition = MenuInput.PointerPosition * mergedFactors;
     }
 
     public void ShowToolTip(string itemName, string itemStatsDescription, Color BorderColor)

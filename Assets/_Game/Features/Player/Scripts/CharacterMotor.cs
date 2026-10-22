@@ -5,7 +5,7 @@ using UnityEngine;
 public class CharacterMotor : MonoBehaviour
 {
     [Header("Ground movement")]
-    [SerializeField] private Animator animator;
+    private Animator animator;
     [SerializeField, Min(0f)] private float walkSpeed = 2.2f;
     [SerializeField, Min(0f)] private float sprintSpeed = 5f;
     [SerializeField, Min(0f)] private float acceleration = 30f;
@@ -29,6 +29,8 @@ public class CharacterMotor : MonoBehaviour
     [SerializeField, Min(0f)] private float jumpAnimationFallGrace = 0.12f;
     [SerializeField, Min(0f)] private float groundProbeContactTolerance = 0.02f;
     [SerializeField, Min(0f)] private float fallPresentationGrace = 0.07f;
+    [SerializeField, Range(0f, 1f)] private float jumpApexPoseWeight = 0.65f;
+    [SerializeField, Min(0.01f)] private float fullFallAnimationTime = 1f;
     [SerializeField, Range(0f, 0.05f)] private float jumpContactPhaseLead = 0.002f;
 
     [Serializable]
@@ -63,7 +65,10 @@ public class CharacterMotor : MonoBehaviour
     private static readonly int Jumping = Animator.StringToHash("Jumping");
     private static readonly int SprintJump = Animator.StringToHash("SprintJump");
     private static readonly int JumpTime = Animator.StringToHash("JumpTime");
+    private static readonly int JumpPoseWeight = Animator.StringToHash("JumpPoseWeight");
     private static readonly int LandingActive = Animator.StringToHash("LandingActive");
+    private static readonly int FallAmount = Animator.StringToHash("FallAmount");
+    private const float MinimumFallAnimationSpeed = 0.15f;
 
     private CharacterController controller;
     private float animationGait;
@@ -81,6 +86,8 @@ public class CharacterMotor : MonoBehaviour
     private float landingRecoveryElapsed;
     private float landingRecoveryDuration;
     private float airbornePresentationElapsed;
+    private float fallAnimationElapsed;
+    private float fallAmount;
     private bool jumpAnimationActive;
     private bool landingAnimationActive;
     private bool sprintJumpAnimation;
@@ -95,8 +102,7 @@ public class CharacterMotor : MonoBehaviour
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
-        if (animator == null)
-            animator = GetComponentInChildren<Animator>();
+        animator = GetComponentInChildren<Animator>();
         if (animator != null)
             animator.applyRootMotion = false;
     }
@@ -242,6 +248,9 @@ public class CharacterMotor : MonoBehaviour
             groundNormal = Vector3.up;
         }
 
+        float actualDownwardSpeed = Mathf.Max(0f, -actualDisplacement.y / deltaTime);
+        UpdateFallAmount(actualDownwardSpeed, acceptedJumpThisTick, collisions, deltaTime);
+
         bool landedThisTick = hasInitializedGroundState && !previouslyGrounded && IsGrounded;
         bool meaningfulLanding = jumpAnimationActive || airbornePresentationElapsed >= fallPresentationGrace;
         bool beganLandingThisTick = false;
@@ -336,17 +345,81 @@ public class CharacterMotor : MonoBehaviour
         const float originLift = 0.05f;
         Vector3 origin = capsuleBottom + Vector3.up * originLift;
         float distance = groundProbeDistance + 0.1f;
-        if (!Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit,
-                distance, groundMask, QueryTriggerInteraction.Ignore))
-            return false;
+        if (Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit,
+                distance, groundMask, QueryTriggerInteraction.Ignore) &&
+            IsWalkableGroundHit(hit))
+        {
+            // The cast uses a slightly smaller sphere than the controller. Correct its vertical
+            // clearance for the probe lift and slope, then allow the CharacterController's skin gap.
+            float verticalGap = hit.distance - originLift -
+                (controller.radius - radius) / Mathf.Max(0.01f, hit.normal.y);
+            float contactAllowance = groundProbeContactTolerance +
+                controller.skinWidth / Mathf.Max(0.01f, hit.normal.y);
+            if (verticalGap <= contactAllowance)
+            {
+                normal = hit.normal;
+                return true;
+            }
+        }
 
-        if (Vector3.Angle(hit.normal, Vector3.up) > controller.slopeLimit)
-            return false;
+        return TryGetGroundFromSupportRays(capsuleBottom, originLift, out normal);
+    }
 
-        // The cast uses a slightly smaller sphere than the controller. Correct its vertical
-        // clearance for the probe lift and slope, then allow the CharacterController's skin gap.
-        float verticalGap = hit.distance - originLift -
-            (controller.radius - radius) / Mathf.Max(0.01f, hit.normal.y);
+    private bool IsWalkableGroundHit(RaycastHit hit)
+    {
+        return Vector3.Angle(hit.normal, Vector3.up) <= controller.slopeLimit;
+    }
+
+    private bool TryGetGroundFromSupportRays(Vector3 capsuleBottom, float originLift,
+        out Vector3 normal)
+    {
+        normal = Vector3.up;
+        float radius = controller.radius;
+        float offsetDistance = radius * 0.6f;
+        Vector3 rightDirection = Vector3.ProjectOnPlane(transform.right, Vector3.up).normalized;
+        Vector3 forwardDirection = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+        Vector3 rightOffset = rightDirection * offsetDistance;
+        Vector3 forwardOffset = forwardDirection * offsetDistance;
+
+        float minimumNormalY = Mathf.Max(0.01f,
+            Mathf.Cos(controller.slopeLimit * Mathf.Deg2Rad));
+        float maximumContactAllowance = groundProbeContactTolerance +
+            controller.skinWidth / minimumNormalY;
+        // Keep the ray search within the same skin/contact band used by the sphere probe.
+        float rayOriginY = capsuleBottom.y - radius + originLift + maximumContactAllowance;
+        float rayDistance = originLift + maximumContactAllowance * 2f;
+
+        if (TryGetGroundFromSupportRay(capsuleBottom, Vector3.zero, radius, rayOriginY,
+                rayDistance, out normal) ||
+            TryGetGroundFromSupportRay(capsuleBottom, rightOffset, radius, rayOriginY,
+                rayDistance, out normal) ||
+            TryGetGroundFromSupportRay(capsuleBottom, -rightOffset, radius, rayOriginY,
+                rayDistance, out normal) ||
+            TryGetGroundFromSupportRay(capsuleBottom, forwardOffset, radius, rayOriginY,
+                rayDistance, out normal) ||
+            TryGetGroundFromSupportRay(capsuleBottom, -forwardOffset, radius, rayOriginY,
+                rayDistance, out normal))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool TryGetGroundFromSupportRay(Vector3 capsuleBottom, Vector3 offset, float radius,
+        float rayOriginY, float rayDistance, out Vector3 normal)
+    {
+        normal = Vector3.up;
+        Vector3 origin = capsuleBottom + Vector3.ProjectOnPlane(offset, Vector3.up);
+        origin.y = rayOriginY;
+        if (!Physics.Raycast(origin, Vector3.down, out RaycastHit hit, rayDistance,
+                groundMask, QueryTriggerInteraction.Ignore) || !IsWalkableGroundHit(hit))
+        {
+            return false;
+        }
+
+        float footLevel = capsuleBottom.y - radius;
+        float verticalGap = footLevel - hit.point.y;
         float contactAllowance = groundProbeContactTolerance +
             controller.skinWidth / Mathf.Max(0.01f, hit.normal.y);
         if (verticalGap > contactAllowance)
@@ -354,6 +427,28 @@ public class CharacterMotor : MonoBehaviour
 
         normal = hit.normal;
         return true;
+    }
+
+    private void UpdateFallAmount(float actualDownwardSpeed, bool acceptedJumpThisTick,
+        CollisionFlags collisions, float deltaTime)
+    {
+        bool belowContactHoldingCharacter =
+            (collisions & CollisionFlags.Below) != 0 &&
+            actualDownwardSpeed <= MinimumFallAnimationSpeed;
+        bool jumpGroundingIsProtected = verticalVelocity > 0f || jumpGroundingGrace > 0f;
+
+        if (IsGrounded || belowContactHoldingCharacter || acceptedJumpThisTick ||
+            jumpGroundingIsProtected || actualDownwardSpeed <= MinimumFallAnimationSpeed)
+        {
+            fallAnimationElapsed = 0f;
+        }
+        else
+        {
+            fallAnimationElapsed += deltaTime;
+        }
+
+        float fullFallTime = Mathf.Max(0.01f, fullFallAnimationTime);
+        fallAmount = Mathf.Clamp01(fallAnimationElapsed / fullFallTime);
     }
 
     private void BeginLandingRecovery(bool hasMovementInput)
@@ -453,11 +548,18 @@ public class CharacterMotor : MonoBehaviour
         animator.SetBool(Jumping, jumpAnimationActive);
         animator.SetBool(SprintJump, sprintJumpAnimation);
         animator.SetFloat(JumpTime, jumpAnimationTime);
+        float jumpPoseWeight = jumpAnimationActive
+            ? Mathf.Lerp(jumpApexPoseWeight, 1f, Mathf.Clamp01(
+                Mathf.Abs(verticalVelocity) / Mathf.Max(0.01f, jumpAnimationLaunchSpeed)))
+            : 1f;
+        animator.SetFloat(JumpPoseWeight, jumpPoseWeight);
         animator.SetBool(LandingActive, landingAnimationActive);
+        animator.SetFloat(FallAmount, fallAmount);
     }
 
     public void AddImpulse(Vector3 velocityChange)
     {
+        ResetFallAnimation();
         externalVelocity += new Vector3(velocityChange.x, 0f, velocityChange.z);
         verticalVelocity += velocityChange.y;
         if (velocityChange.y > 0f)
@@ -490,6 +592,7 @@ public class CharacterMotor : MonoBehaviour
         landingRecoveryElapsed = 0f;
         landingRecoveryDuration = 0f;
         airbornePresentationElapsed = 0f;
+        ResetFallAnimation();
         jumpAnimationActive = false;
         landingAnimationActive = false;
         sprintJumpAnimation = false;
@@ -505,8 +608,18 @@ public class CharacterMotor : MonoBehaviour
             animator.SetBool(Jumping, false);
             animator.SetBool(SprintJump, false);
             animator.SetFloat(JumpTime, 0f);
+            animator.SetFloat(JumpPoseWeight, 1f);
             animator.SetBool(LandingActive, false);
         }
+    }
+
+    private void ResetFallAnimation()
+    {
+        fallAnimationElapsed = 0f;
+        fallAmount = 0f;
+
+        if (animator != null && animator.isActiveAndEnabled)
+            animator.SetFloat(FallAmount, 0f);
     }
 
     public void Teleport(Vector3 position, Quaternion rotation)

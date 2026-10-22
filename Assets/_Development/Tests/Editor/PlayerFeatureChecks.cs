@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 // Edit-mode regression checks for the gameplay boundaries; no scene or save-file changes.
@@ -143,19 +142,10 @@ public static class PlayerFeatureChecks
         var data = new PlayerStatsData { currentHealth = 37f, currentStamina = 22f, currentMana = 13f, currentXP = 123 };
         Set(stats, "statsData", data);
 
-        Image Bar()
-        {
-            var child = new GameObject("Bar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            child.transform.SetParent(fixture.transform);
-            return child.GetComponent<Image>();
-        }
-
-        Image health = Bar(), stamina = Bar(), mana = Bar();
-        stats.BindHUD(health, stamina, mana, null);
-        stats.BindHUD(health, stamina, mana, null);
+        stats.BindHUD(null);
+        stats.BindHUD(null);
         Require(ReferenceEquals(stats.GetPlayerStats(), data) && data.currentXP == 123, "HUD binding/getter preserve the live session object and XP.");
         Require(data.currentHealth == 37f && data.currentStamina == 22f && data.currentMana == 13f, "HUD binding does not refill resources.");
-        Require(Mathf.Approximately(health.fillAmount, .37f) && Mathf.Approximately(stamina.fillAmount, .22f) && Mathf.Approximately(mana.fillAmount, .13f), "Rebound bars reflect current values.");
         stats.SetStaminaUse(true);
         stats.UseStamina(1000f);
         Call(stats, "RegenerateStamina");

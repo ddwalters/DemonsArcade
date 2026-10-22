@@ -224,7 +224,7 @@ public class Inventory : MonoBehaviour
             return Vector2Int.zero;
 
         RectTransformUtility.ScreenPointToLocalPointInRectangle(gridOnMouse.rectTransform,
-            Input.mousePosition, canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera,
+            MenuInput.PointerPosition, canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera,
             out Vector2 local);
 
         return new Vector2Int(Mathf.FloorToInt(local.x / InventorySettings.slotSize.x),

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -15,18 +16,25 @@ public class UIController : MonoBehaviour
     private PlayerModeController mode;
     private CanvasGroup menuGroup;
     private CanvasGroup startGroup;
+    private bool missingSaveManagerReported;
+    private readonly HashSet<string> reportedWarnings = new();
 
     private void Awake()
     {
         Current = this;
-        menuGroup = transform.Find("MenuCanvas").GetComponent<CanvasGroup>();
+        ResolveMissingReferences();
+
+        GameObject menuCanvas = FindChild("MenuCanvas");
+        GameObject interactionRoot = menuCanvas != null ? menuCanvas : gameObject;
+        menuGroup = GetOrAddCanvasGroup(interactionRoot);
         if (startScreen != null)
-            startGroup = startScreen.GetComponent<CanvasGroup>() ?? startScreen.AddComponent<CanvasGroup>();
+            startGroup = GetOrAddCanvasGroup(startScreen);
     }
 
     private void Start()
     {
-        settingsScreen.ApplySavedSettings();
+        if (settingsScreen != null)
+            settingsScreen.ApplySavedSettings();
         mode = FindAnyObjectByType<PlayerModeController>();
         if (mode != null)
         {
@@ -39,12 +47,23 @@ public class UIController : MonoBehaviour
 
     private void Update()
     {
-        bool loading = SaveManager.Instance.IsLoading;
-        loadingScreen.SetActive(loading);
-        menuGroup.interactable = !confirmation.IsOpen && !loading;
+        SaveManager saveManager = SaveManager.Instance;
+        bool loading = saveManager == null || saveManager.IsLoading;
+        if (saveManager == null && !missingSaveManagerReported)
+        {
+            Debug.LogError("UIController cannot enable menu actions because SaveManager is unavailable.", this);
+            missingSaveManagerReported = true;
+        }
+
+        if (loadingScreen != null)
+            loadingScreen.SetActive(loading);
+
+        bool confirmationOpen = confirmation != null && confirmation.IsOpen;
+        if (menuGroup != null)
+            menuGroup.interactable = !confirmationOpen && !loading;
         if (startGroup != null)
-            startGroup.interactable = !confirmation.IsOpen && !loading;
-        if (isStartMenu && Input.GetKeyDown(KeyCode.Escape))
+            startGroup.interactable = !confirmationOpen && !loading;
+        if (isStartMenu && MenuInput.PausePressed)
             Back();
     }
 
@@ -59,6 +78,12 @@ public class UIController : MonoBehaviour
 
     public void ShowSettings()
     {
+        if (settingsScreen == null)
+        {
+            WarnOnce("settings-screen", "Settings are unavailable because this UI has no SettingsScreen.");
+            return;
+        }
+
         HidePages();
         settingsScreen.gameObject.SetActive(true);
         SelectFirst(settingsScreen.gameObject);
@@ -69,6 +94,12 @@ public class UIController : MonoBehaviour
 
     private void ShowSaves(bool saving)
     {
+        if (saveLoadScreen == null)
+        {
+            WarnOnce("save-load-screen", "Save and load menus are unavailable because this UI has no SaveLoadScreen.");
+            return;
+        }
+
         HidePages();
         saveLoadScreen.Show(saving);
         SelectFirst(saveLoadScreen.gameObject);
@@ -76,10 +107,12 @@ public class UIController : MonoBehaviour
 
     public bool HandleEscape()
     {
-        if (SaveManager.Instance.IsLoading)
+        if (SaveManager.Instance == null || SaveManager.Instance.IsLoading)
             return true;
 
-        if (confirmation.IsOpen || settingsScreen.gameObject.activeSelf || saveLoadScreen.gameObject.activeSelf)
+        if ((confirmation != null && confirmation.IsOpen) ||
+            (settingsScreen != null && settingsScreen.gameObject.activeSelf) ||
+            (saveLoadScreen != null && saveLoadScreen.gameObject.activeSelf))
         {
             Back();
             return true;
@@ -90,7 +123,7 @@ public class UIController : MonoBehaviour
 
     public void Back()
     {
-        if (confirmation.IsOpen)
+        if (confirmation != null && confirmation.IsOpen)
         {
             confirmation.Cancel();
             return;
@@ -99,16 +132,45 @@ public class UIController : MonoBehaviour
         ShowRoot();
     }
 
-    public void Resume() => mode?.SetMode(PlayerMode.Gameplay);
-    public void NewGame() => SaveManager.Instance.NewGame();
-    public void MainMenu() => confirmation.Show("Return to the main menu?\nProgress since your last save will be lost.", SaveManager.Instance.MainMenu);
+    public void Resume()
+    {
+        if (mode != null)
+            mode.SetMode(PlayerMode.Gameplay);
+    }
+
+    public void NewGame()
+    {
+        SaveManager saveManager = RequireSaveManager();
+        if (saveManager != null)
+            saveManager.NewGame();
+    }
+
+    public void MainMenu()
+    {
+        SaveManager saveManager = RequireSaveManager();
+        if (saveManager == null)
+            return;
+
+        if (confirmation != null)
+            confirmation.Show("Return to the main menu?\nProgress since your last save will be lost.", saveManager.MainMenu);
+        else
+        {
+            WarnOnce("confirmation", "Confirmation dialog is missing; returning to the main menu without a prompt.");
+            saveManager.MainMenu();
+        }
+    }
+
     public void Quit() => Application.Quit();
 
     private void ApplyMode(PlayerMode next)
     {
-        confirmation.Cancel();
+        if (confirmation != null)
+            confirmation.Cancel();
         HidePages();
-        deathScreen.gameObject.SetActive(next == PlayerMode.Dead);
+        if (deathScreen != null)
+            deathScreen.gameObject.SetActive(next == PlayerMode.Dead);
+        else if (next == PlayerMode.Dead)
+            WarnOnce("death-screen", "Death UI is unavailable because this UI has no DeathScreen.");
         if (next == PlayerMode.Paused)
             ShowRoot();
     }
@@ -116,7 +178,13 @@ public class UIController : MonoBehaviour
     private void ShowRoot()
     {
         HidePages();
-        GameObject root = isStartMenu ? startScreen : pauseScreen;
+        GameObject root = isStartMenu ? (startScreen != null ? startScreen : pauseScreen) : pauseScreen;
+        if (root == null)
+        {
+            WarnOnce("root-screen", "The root menu is unavailable because this UI has no start or pause screen.");
+            return;
+        }
+
         root.SetActive(true);
         SelectFirst(root);
     }
@@ -128,8 +196,76 @@ public class UIController : MonoBehaviour
         if (startScreen != null)
             startScreen.SetActive(false);
 
-        settingsScreen.gameObject.SetActive(false);
-        saveLoadScreen.gameObject.SetActive(false);
+        if (settingsScreen != null)
+            settingsScreen.gameObject.SetActive(false);
+        if (saveLoadScreen != null)
+            saveLoadScreen.gameObject.SetActive(false);
+    }
+
+    private void ResolveMissingReferences()
+    {
+        if (pauseScreen == null)
+            pauseScreen = FindChild("PauseScreen");
+        if (startScreen == null)
+            startScreen = FindChild("StartScreen");
+        if (settingsScreen == null)
+            settingsScreen = FindNamedComponent<SettingsScreen>("SettingsScreen");
+        if (saveLoadScreen == null)
+            saveLoadScreen = FindNamedComponent<SaveLoadScreen>("SaveLoadScreen");
+        if (deathScreen == null)
+            deathScreen = FindNamedComponent<DeathScreen>("DeathScreen");
+        if (confirmation == null)
+            confirmation = GetComponentInChildren<ConfirmationDialog>(true);
+        if (loadingScreen == null)
+            loadingScreen = FindChild("LoadingScreen");
+    }
+
+    private static CanvasGroup GetOrAddCanvasGroup(GameObject target)
+    {
+        CanvasGroup group = target.GetComponent<CanvasGroup>();
+        if (group == null)
+            group = target.AddComponent<CanvasGroup>();
+
+        return group;
+    }
+
+    private GameObject FindChild(string childName)
+    {
+        foreach (Transform child in GetComponentsInChildren<Transform>(true))
+            if (child != transform && child.name == childName)
+                return child.gameObject;
+
+        return null;
+    }
+
+    private T FindNamedComponent<T>(string childName) where T : Component
+    {
+        GameObject child = FindChild(childName);
+        return child != null ? child.GetComponent<T>() : GetComponentInChildren<T>(true);
+    }
+
+    private SaveManager RequireSaveManager()
+    {
+        if (SaveManager.Instance != null)
+            return SaveManager.Instance;
+
+        ReportMissingSaveManager();
+        return null;
+    }
+
+    private void WarnOnce(string key, string message)
+    {
+        if (reportedWarnings.Add(key))
+            Debug.LogWarning(message, this);
+    }
+
+    private void ReportMissingSaveManager()
+    {
+        if (missingSaveManagerReported)
+            return;
+
+        Debug.LogError("UIController cannot enable save actions because SaveManager is unavailable.", this);
+        missingSaveManagerReported = true;
     }
 
     private static void SelectFirst(GameObject screen)

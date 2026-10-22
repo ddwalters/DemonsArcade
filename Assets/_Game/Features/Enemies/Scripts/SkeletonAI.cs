@@ -25,20 +25,9 @@ public class SkeletonAI : MonoBehaviour
     private bool attacking = false;
     private float nextTimeToAttack = 0f;
 
-    enum State
-    {
-        Idle,
-        walkingTo,
-        attacking,
-        waiting
-    }
-
-    State state;
-
     private void Awake()
     {
         target = GameObject.Find("player");
-        state = State.Idle;
         navMeshAgent = GetComponent<NavMeshAgent>();
         navMeshAgent.stoppingDistance = stoppingDistance;
 
@@ -67,7 +56,6 @@ public class SkeletonAI : MonoBehaviour
         else
         {
             navMeshAgent.destination = target.transform.position;
-            state = State.walkingTo;
         }
     }
 

@@ -15,6 +15,23 @@ public class InteractableBase : MonoBehaviour, IInteractable
     [SerializeField] private string tooltipMessage = "Interact";
     public string TooltipMessage => tooltipMessage;
 
+    [SerializeField] private string displayName;
+    protected string ConfiguredDisplayName => displayName;
+    public virtual string DisplayName
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(displayName))
+                return displayName.Trim();
+
+            const string cloneSuffix = "(Clone)";
+            string objectName = gameObject.name;
+            return objectName.EndsWith(cloneSuffix, System.StringComparison.Ordinal)
+                ? objectName.Substring(0, objectName.Length - cloneSuffix.Length).TrimEnd()
+                : objectName;
+        }
+    }
+
     public virtual void OnInteract() { }
 
     protected void SetInteractable(bool interactable) => isInteractable = interactable;
