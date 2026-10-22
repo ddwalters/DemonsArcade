@@ -5,10 +5,12 @@ public class CharacterMotor : MonoBehaviour
 {
     [Header("Ground movement")]
     [SerializeField] private Animator animator;
-    [SerializeField, Min(0.1f), Tooltip("Scales animation playback and grounded root-motion travel.")]
-    private float animationSpeedMultiplier = 1.3f;
-    [SerializeField, Min(0.01f)] private float movementBlendTime = 0.08f;
-    [SerializeField, Min(0.01f)] private float stoppingBlendTime = 0.08f;
+    [SerializeField, Min(0f)] private float walkSpeed = 2.2f;
+    [SerializeField, Min(0f)] private float sprintSpeed = 5f;
+    [SerializeField, Min(0f)] private float acceleration = 30f;
+    [SerializeField, Min(0f)] private float braking = 40f;
+    [SerializeField, Min(0f)] private float turnSpeed = 720f;
+    [SerializeField, Min(0.01f)] private float animationBlendTime = 0.08f;
     [SerializeField] private LayerMask groundMask = ~((1 << 9) | (1 << 5));
     [SerializeField, Min(0f)] private float groundProbeDistance = 0.15f;
 
@@ -17,155 +19,281 @@ public class CharacterMotor : MonoBehaviour
     [SerializeField, Min(0f)] private float jumpHeight = 1.1f;
     [SerializeField, Min(0f)] private float jumpBufferTime = 0.12f;
     [SerializeField, Min(0f)] private float coyoteTime = 0.1f;
-    [SerializeField, Min(0f)] private float airSpeed = 2.5f;
     [SerializeField, Min(0f)] private float airAcceleration = 4f;
     [SerializeField, Min(0f)] private float knockbackBraking = 8f;
 
     private static readonly int MoveX = Animator.StringToHash("MoveX");
     private static readonly int MoveY = Animator.StringToHash("MoveY");
     private static readonly int Grounded = Animator.StringToHash("Grounded");
+    private static readonly int Jumping = Animator.StringToHash("Jumping");
+    private static readonly int SprintJump = Animator.StringToHash("SprintJump");
+    private static readonly int VerticalVelocity = Animator.StringToHash("VerticalVelocity");
 
     private CharacterController controller;
     private Vector2 animationInput;
-    private Vector2 blendVelocity;
-    private Vector3 airVelocity;
+    private Vector3 planarVelocity;
     private Vector3 externalVelocity;
-    private Vector3 groundNormal = Vector3.up;
-    private Vector3? locomotionDirection;
     private float verticalVelocity;
-    private float lastGroundedTime = float.NegativeInfinity;
-    private float jumpRequestedTime = float.NegativeInfinity;
-    private float lastJumpTime = float.NegativeInfinity;
-    private bool movementAllowed;
-    private bool actionMovesWhenBlocked;
+    private float actualPlanarSpeed;
+    private float animationBlendVelocity;
+    private float coyoteTimeRemaining;
+    private float jumpRequestAge;
+    private float jumpGroundingGrace;
+    private bool jumpAnimationActive;
+    private bool sprintJumpAnimation;
+    private bool jumpRequested;
+    private bool foundWalkableGroundContact;
+    private Vector3 walkableGroundContactNormal = Vector3.up;
 
     public bool IsGrounded { get; private set; }
     public Vector2 AnimationInput => animationInput;
     public Animator Animator => animator;
-    public bool IsActionActive { get; private set; }
-
-    // An authored action keeps its root travel but owns the movement input until recovery.
-    public void SetActionMotion(bool active, bool allowWhenMovementBlocked = false)
-    {
-        IsActionActive = active;
-        actionMovesWhenBlocked = active && allowWhenMovementBlocked;
-        if (active)
-        {
-            animationInput = Vector2.zero;
-            blendVelocity = Vector2.zero;
-            jumpRequestedTime = float.NegativeInfinity;
-        }
-    }
+    public Vector3 PlanarVelocity => planarVelocity;
+    public float PlanarSpeed => planarVelocity.magnitude;
+    public float ActualPlanarSpeed => actualPlanarSpeed;
 
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
         if (animator != null)
-            animator.speed = animationSpeedMultiplier;
+            animator.applyRootMotion = false;
     }
 
-    public void RequestJump() => jumpRequestedTime = Time.time;
+    public void RequestJump()
+    {
+        jumpRequested = true;
+        jumpRequestAge = 0f;
+    }
 
-    // Input selects and blends motion. The animation supplies the actual ground displacement.
+    // The motor is the sole owner of player translation. Animators only read its state.
     public void Tick(Vector2 input, bool sprinting, bool allowsMovement, float deltaTime,
         Vector3? worldMovement = null)
     {
-        if (deltaTime <= 0f || !controller.enabled)
+        if (controller == null || deltaTime <= 0f)
             return;
 
-        movementAllowed = allowsMovement;
-        input = allowsMovement && !IsActionActive ? Vector2.ClampMagnitude(input, 1f) : Vector2.zero;
-        if (!worldMovement.HasValue)
-            locomotionDirection = null;
-        else if (worldMovement.Value.sqrMagnitude > 0.001f)
-            // Keep this direction while the gait blends to a stop after releasing input.
-            locomotionDirection = worldMovement.Value.normalized;
-        UpdateGrounding();
-
-        Vector2 target = input * (sprinting ? 2f : 1f);
-        float blendTime = target.sqrMagnitude < 0.001f ? stoppingBlendTime : movementBlendTime;
-        animationInput = Vector2.SmoothDamp(animationInput, target, ref blendVelocity,
-            blendTime, Mathf.Infinity, deltaTime);
-
-        if (IsGrounded)
-        {
-            lastGroundedTime = Time.time;
-            verticalVelocity = -2f;
-        }
-
-        if (allowsMovement && !IsActionActive && Time.time - jumpRequestedTime <= jumpBufferTime &&
-            Time.time - lastGroundedTime <= coyoteTime)
-        {
-            verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            jumpRequestedTime = float.NegativeInfinity;
-            lastGroundedTime = float.NegativeInfinity;
-            lastJumpTime = Time.time;
-            IsGrounded = false;
-        }
-
-        if (!IsGrounded)
-        {
-            verticalVelocity += gravity * deltaTime;
-            Vector3 steering = worldMovement.HasValue
-                ? worldMovement.Value.normalized * input.magnitude
-                : transform.TransformDirection(new Vector3(input.x, 0f, input.y));
-            Vector3 targetVelocity = steering * airSpeed;
-            airVelocity = Vector3.MoveTowards(airVelocity, targetVelocity, airAcceleration * deltaTime);
-        }
-
-        animator.SetFloat(MoveX, animationInput.x);
-        animator.SetFloat(MoveY, animationInput.y);
-        animator.SetBool(Grounded, IsGrounded);
-    }
-
-    private void UpdateGrounding()
-    {
-        IsGrounded = false;
-        groundNormal = Vector3.up;
-        if (verticalVelocity > 0f || Time.time - lastJumpTime < 0.1f)
+        if (!controller.enabled)
             return;
 
-        float radius = controller.radius * 0.9f;
-        Vector3 center = transform.TransformPoint(controller.center);
-        Vector3 origin = center + Vector3.down * (controller.height * 0.5f - controller.radius) + Vector3.up * 0.05f;
-        float distance = groundProbeDistance + controller.radius - radius + 0.05f;
-        if (Physics.SphereCast(origin, radius, Vector3.down, out var hit, distance,
-                groundMask, QueryTriggerInteraction.Ignore) &&
-            Vector3.Angle(hit.normal, Vector3.up) <= controller.slopeLimit)
+        if (!allowsMovement)
         {
-            IsGrounded = true;
-            groundNormal = hit.normal;
-        }
-    }
-
-    public void ApplyRootMotion(Vector3 displacement, float deltaTime)
-    {
-        if (deltaTime <= 0f || !controller.enabled)
-            return;
-
-        displacement.y = 0f;
-        if (!movementAllowed && !actionMovesWhenBlocked)
-        {
-            displacement = Vector3.zero;
-            airVelocity = Vector3.zero;
-        }
-        else if (IsGrounded)
-        {
-            // Exploration keeps the authored stride distance while facing catches up to steering.
-            if (!IsActionActive && locomotionDirection.HasValue)
-                displacement = locomotionDirection.Value * displacement.magnitude;
-            airVelocity = displacement / deltaTime;
-            displacement = Vector3.ProjectOnPlane(displacement, groundNormal);
+            input = Vector2.zero;
+            sprinting = false;
+            jumpRequested = false;
+            jumpRequestAge = 0f;
+            planarVelocity = Vector3.zero;
+            externalVelocity = Vector3.zero;
         }
         else
-            displacement = airVelocity * deltaTime;
+        {
+            input = Vector2.ClampMagnitude(input, 1f);
+        }
 
-        displacement += (Vector3.up * verticalVelocity + externalVelocity) * deltaTime;
+        Vector3 requestedDirection = GetRequestedDirection(input, worldMovement);
+        float inputMagnitude = input.magnitude;
+        bool hasMovementInput = inputMagnitude > 0.001f && requestedDirection.sqrMagnitude > 0.001f;
+        float movementSpeed = sprinting ? sprintSpeed : walkSpeed;
+        Vector3 targetVelocity = hasMovementInput
+            ? requestedDirection * (movementSpeed * inputMagnitude)
+            : Vector3.zero;
+
+        if (hasMovementInput)
+        {
+            Quaternion targetFacing = Quaternion.LookRotation(requestedDirection, Vector3.up);
+            transform.rotation = Quaternion.RotateTowards(
+                transform.rotation, targetFacing, turnSpeed * deltaTime);
+        }
+
+        bool groundedAtStart = TryGetGround(out Vector3 groundNormal);
+        IsGrounded = groundedAtStart;
+        if (groundedAtStart)
+        {
+            coyoteTimeRemaining = coyoteTime;
+            if (verticalVelocity < 0f)
+                verticalVelocity = -2f;
+        }
+        else
+        {
+            coyoteTimeRemaining = Mathf.Max(0f, coyoteTimeRemaining - deltaTime);
+        }
+
+        bool jumpIsBuffered = jumpRequested && jumpRequestAge <= jumpBufferTime;
+        if (jumpIsBuffered && (groundedAtStart || coyoteTimeRemaining > 0f))
+        {
+            verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            jumpRequested = false;
+            coyoteTimeRemaining = 0f;
+            jumpGroundingGrace = 0.1f;
+            jumpAnimationActive = true;
+            sprintJumpAnimation = sprinting && hasMovementInput;
+            IsGrounded = false;
+            groundedAtStart = false;
+        }
+        else if (jumpRequested)
+        {
+            jumpRequestAge += deltaTime;
+            if (jumpRequestAge > jumpBufferTime)
+                jumpRequested = false;
+        }
+
+        jumpGroundingGrace = Mathf.Max(0f, jumpGroundingGrace - deltaTime);
+        if (groundedAtStart)
+        {
+            float rate = hasMovementInput ? acceleration : braking;
+            planarVelocity = Vector3.MoveTowards(planarVelocity, targetVelocity, rate * deltaTime);
+        }
+        else if (hasMovementInput)
+        {
+            // Keep launch momentum and allow only modest steering while airborne.
+            planarVelocity = Vector3.MoveTowards(planarVelocity, targetVelocity, airAcceleration * deltaTime);
+        }
+
+        if (IsGrounded && verticalVelocity < 0f)
+            verticalVelocity = -2f;
+        else
+            verticalVelocity += gravity * deltaTime;
+
+        Vector3 locomotionDisplacement = planarVelocity * deltaTime;
+        if (groundedAtStart)
+            locomotionDisplacement = Vector3.ProjectOnPlane(locomotionDisplacement, groundNormal);
+
+        Vector3 externalDisplacement = externalVelocity * deltaTime;
+        Vector3 displacement = locomotionDisplacement + externalDisplacement +
+            Vector3.up * (verticalVelocity * deltaTime);
+
+        foundWalkableGroundContact = false;
+        walkableGroundContactNormal = Vector3.up;
+        Vector3 startingPosition = transform.position;
         CollisionFlags collisions = controller.Move(displacement);
+        Vector3 actualDisplacement = transform.position - startingPosition;
+
         if ((collisions & CollisionFlags.Above) != 0 && verticalVelocity > 0f)
             verticalVelocity = 0f;
 
-        externalVelocity = Vector3.MoveTowards(externalVelocity, Vector3.zero, knockbackBraking * deltaTime);
+        Vector3 probedGroundNormal = Vector3.up;
+        bool hasGroundProbe = verticalVelocity <= 0f && TryGetGround(out probedGroundNormal);
+        bool hasWalkableGround = verticalVelocity <= 0f &&
+            (foundWalkableGroundContact || hasGroundProbe);
+        if (hasWalkableGround)
+        {
+            IsGrounded = true;
+            coyoteTimeRemaining = coyoteTime;
+            jumpAnimationActive = false;
+            sprintJumpAnimation = false;
+            if (foundWalkableGroundContact)
+                groundNormal = walkableGroundContactNormal;
+            else
+                groundNormal = probedGroundNormal;
+            if (verticalVelocity < 0f)
+                verticalVelocity = -2f;
+        }
+        else
+        {
+            IsGrounded = false;
+            groundNormal = Vector3.up;
+        }
+
+        externalVelocity = Vector3.MoveTowards(
+            externalVelocity, Vector3.zero, knockbackBraking * deltaTime);
+
+        Vector3 resolvedPlanarTravel = Vector3.ProjectOnPlane(
+            actualDisplacement - externalDisplacement, Vector3.up);
+        actualPlanarSpeed = planarVelocity.sqrMagnitude > 0.0001f
+            ? Mathf.Clamp(Vector3.Dot(resolvedPlanarTravel, planarVelocity.normalized) / deltaTime,
+                0f, planarVelocity.magnitude)
+            : 0f;
+
+        UpdateAnimator(GetGaitValue(actualPlanarSpeed), IsGrounded, deltaTime);
+    }
+
+    private Vector3 GetRequestedDirection(Vector2 input, Vector3? worldMovement)
+    {
+        if (input.sqrMagnitude <= 0.000001f)
+            return Vector3.zero;
+
+        Vector3 direction = worldMovement.HasValue
+            ? worldMovement.Value
+            : transform.TransformDirection(new Vector3(input.x, 0f, input.y));
+        direction = Vector3.ProjectOnPlane(direction, Vector3.up);
+        return direction.sqrMagnitude > 0.000001f ? direction.normalized : Vector3.zero;
+    }
+
+    private bool TryGetGround(out Vector3 normal)
+    {
+        normal = Vector3.up;
+        if (verticalVelocity > 0f || jumpGroundingGrace > 0f)
+            return false;
+
+        float radius = Mathf.Max(0.01f, controller.radius * 0.9f);
+        Vector3 center = transform.TransformPoint(controller.center);
+        Vector3 capsuleBottom = center + Vector3.down * (controller.height * 0.5f - controller.radius);
+        Vector3 origin = capsuleBottom + Vector3.up * 0.05f;
+        float distance = groundProbeDistance + 0.1f;
+        if (!Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit,
+                distance, groundMask, QueryTriggerInteraction.Ignore))
+            return false;
+
+        if (Vector3.Angle(hit.normal, Vector3.up) > controller.slopeLimit)
+            return false;
+
+        normal = hit.normal;
+        return true;
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (Vector3.Angle(hit.normal, Vector3.up) <= controller.slopeLimit)
+        {
+            foundWalkableGroundContact = true;
+            if (hit.normal.y > walkableGroundContactNormal.y)
+                walkableGroundContactNormal = hit.normal;
+        }
+
+        if (Vector3.Dot(hit.normal, Vector3.up) >= 0.5f)
+            return;
+
+        Vector3 sideNormal = Vector3.ProjectOnPlane(hit.normal, Vector3.up).normalized;
+        if (sideNormal.sqrMagnitude <= 0.0001f)
+            return;
+
+        if (Vector3.Dot(planarVelocity, sideNormal) < 0f)
+            planarVelocity = Vector3.ProjectOnPlane(planarVelocity, sideNormal);
+        if (Vector3.Dot(externalVelocity, sideNormal) < 0f)
+            externalVelocity = Vector3.ProjectOnPlane(externalVelocity, sideNormal);
+    }
+
+    private float GetGaitValue(float speed)
+    {
+        if (speed <= 0.01f || walkSpeed <= 0f)
+            return 0f;
+
+        if (speed <= walkSpeed)
+            return Mathf.Clamp01(speed / walkSpeed);
+
+        float runRange = Mathf.Max(0.01f, sprintSpeed - walkSpeed);
+        return 1f + Mathf.Clamp01((speed - walkSpeed) / runRange);
+    }
+
+    private void UpdateAnimator(float gaitValue, bool grounded, float deltaTime = 0f)
+    {
+        float blendTime = Mathf.Max(0.01f, animationBlendTime);
+        float nextGait = deltaTime > 0f
+            ? Mathf.SmoothDamp(animationInput.y, gaitValue, ref animationBlendVelocity,
+                blendTime, Mathf.Infinity, deltaTime)
+            : gaitValue;
+        animationInput = new Vector2(0f, nextGait);
+
+        if (animator == null || !animator.isActiveAndEnabled)
+            return;
+
+        animator.SetFloat(MoveX, 0f);
+        animator.SetFloat(MoveY, animationInput.y);
+        animator.SetBool(Grounded, grounded);
+        animator.SetBool(Jumping, jumpAnimationActive);
+        animator.SetBool(SprintJump, sprintJumpAnimation);
+        animator.SetFloat(VerticalVelocity, verticalVelocity);
     }
 
     public void AddImpulse(Vector3 velocityChange)
@@ -175,25 +303,34 @@ public class CharacterMotor : MonoBehaviour
         if (velocityChange.y > 0f)
         {
             IsGrounded = false;
-            lastGroundedTime = float.NegativeInfinity;
+            coyoteTimeRemaining = 0f;
+            jumpGroundingGrace = 0.1f;
         }
     }
 
     public void Stop()
     {
-        movementAllowed = false;
-        locomotionDirection = null;
-        animationInput = Vector2.zero;
-        blendVelocity = Vector2.zero;
-        airVelocity = Vector3.zero;
+        planarVelocity = Vector3.zero;
         externalVelocity = Vector3.zero;
         verticalVelocity = 0f;
-        jumpRequestedTime = float.NegativeInfinity;
-        lastGroundedTime = float.NegativeInfinity;
-        if (animator != null)
+        actualPlanarSpeed = 0f;
+        animationInput = Vector2.zero;
+        animationBlendVelocity = 0f;
+        coyoteTimeRemaining = 0f;
+        jumpRequestAge = 0f;
+        jumpGroundingGrace = 0f;
+        jumpAnimationActive = false;
+        sprintJumpAnimation = false;
+        jumpRequested = false;
+
+        if (animator != null && animator.isActiveAndEnabled)
         {
             animator.SetFloat(MoveX, 0f);
             animator.SetFloat(MoveY, 0f);
+            animator.SetBool(Grounded, IsGrounded);
+            animator.SetBool(Jumping, false);
+            animator.SetBool(SprintJump, false);
+            animator.SetFloat(VerticalVelocity, 0f);
         }
     }
 
@@ -205,6 +342,5 @@ public class CharacterMotor : MonoBehaviour
         transform.SetPositionAndRotation(position, rotation);
         controller.enabled = wasEnabled;
         IsGrounded = false;
-        lastJumpTime = float.NegativeInfinity;
     }
 }

@@ -14,14 +14,7 @@ public class SettingsScreen : MonoBehaviour
     public TMP_Text volumeText;
     public Slider sensitivity;
     public TMP_Text sensitivityText;
-    public Slider thirdPersonFov;
-    public TMP_Text thirdPersonFovText;
     private readonly List<Resolution> resolutions = new();
-
-    private void OnEnable()
-    {
-        RefreshFieldOfView(thirdPersonFov, thirdPersonFovText);
-    }
 
     public void ApplySavedSettings()
     {
@@ -75,30 +68,11 @@ public class SettingsScreen : MonoBehaviour
         sensitivity.SetValueWithoutNotify(PlayerPrefs.GetFloat("Settings.Sensitivity", currentSensitivity));
         volume.onValueChanged.AddListener(SetVolume);
         sensitivity.onValueChanged.AddListener(SetSensitivity);
-        if (thirdPersonFov != null)
-            thirdPersonFov.onValueChanged.AddListener(SetThirdPersonFov);
         SetVolume(volume.value);
         SetSensitivity(sensitivity.value);
     }
 
     private void OnDisable() => PlayerPrefs.Save();
-
-    private static void RefreshFieldOfView(Slider slider, TMP_Text label)
-    {
-        if (slider == null)
-            return;
-
-        float value = PlayerCameraRig.GetSavedFieldOfView();
-        slider.SetValueWithoutNotify(value);
-        label.text = value.ToString("0") + "°";
-    }
-
-    public void SetThirdPersonFov(float value)
-    {
-        PlayerCameraRig.SaveFieldOfView(value);
-        FindAnyObjectByType<PlayerCameraRig>()?.ApplyFieldOfView();
-        thirdPersonFovText.text = PlayerCameraRig.GetSavedFieldOfView().ToString("0") + "°";
-    }
 
     public void SetVolume(float value)
     {

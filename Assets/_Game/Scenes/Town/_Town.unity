@@ -31872,7 +31872,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2012540967683572728, guid: 683d989d01cf45247b027a7d7ed36a67, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value:
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5817128958004127077, guid: 683d989d01cf45247b027a7d7ed36a67, type: 3}
       propertyPath: m_LocalPosition.x
@@ -31920,7 +31920,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6865419059990697171, guid: 683d989d01cf45247b027a7d7ed36a67, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
-      value:
+      value: 
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 4409352388742868417, guid: 683d989d01cf45247b027a7d7ed36a67, type: 3}
@@ -41718,7 +41718,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cca0d66bbdce6734285a14eda9b4ecb8, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldSaveObject
   saveId: 8b791cea3b6744cca488e5aeac79c173
 --- !u!4 &857525674 stripped
@@ -61281,7 +61281,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cca0d66bbdce6734285a14eda9b4ecb8, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldSaveObject
   saveId: 27704f35ce07473cb65b671eb1f1d02b
 --- !u!4 &1276651310 stripped
@@ -78191,7 +78191,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cca0d66bbdce6734285a14eda9b4ecb8, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldSaveObject
   saveId: 3cb3a30cb13d493897876eb1545c90df
 --- !u!4 &1659483387 stripped
@@ -98544,6 +98544,10 @@ PrefabInstance:
       propertyPath: m_TargetTexture
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7869586009327930913, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: collisionMask.m_Bits
+      value: 467
+      objectReference: {fileID: 0}
     - target: {fileID: 8413011045622756147, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
       propertyPath: m_Parameters.m_EndRange
       value: 2
@@ -98575,6 +98579,10 @@ PrefabInstance:
     - target: {fileID: 8451529012344267102, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9201864158812724305, guid: 734f0813d0f687743a28e830077fefd5, type: 3}
+      propertyPath: groundMask.m_Bits
+      value: 471
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -99624,7 +99632,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cca0d66bbdce6734285a14eda9b4ecb8, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldSaveObject
   saveId: 43350ada9e2f400e9e9c9bfc17a3f6e7
 --- !u!1001 &2101306471

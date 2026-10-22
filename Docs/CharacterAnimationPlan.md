@@ -1,24 +1,26 @@
 # Character movement and animation plan
 
-Status: revised 2026-10-20. Third-person root-motion locomotion is implemented. The recent combat and first-person presentation prototype was removed for later redesign.
+Status: revised 2026-10-21. The current direction is code-driven third-person free exploration, with animation following movement. Combat and first-person presentation remain deferred.
 
 ## Direction
 
-Use animation-authored horizontal movement for grounded locomotion and committed combat actions. Route it through one character motor that owns collision-resolved movement. Code controls gravity, grounding, jumping, external forces, and when an action may move or rotate the actor. This is controlled root motion: animation proposes a displacement; gameplay decides how much is allowed.
+Use code-driven movement for ordinary walking and running. One character motor owns travel, facing, collision, grounding, gravity, jumping and external forces. Input selects camera-relative direction and speed; the motor resolves movement; animation follows actual travel. The motor must work with no Animator. See PlayerLocomotion.md for the current implementation and review plan.
 
-The game is currently third-person only. Root motion helps the player's visible steps match ground travel; it does not automatically fix acceleration, collision handling, foot placement, or responsiveness.
+The game is third-person only. Free exploration turns toward travel, including backward input toward the camera. Target-facing strafing is a separate future mode. Match in-place gait playback to travel speed; visual blending must not delay movement. Selected future attacks or traversal actions may use root motion through the same collision owner.
 
 Keep the next review focused on one humanoid character and its locomotion set. Redesign combat after movement and animation feel right.
 
 ## What exists now
 
-- The player prefab has a CharacterController, a Humanoid BodyModel, a CharacterMotor, and a root-motion relay. Movement blends the imported grounded and airborne motions.
-- The camera freely orbits independently of the player's facing. Movement is camera-relative and the character turns toward travel. Its FOV setting is independent of character saves. The player CharacterMotor animation speed defaults to 1.3 and is available in the Inspector.
+- The player prefab has a CharacterController, a Humanoid BodyModel and a CharacterMotor. In-place animation follows resolved movement; no animation callback drives locomotion.
+- The camera freely orbits independently of the player's facing. Movement is camera-relative and the character turns toward travel. Its 60-degree FOV default is editable on PlayerCameraRig in the Inspector and is not saved with character data. Speed, acceleration, braking and turn speed are motor settings independent of animation playback.
 - The recent combat prototype and custom hand-mounted weapon presentation were removed for a later redesign. Inventory equipment data remains, but the player has no attack handler or held weapon model.
 - SkeletonAI lets NavMeshAgent move and rotate the actor, derives animation speed from agent velocity, and rotates the Transform separately when facing the target. Several enemy prefabs have Apply Root Motion enabled already. That checkbox alone does not establish a coordinated animation-driven motor; the clips and hierarchy need auditing before conversion.
-- Slime bosses have special Rigidbody impulses and apply forces to the player's Rigidbody. These callers must be adapted if the player switches to CharacterController. Nonhumanoid creatures can retain specialized locomotion where it suits them.
+- KingSlime applies player knockback through CharacterMotor.AddImpulse. Nonhumanoid creatures can retain specialized locomotion where it suits them.
 
-## How Unity root motion works
+## Optional future action root motion
+
+This section describes a possible future action implementation. It does not drive the current player's walking and running.
 
 An in-place walk changes the pose while code supplies travel. A root-motion walk also contains an authored trajectory. Unity evaluates and blends the clips and exposes the displacement and rotation for that evaluation as Animator.deltaPosition and Animator.deltaRotation.
 
@@ -30,7 +32,7 @@ Recommended import conventions:
 
 - Humanoid avatars for compatible human-shaped rigs; Generic with an appropriate root node for creatures. Retargeting still needs checking for proportions, feet and weapon grips.
 - Consistent world scale, forward direction, grounded height, rig mapping, and root origin across clips. Keep actor/model transforms at unit scale when practical.
-- Ground locomotion: retain XZ root translation, bake Y into pose and use motor gravity. Usually bake rotation for straight/strafe loops so gameplay controls facing.
+- Ground locomotion: bake XZ, Y and rotation into pose for in-place playback; the motor supplies travel and facing.
 - Idle: bake XZ and Y into pose to avoid accumulated drift.
 - Attacks/dodges: retain intentional XZ movement. Retain root rotation only for actions allowed to own turning. Do not loop these clips.
 - Turning clips may intentionally retain rotation. Jump takeoff/flight/landing start with code-driven vertical movement; fully authored traversal is a later exception.
@@ -43,7 +45,7 @@ Keep a few focused components instead of a large character framework:
 
 1. Player input or AI steering supplies movement/look intent and action requests.
 2. CharacterMotor owns the collision capsule, grounding, gravity, slopes, steps and external motion. Prefer CharacterController for the first prototype because this game needs deliberate character control rather than a freely tumbling physics body. Root motion also works with Rigidbody; this is a project recommendation, not a Unity requirement.
-3. CharacterAnimation maps movement/action state to Animator parameters and forwards root motion to the motor. It coordinates movement locks, turning limits and small speed corrections.
+3. Animation maps collision-resolved movement to gait parameters and playback. Future action root motion requires explicit motor ownership; locomotion does not depend on animation callbacks.
 4. CharacterCombat owns action choice, stamina checks, phase timing, interruptions, damage windows and per-swing hit tracking. An action definition can hold the animation reference/state, movement policy, timing and damage data.
 5. PlayerCamera handles third-person presentation and does not own the actor's attack state or world movement.
 
@@ -51,22 +53,22 @@ Suggested hierarchy:
 
 ```text
 ActorRoot                 collision motor, stats, combat
-  Visual                  Animator + root-motion forwarding component
+  Visual                  Animator, in-place locomotion
     Skeleton / Mesh
     Hand sockets          equipped world weapons
   ViewRoot                stable eye/shoulder reference
-    CameraRig             first/third-person camera
+    CameraRig             third-person orbit camera
 ```
 
-The Animator can remain on a child imported model. Its root-motion callback forwards movement to ActorRoot. Player and NPC input are different sources feeding the same movement/action logic. Controllers and clips can differ by rig and character type.
+The Animator remains on a child imported model. ActorRoot moves independently of the Animator. Player and NPC input can be different sources feeding the same motor. Controllers and clips can differ by rig and character type.
 
 ## Implementation sequence and acceptance
 
 ### 1. Establish one body and a small compatible motion set
 
-The humanoid body and idle/walk/run/jump set are in place. Review their blend and movement feel. Add backward/strafe/turn clips only if play reveals a need. Leave combat animation for its later redesign.
+The humanoid body and idle/walk/run set are in place, along with normal and sprint takeoff, falling, and landing clips. Review their transitions and movement feel. The motor selects the jump clip only after accepting a jump; sprint at launch selects the run-jump clip. Descent switches to the falling loop, and ground contact selects the landing clip. Add backward/strafe/turn clips only if play reveals a need. Leave combat animation for its later redesign.
 
-Measure the locomotion clip travel and duration. Keep the current shoulder camera and tune player movement, collision, and facing together.
+Match animation stride and playback to measured motor speed. Keep the current shoulder camera and tune player movement, collision, and facing together. The jump arc stays code-driven; takeoff and landing clips affect pose only, while the fall state covers ledge drops and the descending part of a jump.
 
 Acceptance: the body travels at the intended scale, loops without drifting, and blends between idle, walk, run, and jump cleanly.
 
@@ -74,13 +76,13 @@ Acceptance: the body travels at the intended scale, loops without drifting, and 
 
 Build one motor and connect it to the current input, stamina and PlayerModeController gates. Add acceleration/braking, input clamping, robust ground probing, slopes/steps, ground adhesion, modest air control and buffered jumping. Preserve save/load teleporting, inventory/pause/death stops, interactions, and stamina behavior. Replace Rigidbody-only external-force callers with a motor impulse/knockback entry point if using CharacterController.
 
-Use directional blend trees for grounded root-motion locomotion. Keep ordinary turn control responsive; do not wait for an entire animation loop before accepting a new direction. Small root-motion corrections can help, but extreme warping will reintroduce foot sliding. Treat collision-shortened movement as normal: a wall prevents a lunge moving through it.
+Use a forward idle/walk/run speed blend for free exploration. Turn toward requested travel without waiting for an animation loop. Derive visual gait from resolved speed so walls suppress running in place. Prove movement remains correct with animation disabled or absent, and prove changing playback speed does not change travel distance.
 
 Acceptance: slopes, stairs, diagonal movement, jumping, walls, knockback, pause and save/load work. Compare walking/stopping feel at different frame rates. Body and collision capsule stay together.
 
 ### 3. Tune third-person movement and camera
 
-Keep the game in third person. Tune the orbit distance, shoulder offset, camera collision, FOV, and body-facing response while testing the locomotion blend. Leave combat animations and weapon placement for a separate redesign.
+Keep the game in third person. Tune the orbit distance, shoulder offset, camera collision and body-facing response while testing the locomotion blend. The FOV defaults to 60 degrees and can be edited on PlayerCameraRig in the Inspector. Leave combat animations and weapon placement for a separate redesign.
 
 Acceptance: camera collision keeps the view clear, the camera stays responsive while the body turns, and changing camera settings does not change movement or saved character data.
 

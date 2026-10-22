@@ -1,67 +1,138 @@
 using System;
+using System.IO;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.Animations;
-using UnityEditor.SceneManagement;
 using UnityEngine;
-using UnityEngine.Animations;
-using UnityEngine.Playables;
 using Object = UnityEngine.Object;
 
-// Explicit setup command, never an automatic importer. Existing gameplay references stay on the player root.
+// Explicit setup command. Batch preparation updates the player assets without rebuilding scenes.
 public static class PlayerLocomotionSetup
 {
     private const string Model = "Assets/_Game/Features/Player/Male_yBot_Testing.fbx";
     private const string Clips = "Assets/_Game/Shared/Animations/Humanoid/Clips/Locomotion/";
     private const string ControllerPath = "Assets/_Game/Features/Player/Animations/Controllers/PlayerLocomotion.controller";
     private const string PrefabPath = "Assets/_Game/Features/Player/Prefabs/player.prefab";
+    private const string LegacyRootMotionRelayGuid = "258a7c5aaa007a944b04f268a8e34630";
+
+    private static readonly string[] LoopingClips =
+    {
+        "CalmIdle",
+        "Walking",
+        "Walking Backwards",
+        "Left Strafe Walking",
+        "Right Strafe Walking",
+        "Running",
+        "Falling Idle"
+    };
+
+    private static readonly string[] OneShotClips =
+    {
+        "Jumping",
+        "Running Jump",
+        "Falling To Landing"
+    };
 
     [MenuItem("Tools/Player/Rebuild Locomotion Setup")]
     public static void Run()
     {
+        PrepareAssets();
+        Debug.Log("[Player Locomotion] Configured in-place Humanoid clips, speed blend, and player prefab.");
+    }
+
+    // Use with Unity -batchmode -executeMethod PlayerLocomotionSetup.PrepareBatch.
+    [MenuItem("Tools/Player/Prepare Locomotion for Batch Validation")]
+    public static void PrepareBatch()
+    {
+        PrepareAssets();
+        Debug.Log("[Player Locomotion] Batch preparation complete; no scene was rebuilt.");
+    }
+
+    // Use this method as the single Unity batch entry when preparing and validating the player.
+    public static void PrepareAndValidateBatch()
+    {
+        PrepareAssets();
+        PlayerLocomotionChecks.RunBatch();
+    }
+
+    private static void PrepareAssets()
+    {
         if (EditorApplication.isPlaying)
             throw new InvalidOperationException("Exit Play Mode before configuring the player.");
 
-        ConfigureImport(Model, false, false);
-        foreach (string clip in new[] { "CalmIdle", "Walking", "Walking Backwards", "Left Strafe Walking", "Right Strafe Walking", "Running", "Falling Idle" })
-            ConfigureImport(Clips + clip + ".fbx", true, clip == "CalmIdle" || clip == "Falling Idle");
+        ConfigureImport(Model, false);
+        float? walkingSpeed = MeasureAuthoredGaitSpeed("Walking");
+        float? runningSpeed = MeasureAuthoredGaitSpeed("Running");
+        foreach (string clip in LoopingClips.Where(clip => clip != "Walking" && clip != "Running"))
+            ConfigureImport(Clips + clip + ".fbx", true, true, true);
+        foreach (string clip in OneShotClips)
+            ConfigureImport(Clips + clip + ".fbx", true, true, false);
 
-        var controller = BuildController();
+        var controller = BuildController(walkingSpeed, runningSpeed);
         ConfigurePrefab(controller);
-        RefineBlending();
         PlayerCameraSetup.ConfigurePrefab();
         AssetDatabase.SaveAssets();
-        Debug.Log("[Player Locomotion] Configured yBot, Humanoid locomotion clips, controller and player prefab.");
     }
 
-    private static void ConfigureImport(string path, bool animation, bool inPlace)
+    private static float? MeasureAuthoredGaitSpeed(string name)
     {
-        var importer = (ModelImporter)AssetImporter.GetAtPath(path);
+        string path = Clips + name + ".fbx";
+        ConfigureImport(path, true, false);
+        float speed;
+        try
+        {
+            speed = Clip(name).averageSpeed.magnitude;
+        }
+        finally
+        {
+            ConfigureImport(path, true, true);
+        }
+
+        if (speed <= 0.05f)
+        {
+            Debug.LogWarning($"[Gait Timing] Could not measure {name} root speed; keeping the conservative 1.3 playback scale. Visual stride calibration remains unmeasured.");
+            return null;
+        }
+
+        Debug.Log($"[Gait Timing] {name}: measured authored root speed {speed:F2} m/s before baking root translation.");
+        return speed;
+    }
+
+    private static void ConfigureImport(string path, bool animation, bool inPlace = true, bool loop = true)
+    {
+        var importer = AssetImporter.GetAtPath(path) as ModelImporter;
+        if (importer == null)
+            throw new InvalidOperationException("Missing model importer: " + path);
+
         importer.animationType = ModelImporterAnimationType.Human;
         importer.avatarSetup = ModelImporterAvatarSetup.CreateFromThisModel;
         importer.importCameras = false;
         importer.importLights = false;
         importer.optimizeGameObjects = false;
+
+        if (animation)
+        {
+            var clips = importer.defaultClipAnimations;
+            foreach (var clip in clips)
+            {
+                clip.loopTime = loop;
+                clip.loopPose = loop;
+                clip.lockRootRotation = true;
+                clip.keepOriginalOrientation = true;
+                clip.lockRootHeightY = true;
+                clip.keepOriginalPositionY = true;
+                clip.lockRootPositionXZ = inPlace;
+                clip.keepOriginalPositionXZ = true;
+            }
+
+            importer.clipAnimations = clips;
+        }
+
         importer.SaveAndReimport();
 
         if (!animation)
             return;
 
-        var clips = importer.defaultClipAnimations;
-        foreach (var clip in clips)
-        {
-            clip.loopTime = true;
-            clip.loopPose = true;
-            clip.lockRootRotation = true;
-            clip.keepOriginalOrientation = true;
-            clip.lockRootHeightY = true;
-            clip.keepOriginalPositionY = true;
-            clip.lockRootPositionXZ = inPlace;
-            clip.keepOriginalPositionXZ = true;
-        }
-
-        importer.clipAnimations = clips;
-        importer.SaveAndReimport();
         var avatar = AssetDatabase.LoadAllAssetsAtPath(path).OfType<Avatar>().FirstOrDefault();
         if (avatar == null || !avatar.isValid || !avatar.isHuman)
             throw new InvalidOperationException("Humanoid avatar could not be generated: " + path);
@@ -70,152 +141,186 @@ public static class PlayerLocomotionSetup
     private static AnimationClip Clip(string name)
     {
         var clip = AssetDatabase.LoadAllAssetsAtPath(Clips + name + ".fbx").OfType<AnimationClip>()
-            .First(value => !value.name.StartsWith("__preview__"));
-        Debug.Log($"[Player Locomotion] {name}: {clip.length:F2}s, average root velocity {clip.averageSpeed}");
+            .First(value => !value.name.StartsWith("__preview__", StringComparison.Ordinal));
+        Debug.Log($"[Player Locomotion] {name}: {clip.length:F2}s, authored average speed {clip.averageSpeed.magnitude:F2} m/s");
         return clip;
     }
 
-    private static AnimatorController BuildController()
+    private static AnimatorController BuildController(float? walkingSpeed, float? runningSpeed)
     {
-        // Rebuilding is explicit. Reuse the controller asset so prefab GUID references stay valid.
+        // Reuse the controller and its first state machine so prefab GUID references stay valid.
         var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(ControllerPath);
         if (controller == null)
             controller = AnimatorController.CreateAnimatorControllerAtPath(ControllerPath);
-        else
+
+        var layers = controller.layers;
+        if (layers.Length == 0)
         {
-            foreach (var asset in AssetDatabase.LoadAllAssetsAtPath(ControllerPath))
-                if (asset != controller)
-                    Object.DestroyImmediate(asset, true);
+            controller.AddLayer("Locomotion");
+            layers = controller.layers;
         }
 
+        var layer = layers[0];
+        var machine = layer.stateMachine;
+        var previousStates = machine.states.Select(child => child.state).ToArray();
+        var ground = previousStates.FirstOrDefault(state => state.name == "Grounded") ?? machine.AddState("Grounded");
+        var air = previousStates.FirstOrDefault(state => state.name == "Airborne") ?? machine.AddState("Airborne");
+        var jump = previousStates.FirstOrDefault(state => state.name == "Jump") ?? machine.AddState("Jump");
+        var sprintJump = previousStates.FirstOrDefault(state => state.name == "Sprint Jump") ?? machine.AddState("Sprint Jump");
+        var landing = previousStates.FirstOrDefault(state => state.name == "Landing") ?? machine.AddState("Landing");
+
+        foreach (var state in previousStates)
+        {
+            if (state != ground && state != air && state != jump && state != sprintJump && state != landing)
+                machine.RemoveState(state);
+        }
+
+        foreach (var transition in machine.anyStateTransitions.ToArray())
+            machine.RemoveAnyStateTransition(transition);
+        foreach (var transition in machine.entryTransitions.ToArray())
+            machine.RemoveEntryTransition(transition);
+        foreach (var transition in ground.transitions.ToArray())
+            ground.RemoveTransition(transition);
+        foreach (var transition in air.transitions.ToArray())
+            air.RemoveTransition(transition);
+        foreach (var transition in jump.transitions.ToArray())
+            jump.RemoveTransition(transition);
+        foreach (var transition in sprintJump.transitions.ToArray())
+            sprintJump.RemoveTransition(transition);
+        foreach (var transition in landing.transitions.ToArray())
+            landing.RemoveTransition(transition);
+
+        machine.defaultState = ground;
+        var childStates = machine.states;
+        for (int i = 0; i < childStates.Length; i++)
+        {
+            var childState = childStates[i];
+            if (childState.state == ground)
+                childState.position = new Vector3(200f, 0f, 0f);
+            else if (childState.state == jump)
+                childState.position = new Vector3(450f, -100f, 0f);
+            else if (childState.state == sprintJump)
+                childState.position = new Vector3(450f, 100f, 0f);
+            else if (childState.state == air)
+                childState.position = new Vector3(700f, 0f, 0f);
+            else if (childState.state == landing)
+                childState.position = new Vector3(950f, 0f, 0f);
+
+            childStates[i] = childState;
+        }
+        machine.states = childStates;
+        layer.name = "Locomotion";
+        layer.defaultWeight = 1f;
+        controller.layers = new[] { layer };
         controller.parameters = Array.Empty<AnimatorControllerParameter>();
-        controller.layers = Array.Empty<AnimatorControllerLayer>();
         controller.AddParameter("MoveX", AnimatorControllerParameterType.Float);
         controller.AddParameter("MoveY", AnimatorControllerParameterType.Float);
         controller.AddParameter("Grounded", AnimatorControllerParameterType.Bool);
-        controller.AddLayer("Locomotion");
-        var machine = controller.layers[0].stateMachine;
-        var ground = machine.AddState("Grounded");
-        machine.defaultState = ground;
-        var blend = new BlendTree
-        {
-            name = "Directional Root Motion",
-            blendType = BlendTreeType.FreeformDirectional2D,
-            blendParameter = "MoveX",
-            blendParameterY = "MoveY",
-            useAutomaticThresholds = false
-        };
-        AssetDatabase.AddObjectToAsset(blend, controller);
-        blend.AddChild(Clip("CalmIdle"), Vector2.zero);
-        blend.AddChild(Clip("Walking"), Vector2.up);
-        blend.AddChild(Clip("Walking Backwards"), Vector2.down);
-        blend.AddChild(Clip("Left Strafe Walking"), Vector2.left);
-        blend.AddChild(Clip("Right Strafe Walking"), Vector2.right);
-        blend.AddChild(Clip("Running"), Vector2.up * 2f);
-        ground.motion = blend;
+        controller.AddParameter("Jumping", AnimatorControllerParameterType.Bool);
+        controller.AddParameter("SprintJump", AnimatorControllerParameterType.Bool);
+        controller.AddParameter("VerticalVelocity", AnimatorControllerParameterType.Float);
 
-        var air = machine.AddState("Airborne");
+        var blend = AssetDatabase.LoadAllAssetsAtPath(ControllerPath).OfType<BlendTree>().FirstOrDefault();
+        if (blend == null)
+        {
+            blend = new BlendTree();
+            AssetDatabase.AddObjectToAsset(blend, controller);
+        }
+
+        blend.name = "Ground Speed";
+        blend.blendType = BlendTreeType.Simple1D;
+        blend.blendParameter = "MoveY";
+        blend.useAutomaticThresholds = false;
+        blend.children = Array.Empty<ChildMotion>();
+        blend.AddChild(Clip("CalmIdle"), 0f);
+        blend.AddChild(Clip("Walking"), 1f);
+        blend.AddChild(Clip("Running"), 2f);
+
+        var children = blend.children;
+        children[1].timeScale = GaitTimeScale((AnimationClip)children[1].motion, walkingSpeed, 2.2f);
+        children[2].timeScale = GaitTimeScale((AnimationClip)children[2].motion, runningSpeed, 5f);
+        blend.children = children;
+        ground.motion = blend;
         air.motion = Clip("Falling Idle");
-        var takeoff = ground.AddTransition(air);
-        takeoff.hasExitTime = false;
-        takeoff.duration = 0.1f;
-        takeoff.AddCondition(AnimatorConditionMode.IfNot, 0f, "Grounded");
-        var landing = air.AddTransition(ground);
-        landing.hasExitTime = false;
-        landing.duration = 0.12f;
-        landing.AddCondition(AnimatorConditionMode.If, 0f, "Grounded");
+        jump.motion = Clip("Jumping");
+        sprintJump.motion = Clip("Running Jump");
+        landing.motion = Clip("Falling To Landing");
+
+        AddJumpTransition(ground, jump, false);
+        AddJumpTransition(ground, sprintJump, true);
+
+        var takeoffFall = ground.AddTransition(air);
+        takeoffFall.hasExitTime = false;
+        takeoffFall.duration = 0.1f;
+        takeoffFall.AddCondition(AnimatorConditionMode.IfNot, 0f, "Grounded");
+        takeoffFall.AddCondition(AnimatorConditionMode.IfNot, 0f, "Jumping");
+
+        AddLandingTransition(jump, landing);
+        AddLandingTransition(sprintJump, landing);
+        AddDescentTransition(jump, air);
+        AddDescentTransition(sprintJump, air);
+        AddLandingTransition(air, landing);
+        AddJumpTransition(landing, jump, false);
+        AddJumpTransition(landing, sprintJump, true);
+        AddUnplannedFallTransition(landing, air);
+
+        var recover = landing.AddTransition(ground);
+        recover.hasExitTime = true;
+        recover.exitTime = 0.9f;
+        recover.duration = 0.12f;
+
+        EditorUtility.SetDirty(blend);
         EditorUtility.SetDirty(controller);
         return controller;
     }
 
-    [MenuItem("Tools/Player/Refine Locomotion Blending")]
-    public static void RefineBlending()
+    private static void AddJumpTransition(AnimatorState source, AnimatorState destination, bool sprintJump)
     {
-        var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(ControllerPath);
-        var tree = AssetDatabase.LoadAllAssetsAtPath(ControllerPath).OfType<BlendTree>().Single();
-        tree.blendType = BlendTreeType.FreeformDirectional2D;
-        var motions = tree.children;
-        var scene = EditorSceneManager.NewPreviewScene();
-        var actor = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(PrefabPath), scene);
-        try
-        {
-            foreach (var script in actor.GetComponentsInChildren<MonoBehaviour>(true))
-                script.enabled = false;
-            Object.DestroyImmediate(actor.GetComponentInChildren<CharacterRootMotion>());
-            var animator = actor.GetComponent<CharacterMotor>().Animator;
-            animator.applyRootMotion = false;
-            float[] reference = SampleFootPhase(animator, Clip("Walking"));
-            for (int motion = 1; motion < motions.Length; motion++)
-            {
-                float[] signal = SampleFootPhase(animator, (AnimationClip)motions[motion].motion);
-                int bestOffset = 0;
-                float bestError = float.PositiveInfinity;
-                for (int offset = 0; offset < signal.Length; offset++)
-                {
-                    float error = 0f;
-                    for (int sample = 0; sample < signal.Length; sample++)
-                        error += Mathf.Pow(reference[sample] - signal[(sample + offset) % signal.Length], 2f);
-                    if (error < bestError)
-                    {
-                        bestError = error;
-                        bestOffset = offset;
-                    }
-                }
-                motions[motion].cycleOffset = (float)bestOffset / signal.Length;
-                Debug.Log($"[Gait Phase] {AssetDatabase.GetAssetPath(motions[motion].motion)} offset {motions[motion].cycleOffset:F3}");
-            }
-        }
-        finally
-        {
-            EditorSceneManager.ClosePreviewScene(scene);
-        }
-        tree.children = motions;
-        EditorUtility.SetDirty(tree);
-        EditorUtility.SetDirty(controller);
-        var root = PrefabUtility.LoadPrefabContents(PrefabPath);
-        try
-        {
-            var data = new SerializedObject(root.GetComponent<CharacterMotor>());
-            data.FindProperty("movementBlendTime").floatValue = 0.08f;
-            data.FindProperty("stoppingBlendTime").floatValue = 0.08f;
-            data.ApplyModifiedPropertiesWithoutUndo();
-            PrefabUtility.SaveAsPrefabAsset(root, PrefabPath);
-        }
-        finally
-        {
-            PrefabUtility.UnloadPrefabContents(root);
-        }
-        AssetDatabase.SaveAssets();
+        var transition = source.AddTransition(destination);
+        transition.hasExitTime = false;
+        transition.duration = 0.06f;
+        transition.AddCondition(AnimatorConditionMode.If, 0f, "Jumping");
+        transition.AddCondition(sprintJump ? AnimatorConditionMode.If : AnimatorConditionMode.IfNot,
+            0f, "SprintJump");
     }
 
-    private static float[] SampleFootPhase(Animator animator, AnimationClip clip)
+    private static void AddLandingTransition(AnimatorState source, AnimatorState destination)
     {
-        var graph = PlayableGraph.Create("Gait phase sampling");
-        try
+        var transition = source.AddTransition(destination);
+        transition.hasExitTime = false;
+        transition.duration = 0.08f;
+        transition.AddCondition(AnimatorConditionMode.If, 0f, "Grounded");
+    }
+
+    private static void AddDescentTransition(AnimatorState source, AnimatorState destination)
+    {
+        var transition = source.AddTransition(destination);
+        transition.hasExitTime = false;
+        transition.duration = 0.12f;
+        transition.AddCondition(AnimatorConditionMode.Less, 0f, "VerticalVelocity");
+    }
+
+    private static void AddUnplannedFallTransition(AnimatorState source, AnimatorState destination)
+    {
+        var transition = source.AddTransition(destination);
+        transition.hasExitTime = false;
+        transition.duration = 0.1f;
+        transition.AddCondition(AnimatorConditionMode.IfNot, 0f, "Grounded");
+        transition.AddCondition(AnimatorConditionMode.IfNot, 0f, "Jumping");
+    }
+
+    private static float GaitTimeScale(AnimationClip clip, float? authoredSpeed, float targetSpeed)
+    {
+        if (!authoredSpeed.HasValue || authoredSpeed.Value <= 0.05f)
         {
-            var playable = AnimationClipPlayable.Create(graph, clip);
-            playable.SetApplyFootIK(false);
-            var output = AnimationPlayableOutput.Create(graph, "Body", animator);
-            output.SetSourcePlayable(playable);
-            graph.Play();
-            float[] signal = new float[32];
-            for (int sample = 0; sample < signal.Length; sample++)
-            {
-                playable.SetTime(clip.length * sample / signal.Length);
-                graph.Evaluate(0f);
-                signal[sample] = animator.GetBoneTransform(HumanBodyBones.LeftFoot).position.y -
-                    animator.GetBoneTransform(HumanBodyBones.RightFoot).position.y;
-            }
-            float mean = signal.Average();
-            float magnitude = Mathf.Sqrt(signal.Sum(value => (value - mean) * (value - mean)) / signal.Length);
-            for (int sample = 0; sample < signal.Length; sample++)
-                signal[sample] = (signal[sample] - mean) / Mathf.Max(magnitude, 0.001f);
-            return signal;
+            Debug.LogWarning($"[Gait Timing] {clip.name}: using an uncalibrated 1.3 playback scale for {targetSpeed:F1} m/s motor movement.");
+            return 1.3f;
         }
-        finally
-        {
-            graph.Destroy();
-        }
+
+        float scale = targetSpeed / authoredSpeed.Value;
+        scale = Mathf.Clamp(scale, 0.5f, 2f);
+        Debug.Log($"[Gait Timing] {clip.name}: {authoredSpeed.Value:F2} m/s authored, {scale:F2} playback scale for {targetSpeed:F1} m/s movement.");
+        return scale;
     }
 
     private static void ConfigurePrefab(AnimatorController controller)
@@ -223,13 +328,17 @@ public static class PlayerLocomotionSetup
         var root = PrefabUtility.LoadPrefabContents(PrefabPath);
         try
         {
+            RemoveLegacyRootMotionRelay(root);
             var oldBody = root.transform.Find("BodyModel");
-            if (oldBody != null)
-                Object.DestroyImmediate(oldBody.gameObject);
-            Object.DestroyImmediate(root.GetComponent<Rigidbody>());
-            Object.DestroyImmediate(root.GetComponent<CapsuleCollider>());
-            Object.DestroyImmediate(root.GetComponent<MeshRenderer>());
-            Object.DestroyImmediate(root.GetComponent<MeshFilter>());
+            GameObject model = oldBody != null
+                ? oldBody.gameObject
+                : (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(Model), root.transform);
+            model.name = "BodyModel";
+            model.transform.localPosition = Vector3.down;
+            model.transform.localRotation = Quaternion.identity;
+            model.transform.localScale = Vector3.one;
+            foreach (var part in model.GetComponentsInChildren<Transform>(true))
+                part.gameObject.layer = root.layer;
 
             var capsule = root.GetComponent<CharacterController>() ?? root.AddComponent<CharacterController>();
             capsule.height = 2f;
@@ -239,34 +348,36 @@ public static class PlayerLocomotionSetup
             capsule.stepOffset = 0.3f;
             capsule.slopeLimit = 50f;
             capsule.minMoveDistance = 0f;
+
+            Object.DestroyImmediate(root.GetComponent<Rigidbody>());
+            Object.DestroyImmediate(root.GetComponent<CapsuleCollider>());
+            Object.DestroyImmediate(root.GetComponent<MeshRenderer>());
+            Object.DestroyImmediate(root.GetComponent<MeshFilter>());
+
             var motor = root.GetComponent<CharacterMotor>() ?? root.AddComponent<CharacterMotor>();
-
-            var model = (GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(Model), root.transform);
-            model.name = "BodyModel";
-            model.transform.localPosition = Vector3.down;
-            model.transform.localRotation = Quaternion.identity;
-            model.transform.localScale = Vector3.one;
-            foreach (var part in model.GetComponentsInChildren<Transform>(true))
-                part.gameObject.layer = root.layer;
-
             var animator = model.GetComponent<Animator>();
             if (animator == null || animator.avatar == null || !animator.avatar.isValid || !animator.avatar.isHuman)
                 throw new InvalidOperationException("Player body needs a valid Humanoid Avatar.");
 
             animator.runtimeAnimatorController = controller;
-            animator.applyRootMotion = true;
+            animator.applyRootMotion = false;
             animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
             animator.updateMode = AnimatorUpdateMode.Normal;
-            var relay = model.AddComponent<CharacterRootMotion>();
-            var motorData = new SerializedObject(motor);
-            motorData.FindProperty("animator").objectReferenceValue = animator;
-            motorData.ApplyModifiedPropertiesWithoutUndo();
-            var relayData = new SerializedObject(relay);
-            relayData.FindProperty("motor").objectReferenceValue = motor;
-            relayData.ApplyModifiedPropertiesWithoutUndo();
 
-            // Keep the gameplay camera independent from the new animated body.
-            var camera = root.GetComponentInChildren<Camera>();
+            var motorData = new SerializedObject(motor);
+            var animatorProperty = motorData.FindProperty("animator");
+            if (animatorProperty != null)
+                animatorProperty.objectReferenceValue = animator;
+            SetFloat(motorData, "walkSpeed", 2.2f);
+            SetFloat(motorData, "sprintSpeed", 5f);
+            SetFloat(motorData, "acceleration", 30f);
+            SetFloat(motorData, "braking", 40f);
+            SetFloat(motorData, "turnSpeed", 720f);
+            motorData.ApplyModifiedPropertiesWithoutUndo();
+
+            var camera = root.GetComponentInChildren<Camera>(true);
+            if (camera == null)
+                throw new InvalidOperationException("Player prefab needs its gameplay camera.");
             camera.cullingMask &= ~(1 << root.layer);
             camera.nearClipPlane = 0.05f;
 
@@ -279,6 +390,41 @@ public static class PlayerLocomotionSetup
         }
     }
 
+    private static void RemoveLegacyRootMotionRelay(GameObject root)
+    {
+        string projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+        string prefabFile = Path.Combine(projectRoot, PrefabPath.Replace('/', Path.DirectorySeparatorChar));
+        string prefabYaml = File.ReadAllText(prefabFile);
+        int relayReferences = prefabYaml.Split(new[] { LegacyRootMotionRelayGuid }, StringSplitOptions.None).Length - 1;
+        if (relayReferences == 0)
+            return;
+
+        var missingScriptObjects = root.GetComponentsInChildren<Transform>(true)
+            .Select(transform => transform.gameObject)
+            .Select(gameObject => new
+            {
+                GameObject = gameObject,
+                Count = gameObject.GetComponents<Component>().Count(component => component == null)
+            })
+            .Where(entry => entry.Count > 0)
+            .ToArray();
+        int missingScriptCount = missingScriptObjects.Sum(entry => entry.Count);
+        if (relayReferences != 1 || missingScriptCount != 1 || missingScriptObjects.Length != 1)
+        {
+            throw new InvalidOperationException(
+                "The player prefab has missing scripts beyond the known locomotion relay; refusing to remove unrelated components.");
+        }
+
+        GameObjectUtility.RemoveMonoBehavioursWithMissingScript(missingScriptObjects[0].GameObject);
+    }
+
+    private static void SetFloat(SerializedObject serializedObject, string propertyName, float value)
+    {
+        var property = serializedObject.FindProperty(propertyName);
+        if (property != null)
+            property.floatValue = value;
+    }
+
     private static void ApplyMaterials(GameObject model)
     {
         const string directory = "Assets/_Game/Features/Player/Materials";
@@ -288,8 +434,10 @@ public static class PlayerLocomotionSetup
         var body = Material(directory + "/TestBody.mat", new Color(0.65f, 0.48f, 0.16f));
         var joints = Material(directory + "/TestJoints.mat", new Color(0.12f, 0.15f, 0.18f));
         foreach (var renderer in model.GetComponentsInChildren<SkinnedMeshRenderer>())
+        {
             renderer.sharedMaterials = renderer.sharedMaterials.Select(material =>
                 material != null && material.name.ToLowerInvariant().Contains("joint") ? joints : body).ToArray();
+        }
     }
 
     private static Material Material(string path, Color color)

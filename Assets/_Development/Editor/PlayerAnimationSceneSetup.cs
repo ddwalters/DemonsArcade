@@ -114,7 +114,7 @@ public static class PlayerAnimationSceneSetup
         demo.caption = Label(canvas.transform, "Title", new Vector2(24f, -20f), 30f);
         demo.caption.text = "PLAYER MOVEMENT TEST";
         demo.details = Label(canvas.transform, "Instructions", new Vector2(24f, -64f), 17f);
-        demo.details.text = "WASD / Shift / Space / Mouse  |  Escape releases cursor";
+        demo.details.text = "WASD / Shift / Space / Mouse  |  Code-driven movement  |  Escape releases cursor";
         EditorSceneManager.SaveScene(scene, ScenePath);
         AssetDatabase.SaveAssets();
         Debug.Log($"[Animation Test Scene] Saved {ScenePath} with {previews.Length} animation previews.");

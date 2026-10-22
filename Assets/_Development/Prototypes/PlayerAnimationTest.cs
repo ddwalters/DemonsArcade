@@ -23,6 +23,7 @@ public class PlayerAnimationTest : MonoBehaviour
 
     private CharacterMotor motor;
     private Animator animator;
+    private PlayerCameraRig cameraRig;
     private RuntimeAnimatorController locomotionController;
     private AnimatorOverrideController previewOverride;
     private Vector2 driveInput;
@@ -38,6 +39,7 @@ public class PlayerAnimationTest : MonoBehaviour
     {
         motor = player.GetComponent<CharacterMotor>();
         animator = motor.Animator;
+        cameraRig = player.GetComponent<PlayerCameraRig>();
         locomotionController = animator.runtimeAnimatorController;
         previewOverride = new AnimatorOverrideController(previewController);
     }
@@ -47,7 +49,10 @@ public class PlayerAnimationTest : MonoBehaviour
     private void Update()
     {
         if (driving)
-            motor.Tick(driveInput, sprinting, true, Time.deltaTime);
+        {
+            Vector3 worldMovement = cameraRig.GetMovementDirection(driveInput);
+            motor.Tick(driveInput, sprinting, true, Time.deltaTime, worldMovement);
+        }
         else if (previewing && animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
             animator.Play("Preview", 0, 0f);
     }
@@ -68,9 +73,11 @@ public class PlayerAnimationTest : MonoBehaviour
         RestoreLocomotion();
         driving = false;
         player.enabled = true;
+        motor.Teleport(new Vector3(0f, 1.04f, -2f), Quaternion.identity);
+        cameraRig.ResetView();
         PlayerModeController.ForPlayer(player).ResetToGameplay();
         caption.text = "PLAYER MOVEMENT TEST";
-        details.text = "WASD / Shift / Space / Mouse  |  Third-person camera  |  Camera button: player / overview";
+        details.text = "WASD / Shift / Space / Mouse  |  Code-driven movement  |  Camera button: player / overview";
     }
 
     private void RestoreLocomotion()
@@ -91,10 +98,11 @@ public class PlayerAnimationTest : MonoBehaviour
         sprinting = sprint;
         driving = true;
         motor.Teleport(new Vector3(0f, 1.04f, -2f), Quaternion.identity);
+        cameraRig.ResetView();
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         caption.text = label;
-        details.text = "Live locomotion controller  |  Animation root travel + collision motor";
+        details.text = "Code-driven locomotion  |  The motor turns and moves toward camera-relative input";
     }
 
     public void Jump() => motor.RequestJump();
@@ -109,6 +117,7 @@ public class PlayerAnimationTest : MonoBehaviour
         sprinting = false;
         driving = true;
         motor.Teleport(new Vector3(0f, 1.04f, -2f), Quaternion.identity);
+        cameraRig.ResetView();
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }

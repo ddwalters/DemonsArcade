@@ -102,10 +102,7 @@ public static class SaveFeaturePlayChecks
         int startSettingsFrame = Time.frameCount + 2;
         while (Time.frameCount < startSettingsFrame)
             yield return null;
-        var startSettings = UIController.Current.settingsScreen;
-        startSettings.thirdPersonFov.value = 96f;
-        Require(PlayerCameraRig.GetSavedFieldOfView() == 96f,
-            "Main-menu FOV slider saves the third-person value without a player present.");
+        Require(UIController.Current.settingsScreen != null, "Main-menu settings open without a player present.");
         UIController.Current.HandleEscape();
         saves.NewGame();
         double deadline = EditorApplication.timeSinceStartup + 120;
@@ -185,9 +182,6 @@ public static class SaveFeaturePlayChecks
         Require(player.GetComponent<PlayerCameraRig>().IsThirdPerson &&
             player.GetComponent<PlayerCameraRig>().ViewCamera.targetTexture == null,
             "Save/load retains the local view preference and display camera.");
-        Require(Mathf.Approximately(player.GetComponent<PlayerCameraRig>().ViewCamera.fieldOfView,
-            PlayerCameraRig.GetSavedFieldOfView()),
-            "Save/load applies the saved FOV for the selected view.");
         if (pickupId != null)
             Require(!Object.FindObjectsByType<WorldSaveObject>().Any(target => target.SaveId == pickupId), "Collected pickups stay removed after loading.");
 
@@ -266,9 +260,6 @@ public static class SaveFeaturePlayChecks
     {
         float oldSensitivity = player.LookSensitivity;
         float oldVolume = settings.volume.value;
-        var cameraRig = player.GetComponent<PlayerCameraRig>();
-        bool oldView = cameraRig.IsThirdPerson;
-        float oldThirdPersonFov = PlayerCameraRig.GetSavedFieldOfView();
         int oldQuality = QualitySettings.GetQualityLevel();
         bool hadVolume = PlayerPrefs.HasKey("Settings.Volume");
         bool hadSensitivity = PlayerPrefs.HasKey("Settings.Sensitivity");
@@ -278,9 +269,6 @@ public static class SaveFeaturePlayChecks
         int savedQuality = PlayerPrefs.GetInt("Settings.Quality");
         try
         {
-            settings.thirdPersonFov.value = 104f;
-            Require(Mathf.Approximately(cameraRig.ViewCamera.fieldOfView, 104f) && settings.thirdPersonFovText.text == "104°",
-                "Third-person FOV slider applies immediately while paused and updates its label.");
             settings.volume.value = 37f;
             Require(settings.volumeText.text == "37%" && settings.audioMixer.GetFloat("volume", out float decibels) &&
                 Mathf.Abs(decibels - Mathf.Log10(0.37f) * 20f) < 0.01f, "Volume slider changes the mixer and label.");
@@ -295,8 +283,6 @@ public static class SaveFeaturePlayChecks
         }
         finally
         {
-            PlayerCameraRig.SaveFieldOfView(oldThirdPersonFov);
-            settings.thirdPersonFov.SetValueWithoutNotify(oldThirdPersonFov);
             settings.volume.value = oldVolume;
             settings.sensitivity.value = oldSensitivity;
             if (settings.qualityDropdown != null)

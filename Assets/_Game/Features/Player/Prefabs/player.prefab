@@ -593,7 +593,7 @@ Camera:
     height: 1
   near clip plane: 0.05
   far clip plane: 1000
-  field of view: 80
+  field of view: 60
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
@@ -812,9 +812,12 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterMotor
   animator: {fileID: 2460893685413801240}
-  animationSpeedMultiplier: 1.3
-  movementBlendTime: 0.08
-  stoppingBlendTime: 0.08
+  walkSpeed: 2.2
+  sprintSpeed: 5
+  acceleration: 30
+  braking: 40
+  turnSpeed: 720
+  animationBlendTime: 0.08
   groundMask:
     serializedVersion: 2
     m_Bits: 4294966751
@@ -823,7 +826,6 @@ MonoBehaviour:
   jumpHeight: 1.1
   jumpBufferTime: 0.12
   coyoteTime: 0.1
-  airSpeed: 2.5
   airAcceleration: 4
   knockbackBraking: 8
 --- !u!114 &7869586009327930913
@@ -841,6 +843,7 @@ MonoBehaviour:
   viewCamera: {fileID: 7534581174159498519}
   viewPivot: {fileID: 9210062032661298754}
   thirdPersonOffset: {x: 0.45, y: 0.2, z: -3.25}
+  fieldOfView: 60
   transitionTime: 0.18
   obstructionReturnTime: 0.22
   collisionRadius: 0.2
@@ -1183,6 +1186,10 @@ PrefabInstance:
       propertyPath: m_CullingMode
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6240733294840144465, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
       propertyPath: m_Layer
       value: 9
@@ -1222,10 +1229,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 7857089628861953993}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
 --- !u!95 &2460893685413801240 stripped
 Animator:
@@ -1242,16 +1246,3 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
   m_PrefabInstance: {fileID: 8308099444815417481}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &7857089628861953993
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9191043906649386456}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 258a7c5aaa007a944b04f268a8e34630, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::CharacterRootMotion
-  motor: {fileID: 9201864158812724305}

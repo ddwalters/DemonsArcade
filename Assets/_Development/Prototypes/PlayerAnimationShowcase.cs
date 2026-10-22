@@ -39,14 +39,14 @@ public class PlayerAnimationShowcase : MonoBehaviour
         yield return Move("EASE TO IDLE", Vector2.zero, false, 1.2f);
 
         demo.caption.text = "MOVEMENT SHOWCASE COMPLETE";
-        demo.details.text = "The same third-person root-motion controller drives each blend.";
+        demo.details.text = "The motor controls movement and turning; animations follow measured speed.";
         routine = null;
     }
 
     private IEnumerator Move(string label, Vector2 input, bool sprint, float duration)
     {
         demo.caption.text = label;
-        demo.details.text = "Live locomotion blend tree  |  Animation root travel + collision motor";
+        demo.details.text = "Live speed blend  |  Motor movement and turning are independent of animation playback";
         demo.SetDrive(input, sprint);
 
         for (float elapsed = 0f; elapsed < duration; elapsed += Time.deltaTime)

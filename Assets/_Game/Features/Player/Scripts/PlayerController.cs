@@ -8,10 +8,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float sensitivity = 2f;
     [SerializeField] private float joystickScalingFactor = 2f;
 
-    [Header("Movement")]
-    [SerializeField, Min(0f), Tooltip("Character turning speed in degrees per second.")]
-    private float turnSpeed = 720f;
-
     [Header("Sprint")]
     [SerializeField] private float staminaUsageRate = 1f;
 
@@ -74,31 +70,29 @@ public class PlayerController : MonoBehaviour
         if (controls == null)
             return;
 
-        if (mode.AllowsGameplay && !motor.IsActionActive)
+        bool allowsMovement = mode != null && mode.AllowsGameplay;
+        if (allowsMovement)
             LookAround();
 
         Vector2 input = Vector2.ClampMagnitude(moveInput, 1f);
-        Vector3 movement = cameraRig.GetMovementDirection(input);
-        if (mode.AllowsGameplay && !motor.IsActionActive && movement.sqrMagnitude > 0.001f)
-        {
-            Quaternion facing = Quaternion.LookRotation(movement, Vector3.up);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, facing, turnSpeed * Time.deltaTime);
-        }
-
-        bool sprinting = UpdateSprint();
-        motor.Tick(Vector2.up * input.magnitude, sprinting, mode.AllowsGameplay, Time.deltaTime, movement);
+        Vector3? movement = cameraRig != null ? cameraRig.GetMovementDirection(input) : null;
+        bool sprinting = UpdateSprint(allowsMovement);
+        motor.Tick(input, sprinting, allowsMovement, Time.deltaTime, movement);
     }
 
     public NewControls GetNewControls() => controls;
 
-    private bool UpdateSprint()
+    private bool UpdateSprint(bool allowsMovement)
     {
+        if (statsManager == null)
+            return false;
+
         if (statsManager.GetStamina() <= 0f)
             sprintCooldown = true;
         else if (sprintCooldown && statsManager.GetStamina() >= statsManager.GetMaxStamina() - 1f)
             sprintCooldown = false;
 
-        bool sprinting = mode.AllowsGameplay && !motor.IsActionActive && sprintInput && !sprintCooldown && moveInput.sqrMagnitude > 0.01f;
+        bool sprinting = allowsMovement && sprintInput && !sprintCooldown && moveInput.sqrMagnitude > 0.01f;
         statsManager.SetStaminaUse(sprinting);
         if (sprinting)
             statsManager.UseStamina(staminaUsageRate * Time.deltaTime);
@@ -113,7 +107,7 @@ public class PlayerController : MonoBehaviour
         float yaw = lookInput.x * sensitivity * inputMultiplier;
         float pitch = lookInput.y * sensitivity * inputMultiplier;
 
-        cameraRig.Look(new Vector2(yaw, pitch));
+        cameraRig?.Look(new Vector2(yaw, pitch));
     }
 
     public float LookSensitivity => sensitivity;

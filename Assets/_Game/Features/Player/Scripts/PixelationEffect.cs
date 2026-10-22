@@ -18,15 +18,12 @@ public class PixelationEffect : MonoBehaviour
     private bool isTransitioning = false;
     private float transitionDuration = 0.3f; // Duration of each effect (pixelation/normalization) in seconds
 
-    // Start is called before the first frame update
     void Start()
     {
-        // Save the screen's resolution
         originalWidth = Screen.width;
         originalHeight = Screen.height;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (makePixelated)

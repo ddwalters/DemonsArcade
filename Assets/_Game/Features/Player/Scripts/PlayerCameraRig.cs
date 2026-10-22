@@ -1,17 +1,12 @@
 using UnityEngine;
 
-// Third-person orbit camera independent of the animated head and body root motion.
 [DefaultExecutionOrder(100)]
 public class PlayerCameraRig : MonoBehaviour
 {
-    public const string ThirdPersonFovKey = "Settings.ThirdPersonFov";
-    public const float DefaultFov = 80f;
-    public const float MinFov = 60f;
-    public const float MaxFov = 110f;
-
     [SerializeField] private Camera viewCamera;
     [SerializeField] private Transform viewPivot;
     [SerializeField] private Vector3 thirdPersonOffset = new Vector3(0.45f, 0.2f, -3.25f);
+    [SerializeField, Range(1f, 179f)] private float fieldOfView = 60f;
     [SerializeField, Min(0.01f)] private float transitionTime = 0.18f;
     [SerializeField, Min(0.01f)] private float obstructionReturnTime = 0.22f;
     [SerializeField, Min(0.01f)] private float collisionRadius = 0.2f;
@@ -39,6 +34,8 @@ public class PlayerCameraRig : MonoBehaviour
         ResetView();
     }
 
+    private void OnValidate() => ApplyFieldOfView();
+
     public void Look(Vector2 delta)
     {
         yaw = Mathf.Repeat(yaw + delta.x, 360f);
@@ -55,13 +52,11 @@ public class PlayerCameraRig : MonoBehaviour
         ResetPlacement();
     }
 
-    public static float GetSavedFieldOfView() => Mathf.Clamp(
-        PlayerPrefs.GetFloat(ThirdPersonFovKey, DefaultFov), MinFov, MaxFov);
-
-    public static void SaveFieldOfView(float value) => PlayerPrefs.SetFloat(
-        ThirdPersonFovKey, Mathf.Clamp(value, MinFov, MaxFov));
-
-    public void ApplyFieldOfView() => viewCamera.fieldOfView = GetSavedFieldOfView();
+    public void ApplyFieldOfView()
+    {
+        if (viewCamera != null)
+            viewCamera.fieldOfView = fieldOfView;
+    }
 
     private void ResetPlacement()
     {
