@@ -1,6 +1,7 @@
+using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.UI;
 
 public class InteractionUIPanel : MonoBehaviour
@@ -11,10 +12,13 @@ public class InteractionUIPanel : MonoBehaviour
     private const float PromptGap = 8f;
     private const float ProgressIndicatorOffset = 24f;
     private const float HudPromptVerticalFraction = 0.35f;
-    private const float WorldNameFontSize = 36f;
-    private const float WorldNameScale = 0.05f;
-    private const float WorldNameMaximumWidth = 16f;
-    private const float WorldNameHeight = 5f;
+
+    [Serializable]
+    private struct NameLabelEntry
+    {
+        public InteractionWorldSpaceNameType nameType;
+        public FloatingNameLabel prefab;
+    }
 
     private bool isReset;
     private RectTransform panelRect;
@@ -23,14 +27,17 @@ public class InteractionUIPanel : MonoBehaviour
     private RectTransform tooltipRect;
     private Image keycapImage;
     private TextMeshProUGUI keycapText;
-    private TextMeshPro targetNameText;
-    private Camera targetNameCamera;
+    private FloatingNameLabel activeNameLabel;
+    private bool missingNameLabelReported;
     private string currentTooltip;
     private string currentBinding;
     private string currentTargetName;
+    private InteractionWorldSpaceNameType currentTargetNameType;
+    private readonly Dictionary<InteractionWorldSpaceNameType, FloatingNameLabel> nameLabelInstances = new();
 
     [SerializeField] private Image progressBar;
     [SerializeField] private TextMeshProUGUI tooltipText;
+    [SerializeField] private NameLabelEntry[] nameLabels;
 
     private void Awake()
     {
@@ -53,26 +60,22 @@ public class InteractionUIPanel : MonoBehaviour
     private void LateUpdate()
     {
         SetFixedPromptPosition();
-        if (targetNameText != null && targetNameText.gameObject.activeSelf && targetNameCamera != null)
-            targetNameText.transform.rotation = targetNameCamera.transform.rotation;
     }
 
     private void OnDisable()
     {
-        if (targetNameText != null)
-            targetNameText.gameObject.SetActive(false);
         ResetUI();
     }
 
     private void OnDestroy()
     {
-        if (targetNameText != null)
+        foreach (FloatingNameLabel label in nameLabelInstances.Values)
         {
-            if (Application.isPlaying)
-                Destroy(targetNameText.gameObject);
-            else
-                DestroyImmediate(targetNameText.gameObject);
+            if (label != null)
+                Destroy(label.gameObject);
         }
+
+        nameLabelInstances.Clear();
     }
 
     public void SetToolTip(string tooltip)
@@ -100,39 +103,36 @@ public class InteractionUIPanel : MonoBehaviour
         isReset = false;
     }
 
-    public void SetTargetName(string targetName)
+    public void SetTargetName(string targetName, InteractionWorldSpaceNameType nameType)
     {
         targetName ??= string.Empty;
-        if (currentTargetName == targetName && targetNameText != null)
+        if (currentTargetName == targetName && currentTargetNameType == nameType && activeNameLabel != null)
             return;
 
+        if (activeNameLabel != null)
+            activeNameLabel.Hide();
+
+        activeNameLabel = null;
         currentTargetName = targetName;
+        currentTargetNameType = nameType;
         if (string.IsNullOrWhiteSpace(currentTargetName))
-        {
-            if (targetNameText != null)
-                targetNameText.gameObject.SetActive(false);
-            return;
-        }
-
-        CreateWorldNameLabel();
-        if (targetNameText == null)
             return;
 
-        targetNameText.SetText(currentTargetName);
-        RefreshTargetNameLayout();
-        targetNameText.gameObject.SetActive(false);
+        activeNameLabel = GetNameLabel(nameType);
+        if (activeNameLabel == null)
+            return;
+
+        activeNameLabel.SetName(currentTargetName);
+        activeNameLabel.Hide();
         isReset = false;
     }
 
     public void SetTargetWorldPosition(Vector3 worldPosition, Camera viewCamera)
     {
-        if (targetNameText == null || string.IsNullOrWhiteSpace(currentTargetName) || viewCamera == null)
+        if (activeNameLabel == null || viewCamera == null)
             return;
 
-        targetNameCamera = viewCamera;
-        targetNameText.transform.position = worldPosition;
-        targetNameText.transform.rotation = viewCamera.transform.rotation;
-        targetNameText.gameObject.SetActive(true);
+        activeNameLabel.Show(worldPosition, viewCamera);
     }
 
     public void UpdateProgressBar(float fillAmount)
@@ -165,13 +165,13 @@ public class InteractionUIPanel : MonoBehaviour
 
         if (promptRect != null)
             promptRect.gameObject.SetActive(false);
-        if (targetNameText != null)
-            targetNameText.gameObject.SetActive(false);
+        if (activeNameLabel != null)
+            activeNameLabel.Hide();
 
+        activeNameLabel = null;
         currentTooltip = null;
         currentBinding = null;
         currentTargetName = null;
-        targetNameCamera = null;
         isReset = true;
     }
 
@@ -270,49 +270,44 @@ public class InteractionUIPanel : MonoBehaviour
         tooltipRect.sizeDelta = new Vector2(tooltipWidth, tooltipHeight);
     }
 
-    private void RefreshTargetNameLayout()
+    private FloatingNameLabel GetNameLabel(InteractionWorldSpaceNameType nameType)
     {
-        if (targetNameText == null)
-            return;
+        if (nameLabelInstances.TryGetValue(nameType, out FloatingNameLabel existing) && existing != null)
+            return existing;
 
-        Vector2 textSize = targetNameText.GetPreferredValues(currentTargetName);
-        float width = Mathf.Max(textSize.x, 2f);
-        float height = Mathf.Max(textSize.y, WorldNameHeight);
-        targetNameText.rectTransform.sizeDelta = new Vector2(width, height);
-    }
+        FloatingNameLabel prefab = FindNameLabelPrefab(nameType);
+        if (prefab == null)
+            prefab = FindNameLabelPrefab(InteractionWorldSpaceNameType.Default);
 
-    private void CreateWorldNameLabel()
-    {
-        if (targetNameText != null || tooltipText == null)
-            return;
-
-        GameObject nameObject = new GameObject("Interaction Target Name", typeof(TextMeshPro));
-        nameObject.layer = 0;
-        targetNameText = nameObject.GetComponent<TextMeshPro>();
-        targetNameText.font = tooltipText.font;
-        targetNameText.fontSize = WorldNameFontSize;
-        targetNameText.fontStyle = FontStyles.Bold;
-        targetNameText.alignment = TextAlignmentOptions.Center;
-        targetNameText.color = Color.white;
-        targetNameText.isOrthographic = false;
-        targetNameText.textWrappingMode = TextWrappingModes.NoWrap;
-        targetNameText.overflowMode = TextOverflowModes.Overflow;
-
-        RectTransform nameRect = targetNameText.rectTransform;
-        nameRect.anchorMin = new Vector2(0.5f, 0.5f);
-        nameRect.anchorMax = new Vector2(0.5f, 0.5f);
-        nameRect.pivot = new Vector2(0.5f, 0.5f);
-        nameRect.sizeDelta = new Vector2(WorldNameMaximumWidth, WorldNameHeight);
-        targetNameText.transform.localScale = Vector3.one * WorldNameScale;
-
-        Renderer nameRenderer = targetNameText.GetComponent<Renderer>();
-        if (nameRenderer != null)
+        if (prefab == null)
         {
-            nameRenderer.shadowCastingMode = ShadowCastingMode.Off;
-            nameRenderer.receiveShadows = false;
+            if (!missingNameLabelReported)
+            {
+                Debug.LogWarning("InteractionUIPanel has no name label prefab assigned.", this);
+                missingNameLabelReported = true;
+            }
+
+            return null;
         }
 
-        targetNameText.gameObject.SetActive(false);
+        FloatingNameLabel instance = Instantiate(prefab);
+        instance.gameObject.SetActive(false);
+        nameLabelInstances[nameType] = instance;
+        return instance;
+    }
+
+    private FloatingNameLabel FindNameLabelPrefab(InteractionWorldSpaceNameType nameType)
+    {
+        if (nameLabels == null)
+            return null;
+
+        foreach (NameLabelEntry entry in nameLabels)
+        {
+            if (entry.nameType == nameType && entry.prefab != null)
+                return entry.prefab;
+        }
+
+        return null;
     }
 
     private void SetFixedPromptPosition()

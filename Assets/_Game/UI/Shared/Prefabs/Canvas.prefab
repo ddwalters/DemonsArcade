@@ -51,6 +51,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   progressBar: {fileID: 1305698452165707778}
   tooltipText: {fileID: 7923158825413953375}
+  nameLabels:
+  - nameType: 0
+    prefab: {fileID: 1722196163289342144, guid: 38775d236d2ce934093a5a1a40f65f19, type: 3}
+  - nameType: 1
+    prefab: {fileID: 6796958515323013775, guid: 31aed3da9efae4745aae1eaaac66cc1d, type: 3}
+  - nameType: 2
+    prefab: {fileID: 2184148723854509731, guid: ab89950094297dd45aecfcb64e958f78, type: 3}
 --- !u!1 &848482990021559085
 GameObject:
   m_ObjectHideFlags: 0
@@ -1120,6 +1127,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
+  m_UseReflectionProbes: 0
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -1344,20 +1352,23 @@ MonoBehaviour:
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
+  m_EmojiFallbackSupport: 1
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
@@ -1677,6 +1688,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6240684032909703645}
     m_Modifications:
+    - target: {fileID: 3145756229994911649, guid: 360db6f632e4938428bdf368e8fc353c, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     - target: {fileID: 5550702610339323654, guid: 360db6f632e4938428bdf368e8fc353c, type: 3}
       propertyPath: m_Color.b
       value: 1
@@ -1720,6 +1735,10 @@ PrefabInstance:
     - target: {fileID: 5775220551801644467, guid: 360db6f632e4938428bdf368e8fc353c, type: 3}
       propertyPath: m_hasFontAssetChanged
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5775220551801644467, guid: 360db6f632e4938428bdf368e8fc353c, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
       objectReference: {fileID: 0}
     - target: {fileID: 6522398617524700353, guid: 360db6f632e4938428bdf368e8fc353c, type: 3}
       propertyPath: border
@@ -1995,6 +2014,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6240684032909703645}
     m_Modifications:
+    - target: {fileID: 3509654653595049047, guid: a2c1608ed7413d74daee436207f2b28c, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    - target: {fileID: 3509654653595049047, guid: a2c1608ed7413d74daee436207f2b28c, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    - target: {fileID: 3509654653595049047, guid: a2c1608ed7413d74daee436207f2b28c, type: 3}
+      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
+      value: 1801810542
+      objectReference: {fileID: 0}
     - target: {fileID: 5214272346906216503, guid: a2c1608ed7413d74daee436207f2b28c, type: 3}
       propertyPath: m_Name
       value: GoldCounter

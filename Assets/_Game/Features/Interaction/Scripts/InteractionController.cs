@@ -101,7 +101,7 @@ public class InteractionController : MonoBehaviour
 
         if (target != null)
         {
-            uiPanel.SetTargetName(target.DisplayName);
+            uiPanel.SetTargetName(target.DisplayName, target.WorldSpaceNameType);
             uiPanel.SetToolTip(GetTargetTooltip(), GetInteractBindingDisplayString());
             uiPanel.SetTargetWorldPosition(GetTargetNamePosition(), playerCamera);
         }
@@ -363,7 +363,7 @@ public class InteractionController : MonoBehaviour
             uiPanel.ResetUI();
             if (target != null)
             {
-                uiPanel.SetTargetName(target.DisplayName);
+                uiPanel.SetTargetName(target.DisplayName, target.WorldSpaceNameType);
                 uiPanel.SetToolTip(GetTargetTooltip(), GetInteractBindingDisplayString());
             }
         }

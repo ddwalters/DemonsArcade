@@ -14,6 +14,8 @@ public class MerchantInteractable : InteractableBase
     private int gridId;
     public int GridId => gridId;
 
+    public override InteractionWorldSpaceNameType WorldSpaceNameType => InteractionWorldSpaceNameType.Npc;
+
     private void Awake()
     {
         inventory = FindAnyObjectByType<Inventory>();

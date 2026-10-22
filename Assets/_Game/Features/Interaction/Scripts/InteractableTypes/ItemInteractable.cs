@@ -4,6 +4,8 @@ public class ItemInteractable : InteractableBase
 {
     [SerializeField] ItemData itemData;
 
+    public override InteractionWorldSpaceNameType WorldSpaceNameType => InteractionWorldSpaceNameType.Item;
+
     public override string DisplayName
     {
         get
@@ -12,8 +14,8 @@ public class ItemInteractable : InteractableBase
                 return ConfiguredDisplayName.Trim();
 
             string itemName = itemData != null && itemData.itemStats != null
-                ? itemData.itemStats.GetItemName()
-                : null;
+                ? itemData.itemStats.GetItemName() : null;
+
             if (!string.IsNullOrWhiteSpace(itemName))
                 return itemName.Trim();
 

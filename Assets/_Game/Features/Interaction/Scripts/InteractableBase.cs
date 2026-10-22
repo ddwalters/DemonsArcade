@@ -32,6 +32,8 @@ public class InteractableBase : MonoBehaviour, IInteractable
         }
     }
 
+    public virtual InteractionWorldSpaceNameType WorldSpaceNameType => InteractionWorldSpaceNameType.Default;
+
     public virtual void OnInteract() { }
 
     protected void SetInteractable(bool interactable) => isInteractable = interactable;
