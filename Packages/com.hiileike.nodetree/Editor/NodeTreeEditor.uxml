@@ -1,0 +1,22 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xmlns:local="NodeTree.Editor" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="NodeTreeEditor.uss" />
+
+    <ui:VisualElement name="main-container" style="flex-grow: 1;">
+        <ui:VisualElement name="list-view-container" style="min-height: auto;">
+            <ui:Label text="Node Selector" style="font-size: 14px; -unity-font-style: bold;" />
+            <ui:VisualElement class="hr-line" />
+            <uie:ToolbarSearchField name="node-search-field" style="width: 80%;" />
+            <ui:ListView name="node-list-view" />
+
+            <ui:Label text="Scriptable Objects" style="font-size: 14px; -unity-font-style: bold; margin-top: 10px;" />
+            <ui:VisualElement class="hr-line" />
+            <uie:ToolbarSearchField name="scriptable-object-search-field" style="width: 80%;" />
+            <ui:ListView name="scriptable-object-list-view" />
+
+        </ui:VisualElement>
+
+        <ui:VisualElement name="graph-view-container">
+            <local:TreeGraphView name="tree-graph-view" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

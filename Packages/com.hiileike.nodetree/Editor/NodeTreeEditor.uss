@@ -1,0 +1,47 @@
+#main-container {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+#list-view-container {
+    flex-direction: column;
+    flex-basis: 20%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    min-width: 200px;
+    padding: 10px;
+    background-color: rgb(45, 45, 45);
+}
+
+#node-list-view {
+    flex-grow: 4;
+}
+
+#node-search-field {
+    margin-bottom: 6px;
+}
+
+#scriptable-object-search-field {
+    margin-bottom: 6px;
+}
+
+#scriptable-object-list-view {
+    flex-grow: 1;
+    min-height: 0;
+}
+
+#audio-clip-list-view {
+    flex-grow: 1;
+    min-height: 0;
+}
+
+#graph-view-container {
+    flex-grow: 1;
+}
+
+.hr-line {
+    background-color: rgb(75, 75, 75);
+    height: 1px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}

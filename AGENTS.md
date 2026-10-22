@@ -21,6 +21,16 @@ luna_threshold = "exact mechanical work, tests, formatting, refactoring"
 
 Use these as workspace instructions when the requested models and delegation tools are available. This Markdown file does not itself change the app's active model or register configuration keys.
 
+### Delegate routine execution to Luna
+
+Apply this standing preference in every chat working in this repository, without waiting for the user to repeat it:
+
+- Delegate routine execution to a cheaper `gpt-6-luna` subagent. This includes gameplay recordings, video encoding, uploads, file transfers, straightforward code changes, formatting, refactoring, and routine validation.
+- Use Luna with `max` reasoning effort for code work and recordings/uploads; use the configured `high` default for simpler mechanical tasks. Luna does not support `ultra`.
+- The main Sol agent handles architecture, complex planning, choreography, coordination, and final verification. Verify the resulting artifact or behavior, and confirm uploads reached their requested destination, before reporting completion.
+- For a task such as recording a gameplay walkthrough and uploading it, give Luna the complete execution task, then independently inspect the video and upload confirmation. Do not perform the entire routine task on Sol merely because the tools are available there.
+- If Luna or delegation is unavailable, explain that briefly and continue the authorized work with the available agent.
+
 ## Global standing practices
 
 ### Background bash tasks: always checkpoint

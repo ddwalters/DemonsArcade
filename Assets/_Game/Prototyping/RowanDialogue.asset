@@ -1,0 +1,113 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ae2a7f2f014708499c628fd68af88ac, type: 3}
+  m_Name: RowanDialogue
+  m_EditorClassIdentifier: Hiileike.Nodetree::NodeTree.NodeTreeGraphSO
+  Nodes:
+  - rid: 5520813321165733974
+  - rid: 5520813321165733975
+  - rid: 5520813321165733976
+  - rid: 5520813321165733977
+  - rid: 5520813321165733978
+  Edges:
+  - OutputNodeGuid: start
+    InputNodeGuid: hello
+    OutputPortIndex: 0
+  - OutputNodeGuid: hello
+    InputNodeGuid: course
+    OutputPortIndex: 0
+  - OutputNodeGuid: course
+    InputNodeGuid: bye
+    OutputPortIndex: 0
+  - OutputNodeGuid: bye
+    InputNodeGuid: end
+    OutputPortIndex: 0
+  defaultTextSpeed: 0.018
+  IndicatorIcon: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: 5520813321165733974
+      type: {class: StartNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: start
+        Position: {x: 50, y: 100}
+        HasSeen: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+    - rid: 5520813321165733975
+      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: hello
+        Position: {x: 300, y: 100}
+        HasSeen: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+        DialogText: 'ROWAN
+
+          Welcome to the practice yard! I am testing
+          the same walking and stair movement as you.'
+        TypingTickClip: {fileID: 0}
+        FontAsset: {fileID: 0}
+        FontSize: 26
+        FontColor: {r: 1, g: 1, b: 1, a: 1}
+        FontStyle: 0
+        TextSpeed: 0
+    - rid: 5520813321165733976
+      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: course
+        Position: {x: 600, y: 100}
+        HasSeen: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+        DialogText: 'ROWAN
+
+          Try the green box for a short jump. The orange
+          box is deliberately too tall. My patrol takes me up the stairs, through
+          the doorway, and back around.'
+        TypingTickClip: {fileID: 0}
+        FontAsset: {fileID: 0}
+        FontSize: 26
+        FontColor: {r: 1, g: 1, b: 1, a: 1}
+        FontStyle: 0
+        TextSpeed: 0
+    - rid: 5520813321165733977
+      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: bye
+        Position: {x: 900, y: 100}
+        HasSeen: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+        DialogText: 'ROWAN
+
+          Catch me again whenever you like. I will pick
+          up my patrol where we stopped.
+
+
+          Use your interaction button
+          to continue; Escape or controller Back/Cancel closes this conversation.'
+        TypingTickClip: {fileID: 0}
+        FontAsset: {fileID: 0}
+        FontSize: 26
+        FontColor: {r: 1, g: 1, b: 1, a: 1}
+        FontStyle: 0
+        TextSpeed: 0
+    - rid: 5520813321165733978
+      type: {class: EndNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: end
+        Position: {x: 1200, y: 100}
+        HasSeen: 0
+        Conditions: []
+        ConditionFailBehavior: 0
