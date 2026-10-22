@@ -9,6 +9,7 @@ public class PlayerStatsManager : MonoBehaviour
     [SerializeField, Min(0f)] private float staminaRecoveryRate = 1.5f;
 
     private Animator BloodyScreenAnim;
+    private PlayerEquipment playerEquipment;
     private bool isUsingStamina;
     private int temporaryEffects;
     public bool HasTemporaryEffects => temporaryEffects > 0;
@@ -89,7 +90,9 @@ public class PlayerStatsManager : MonoBehaviour
     #region Health
     public void DamagePlayer(float damageAmount)
     {
-        statsData.currentHealth = Mathf.Max(0, statsData.currentHealth - damageAmount);
+        float incomingDamage = Mathf.Max(0f, damageAmount);
+        incomingDamage = Mathf.Max(0f, incomingDamage - GetEquipmentBonus(EquipmentStat.Defense));
+        statsData.currentHealth = Mathf.Max(0f, statsData.currentHealth - incomingDamage);
         if (statsData.currentHealth == 0)
         {
             PlayerDeath();
@@ -123,9 +126,19 @@ public class PlayerStatsManager : MonoBehaviour
     {
         if (!isUsingStamina && statsData.currentStamina < statsData.maxStamina)
         {
+            float recoveryRate = Mathf.Max(0f,
+                staminaRecoveryRate + GetEquipmentBonus(EquipmentStat.StaminaRecovery));
             statsData.currentStamina = Mathf.Min(statsData.maxStamina,
-                statsData.currentStamina + staminaRecoveryRate * Time.deltaTime);
+                statsData.currentStamina + recoveryRate * Time.deltaTime);
         }
+    }
+
+    private int GetEquipmentBonus(EquipmentStat stat)
+    {
+        if (playerEquipment == null)
+            playerEquipment = GetComponent<PlayerEquipment>();
+
+        return playerEquipment != null ? playerEquipment.GetBonus(stat) : 0;
     }
 
     private void IncreaseStaminaStat()

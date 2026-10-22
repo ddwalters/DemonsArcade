@@ -54,7 +54,12 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if (IsHeld || inventory.tooltip == null || definition.itemStats == null)
             return;
 
-        inventory.tooltip.ShowToolTip(definition.itemStats.GetItemName(), definition.itemStats.CreateItemDescriptionText(),
+        InventoryManager manager = FindAnyObjectByType<InventoryManager>();
+        string description = manager != null
+            ? EquipmentDescription.Build(definition, manager.CurrentEquipment)
+            : definition.itemStats.CreateItemDescriptionText();
+
+        inventory.tooltip.ShowToolTip(definition.itemStats.GetItemName(), description,
             definition.rarity != null ? definition.rarity.rarityColor : Color.white);
     }
 

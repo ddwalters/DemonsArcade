@@ -1,11 +1,25 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class InventoryManager : MonoBehaviour
 {
     private Dictionary<int, (List<ItemInstance> list, InventoryType type)> ItemDataInformation;
-    private WeaponsHandler weaponHandler;
     private int nextGridId = 8;
+    private EquipmentTotals currentEquipment;
+    private bool playerInventoryTypeBound;
+
+    public event Action<EquipmentTotals> EquipmentChanged;
+    public EquipmentTotals CurrentEquipment
+    {
+        get
+        {
+            EnsureInitialized();
+            return currentEquipment;
+        }
+    }
 
     [SerializeField] private Sprite[] armorSlotIcons;
     [SerializeField] private Sprite[] weaponIcons;
@@ -24,10 +38,27 @@ public class InventoryManager : MonoBehaviour
         }
 
         DontDestroyOnLoad(gameObject);
-        Initialize(FindAnyObjectByType<PlayerStatsManager>().GetPlayerStats().inventoryType);
+
+        PlayerStatsManager playerStats = FindAnyObjectByType<PlayerStatsManager>();
+        if (playerStats != null)
+        {
+            Initialize(playerStats.GetPlayerStats().inventoryType);
+            playerInventoryTypeBound = true;
+        }
+        else
+        {
+            // The inventory can be created before the player during scene startup.
+            Initialize(InventoryType.FourByFourFull);
+        }
+
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
-    private void Start() => weaponHandler = FindAnyObjectByType<WeaponsHandler>();
+    private void Start() => RebuildEquipment();
+
+    private void OnDestroy() => SceneManager.sceneLoaded -= OnSceneLoaded;
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) => RebuildEquipment();
 
     public void Initialize(InventoryType playerType)
     {
@@ -38,6 +69,27 @@ public class InventoryManager : MonoBehaviour
         ItemDataInformation.Add(0, (new List<ItemInstance>(), playerType));
         for (int id = 1; id <= 7; id++)
             ItemDataInformation.Add(id, (new List<ItemInstance>(), InventoryType.OneByOneMinimal));
+
+        currentEquipment = EquipmentCalculator.Calculate(Array.Empty<ItemData>());
+    }
+
+    private void EnsureInitialized()
+    {
+        if (ItemDataInformation == null)
+            Initialize(InventoryType.FourByFourFull);
+    }
+
+    private void BindPlayerInventoryTypeIfAvailable()
+    {
+        if (playerInventoryTypeBound)
+            return;
+
+        PlayerStatsManager playerStats = FindAnyObjectByType<PlayerStatsManager>();
+        if (playerStats == null)
+            return;
+
+        SetPlayerInventoryType(playerStats.GetPlayerStats().inventoryType);
+        playerInventoryTypeBound = true;
     }
 
     public static bool IsEquipmentGrid(int id) => id >= 1 && id <= 7;
@@ -75,40 +127,68 @@ public class InventoryManager : MonoBehaviour
 
     public int AddNewGridList(InventoryType type)
     {
+        EnsureInitialized();
         int id = nextGridId++;
         ItemDataInformation.Add(id, (new List<ItemInstance>(), type));
         return id;
     }
 
-    public (List<ItemInstance> list, InventoryType type) GetItems(int id) => ItemDataInformation[id];
+    public (List<ItemInstance> list, InventoryType type) GetItems(int id)
+    {
+        EnsureInitialized();
+        return ItemDataInformation[id];
+    }
 
     public void SetPlayerInventoryType(InventoryType type)
     {
+        EnsureInitialized();
         ItemDataInformation[0] = (GetItems(0).list, type);
+        playerInventoryTypeBound = true;
     }
 
     public void ReplaceItems(int id, List<ItemInstance> items)
     {
+        EnsureInitialized();
         var list = GetItems(id).list;
         list.Clear();
         list.AddRange(items);
+
+        if (IsEquipmentGrid(id))
+            RefreshEquipment(id, id);
     }
 
     public void RebuildEquipment()
     {
-        weaponHandler = FindAnyObjectByType<WeaponsHandler>();
-        RefreshEquipment((int)EquipmentSlot.RightHand, (int)EquipmentSlot.LeftHand);
+        EnsureInitialized();
+        BindPlayerInventoryTypeIfAvailable();
+        RecomputeEquipment();
+        RefreshRightHandWeapon();
     }
 
     public void RemoveGrid(int id)
     {
+        EnsureInitialized();
         if (!IsEquipmentGrid(id) && id != 0)
             ItemDataInformation.Remove(id);
+    }
+
+    public IEnumerable<ItemData> EnumerateEquippedItems()
+    {
+        EnsureInitialized();
+        for (int id = 1; id <= 7; id++)
+        {
+            foreach (ItemInstance item in ItemDataInformation[id].list)
+            {
+                if (item != null && item.Definition != null)
+                    yield return item.Definition;
+            }
+        }
     }
 
     public bool CanPlace(int gridId, ItemData definition, Vector2Int position, int rotation,
         Vector2Int gridSize, ItemInstance ignore = null, ItemInstance otherIgnore = null)
     {
+        EnsureInitialized();
         if (definition == null || !ItemDataInformation.TryGetValue(gridId, out var grid))
             return false;
 
@@ -148,6 +228,7 @@ public class InventoryManager : MonoBehaviour
     public bool TryMoveItem(int sourceId, ItemInstance item, int destinationId,
         Vector2Int position, int rotation, Vector2Int destinationSize)
     {
+        EnsureInitialized();
         var source = GetItems(sourceId).list;
         if (!source.Contains(item) || !CanPlace(destinationId, item.Definition, position, rotation, destinationSize, item))
             return false;
@@ -160,6 +241,7 @@ public class InventoryManager : MonoBehaviour
     public bool TrySwapItems(int sourceId, ItemInstance item, int destinationId, ItemInstance other,
         Vector2Int position, int rotation, Vector2Int sourceSize, Vector2Int destinationSize)
     {
+        EnsureInitialized();
         var source = GetItems(sourceId).list;
         var destination = GetItems(destinationId).list;
         if (ReferenceEquals(item, other) || !source.Contains(item) || !destination.Contains(other))
@@ -184,6 +266,10 @@ public class InventoryManager : MonoBehaviour
 
     public bool TryAddItem(int gridId, ItemInstance item, Vector2Int gridSize)
     {
+        EnsureInitialized();
+        if (item == null)
+            return false;
+
         if (!CanPlace(gridId, item.Definition, item.Position, item.Rotation, gridSize))
             return false;
 
@@ -196,22 +282,61 @@ public class InventoryManager : MonoBehaviour
 
     public void RemoveItem(int gridId, ItemInstance item)
     {
+        EnsureInitialized();
         if (GetItems(gridId).list.Remove(item))
             RefreshEquipment(gridId, gridId);
     }
 
     private void RefreshEquipment(int source, int destination)
     {
+        if (!IsEquipmentGrid(source) && !IsEquipmentGrid(destination))
+            return;
+
+        RecomputeEquipment();
+
+        if (source == (int)EquipmentSlot.RightHand || destination == (int)EquipmentSlot.RightHand)
+            RefreshRightHandWeapon();
+    }
+
+    private void RecomputeEquipment()
+    {
+        ItemData[] equippedItems = EnumerateEquippedItems().ToArray();
+        currentEquipment = EquipmentCalculator.Calculate(equippedItems);
+
+        PlayerEquipment playerEquipment = FindPlayerEquipment();
+        if (playerEquipment != null)
+            playerEquipment.SetEquipment(currentEquipment, equippedItems);
+
+        EquipmentChanged?.Invoke(currentEquipment);
+    }
+
+    private PlayerEquipment FindPlayerEquipment()
+    {
+        PlayerController player = FindAnyObjectByType<PlayerController>();
+        if (player == null)
+            return null;
+
+        PlayerEquipment playerEquipment = player.GetComponent<PlayerEquipment>();
+        if (playerEquipment == null)
+            playerEquipment = player.gameObject.AddComponent<PlayerEquipment>();
+
+        if (player.GetComponent<EquipmentVisualController>() == null)
+            player.gameObject.AddComponent<EquipmentVisualController>();
+
+        return playerEquipment;
+    }
+
+    private void RefreshRightHandWeapon()
+    {
+        PlayerController player = FindAnyObjectByType<PlayerController>();
+        WeaponsHandler weaponHandler = player != null ? player.GetComponent<WeaponsHandler>() : null;
         if (weaponHandler == null)
             return;
 
-        if (source == (int)EquipmentSlot.RightHand || destination == (int)EquipmentSlot.RightHand)
-        {
-            weaponHandler.RemoveItemFromPlayerRightHand();
+        weaponHandler.RemoveItemFromPlayerRightHand();
 
-            var list = GetItems((int)EquipmentSlot.RightHand).list;
-            if (list.Count > 0)
-                weaponHandler.AddItemToPlayerRightHand(list[0].Definition.itemStats);
-        }
+        var list = GetItems((int)EquipmentSlot.RightHand).list;
+        if (list.Count > 0 && list[0].Definition != null && list[0].Definition.itemStats != null)
+            weaponHandler.AddItemToPlayerRightHand(list[0].Definition.itemStats);
     }
 }

@@ -20,6 +20,7 @@ public class PlayerCombatHandler : MonoBehaviour
     Sword swordRightHandler;
     Axe axeRightHandler;
     Staff staffRightHandler;
+    PlayerEquipment playerEquipment;
 
     private void Start()
     {
@@ -94,8 +95,20 @@ public class PlayerCombatHandler : MonoBehaviour
     public void DamageEnemy(EnemyStats enemyStats)
     {
         if (mode.AllowsGameplay && canAttack && itemStats != null)
-            StartCoroutine(enemyStats.DamageMonster(itemStats.GetDamage()));
+        {
+            float damage = itemStats.GetDamage() + GetEquipmentAttackBonus();
+            StartCoroutine(enemyStats.DamageMonster(Mathf.Max(0f, damage)));
+        }
     }
+
+    private int GetEquipmentAttackBonus()
+    {
+        if (playerEquipment == null)
+            playerEquipment = GetComponentInParent<PlayerEquipment>();
+
+        return playerEquipment != null ? playerEquipment.GetBonus(EquipmentStat.Attack) : 0;
+    }
+
     public void SetWeaponStats(ItemStatsData itemStats) => this.itemStats = itemStats;
     public void SetAttack(bool status)
     {

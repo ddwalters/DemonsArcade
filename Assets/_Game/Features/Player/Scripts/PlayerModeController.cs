@@ -19,6 +19,7 @@ public class PlayerModeController : MonoBehaviour
     public bool AllowsGameplay => Mode == PlayerMode.Gameplay;
     public event Action<PlayerMode> ModeChanged;
     private float previousTimeScale = 1f;
+    private bool cursorLockPending;
 
     public static PlayerModeController ForPlayer(PlayerController player)
     {
@@ -30,6 +31,13 @@ public class PlayerModeController : MonoBehaviour
 
     private void Update()
     {
+        if (cursorLockPending && Time.frameCount > ChangedFrame)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+            cursorLockPending = false;
+        }
+
         NewControls controls = GetComponent<PlayerController>()?.GetNewControls();
         bool interactPressed = controls != null && controls.BasicActionMap.Interact.WasPressedThisFrame();
         HandleMenuInput(MenuInput.PausePressed, MenuInput.InventoryPressed, interactPressed);
@@ -85,8 +93,12 @@ public class PlayerModeController : MonoBehaviour
         if (next != PlayerMode.Looting)
             LootGridId = -1;
 
-        Cursor.lockState = next == PlayerMode.Gameplay ? CursorLockMode.Locked : CursorLockMode.Confined;
-        Cursor.visible = next != PlayerMode.Gameplay;
+        cursorLockPending = next == PlayerMode.Gameplay;
+        if (!cursorLockPending)
+        {
+            Cursor.lockState = CursorLockMode.Confined;
+            Cursor.visible = true;
+        }
 
         if (next != PlayerMode.Gameplay)
             GetComponent<PlayerController>()?.StopMotion();
