@@ -58,10 +58,7 @@ public class PlayerStatsManager : MonoBehaviour
     private void LevelUp()
     {
         if (statsData.lvl >= 100)
-        {
-            Debug.Log("Max Level");
             return;
-        }
 
         statsData.lvl++;
         IncreaseStats();
@@ -77,10 +74,7 @@ public class PlayerStatsManager : MonoBehaviour
     public void GainEXP(int expGain)
     {
         if (statsData.lvl >= 100)
-        {
-            Debug.Log("Max Level No Exp Gain");
             return;
-        }
 
         statsData.currentXP += expGain;
         while (statsData.currentXP >= statsData.nextLevelXP && statsData.lvl < 100)

@@ -62,26 +62,6 @@ public class WeaponsHandler : MonoBehaviour
     }
     #endregion
 
-    #region left hand
-    public void AddItemToPlayerLeftHand(ItemStatsData itemStats)
-    {
-        // check that it is a shield
-
-        //if (_hasLeftHandWeapon) return;
-        //CreateWeapon(itemStats, leftHandSheildLocation);
-    }
-
-    public void RemoveItemFromPlayerLeftHand()
-    {
-        // update to just work with shields for now
-
-        //if (!_hasLeftHandWeapon) return;
-        //
-        //if (leftHandShortSwordLocation.transform.childCount > 0)
-        //    Destroy(leftHandShortSwordLocation.transform.GetChild(0).gameObject);
-    }
-    #endregion
-
     private void CreateWeapon(ItemStatsData itemStats, GameObject prefabLocation)
     {
         GameObject weapon;
@@ -96,14 +76,6 @@ public class WeaponsHandler : MonoBehaviour
         weapon.transform.SetParent(prefabLocation.transform);
         weapon.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
         combatHandler.SetWeaponStats(itemStats);
-    }
-
-    public ItemStatsData GetCurrentLeftHandItemStats()
-    {
-        if (!inventoryManager.GetItems(7).list.Any())
-            return null;
-
-        return inventoryManager.GetItems((int)EquipmentSlot.LeftHand).list[0].Definition.itemStats;
     }
 
     public ItemStatsData GetCurrentRightHandItemStats()

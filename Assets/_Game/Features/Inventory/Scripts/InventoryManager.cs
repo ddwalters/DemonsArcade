@@ -213,13 +213,5 @@ public class InventoryManager : MonoBehaviour
             if (list.Count > 0)
                 weaponHandler.AddItemToPlayerRightHand(list[0].Definition.itemStats);
         }
-        if (source == (int)EquipmentSlot.LeftHand || destination == (int)EquipmentSlot.LeftHand)
-        {
-            weaponHandler.RemoveItemFromPlayerLeftHand();
-
-            var list = GetItems((int)EquipmentSlot.LeftHand).list;
-            if (list.Count > 0)
-                weaponHandler.AddItemToPlayerLeftHand(list[0].Definition.itemStats);
-        }
     }
 }

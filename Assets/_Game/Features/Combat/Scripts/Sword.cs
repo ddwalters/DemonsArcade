@@ -25,7 +25,6 @@ public class Sword : MonoBehaviour
 
     public void BeginSwordAnimation()
     {
-        Debug.Log("Animation begin");
         int animAttackIndex = Random.Range(0, 3); // number of attack animations
 
         _collisionCheck = GetComponentInChildren<WeaponCollisionCheck>();
@@ -42,7 +41,6 @@ public class Sword : MonoBehaviour
     // Called in unity
     public void OnAttackAnimationEnd()
     {
-        Debug.Log("animation end");
         _combatHandler.EndAttack();
         _collisionCheck.SetCanDamage(false);
     }
