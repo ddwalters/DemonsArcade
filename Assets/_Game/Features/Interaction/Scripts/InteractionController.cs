@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class InteractionController : MonoBehaviour
 {
     private const int NearbyColliderCapacity = 64;
+    private const float NameHeightOffset = 0.25f;
 
     [SerializeField, Min(0.1f)] private float interactionDistance = 2f;
     [SerializeField, Range(0f, 90f)] private float interactionHalfAngle = 60f;
@@ -16,6 +18,7 @@ public class InteractionController : MonoBehaviour
     [SerializeField, Min(0f)] private float headLookSmoothness = 8f;
 
     private readonly Collider[] nearbyColliders = new Collider[NearbyColliderCapacity];
+    private readonly List<Renderer> targetRenderers = new();
     private Camera playerCamera;
     private PlayerCameraRig cameraRig;
     private CharacterController characterController;
@@ -220,11 +223,42 @@ public class InteractionController : MonoBehaviour
 
     private Vector3 GetTargetNamePosition()
     {
-        if (targetCollider == null)
+        Bounds bounds = default;
+        bool hasBounds = false;
+        foreach (Renderer targetRenderer in targetRenderers)
+        {
+            if (targetRenderer == null || !targetRenderer.enabled)
+                continue;
+
+            if (hasBounds)
+                bounds.Encapsulate(targetRenderer.bounds);
+            else
+            {
+                bounds = targetRenderer.bounds;
+                hasBounds = true;
+            }
+        }
+
+        if (!hasBounds && targetCollider != null)
+        {
+            bounds = targetCollider.bounds;
+            hasBounds = true;
+        }
+
+        if (!hasBounds)
             return target != null ? target.transform.position + Vector3.up : transform.position;
 
-        Bounds bounds = targetCollider.bounds;
-        return bounds.center + Vector3.up * (bounds.extents.y + 0.2f);
+        return new Vector3(bounds.center.x, bounds.max.y + NameHeightOffset, bounds.center.z);
+    }
+
+    private void CacheTargetRenderers()
+    {
+        targetRenderers.Clear();
+        if (target == null)
+            return;
+
+        target.GetComponentsInChildren(targetRenderers);
+        targetRenderers.RemoveAll(candidate => !(candidate is MeshRenderer || candidate is SkinnedMeshRenderer));
     }
 
     private string GetInteractBindingDisplayString()
@@ -322,6 +356,7 @@ public class InteractionController : MonoBehaviour
         CancelHold();
         target = next;
         targetCollider = nextCollider;
+        CacheTargetRenderers();
 
         if (uiPanel != null)
         {
@@ -386,6 +421,7 @@ public class InteractionController : MonoBehaviour
         CancelHold();
         target = null;
         targetCollider = null;
+        targetRenderers.Clear();
         if (uiPanel != null)
             uiPanel.ResetUI();
     }

@@ -28,6 +28,17 @@ public class SaveLoadScreen : MonoBehaviour
         saveButton.onClick.AddListener(CreateSave);
         loadButton.onClick.AddListener(LoadSelected);
         deleteButton.onClick.AddListener(ConfirmDelete);
+        ResolveConfirmation();
+    }
+
+    private void ResolveConfirmation()
+    {
+        if (confirmation != null)
+            return;
+
+        UIController controller = GetComponentInParent<UIController>(true);
+        Transform searchRoot = controller != null ? controller.transform : transform.root;
+        confirmation = searchRoot.GetComponentInChildren<ConfirmationDialog>(true);
     }
 
     private void OnEnable() => SaveManager.Instance.SavesChanged += Refresh;
@@ -138,6 +149,12 @@ public class SaveLoadScreen : MonoBehaviour
     {
         if (selected == null)
             return;
+
+        if (confirmation == null)
+        {
+            status.text = "Delete confirmation dialog is missing.";
+            return;
+        }
 
         SaveData target = selected;
         confirmation.Show("Delete this save for " + target.playthrough.characterName + "?\n" +

@@ -14,7 +14,7 @@ public class InteractionUIPanel : MonoBehaviour
     private const float WorldNameFontSize = 36f;
     private const float WorldNameScale = 0.05f;
     private const float WorldNameMaximumWidth = 16f;
-    private const float WorldNameHeight = 4f;
+    private const float WorldNameHeight = 5f;
 
     private bool isReset;
     private RectTransform panelRect;
@@ -275,10 +275,10 @@ public class InteractionUIPanel : MonoBehaviour
         if (targetNameText == null)
             return;
 
-        Vector2 textSize = targetNameText.GetPreferredValues(currentTargetName, WorldNameMaximumWidth,
-            WorldNameHeight);
-        float width = Mathf.Clamp(textSize.x, 2f, WorldNameMaximumWidth);
-        targetNameText.rectTransform.sizeDelta = new Vector2(width, WorldNameHeight);
+        Vector2 textSize = targetNameText.GetPreferredValues(currentTargetName);
+        float width = Mathf.Max(textSize.x, 2f);
+        float height = Mathf.Max(textSize.y, WorldNameHeight);
+        targetNameText.rectTransform.sizeDelta = new Vector2(width, height);
     }
 
     private void CreateWorldNameLabel()
@@ -296,7 +296,7 @@ public class InteractionUIPanel : MonoBehaviour
         targetNameText.color = Color.white;
         targetNameText.isOrthographic = false;
         targetNameText.textWrappingMode = TextWrappingModes.NoWrap;
-        targetNameText.overflowMode = TextOverflowModes.Ellipsis;
+        targetNameText.overflowMode = TextOverflowModes.Overflow;
 
         RectTransform nameRect = targetNameText.rectTransform;
         nameRect.anchorMin = new Vector2(0.5f, 0.5f);
