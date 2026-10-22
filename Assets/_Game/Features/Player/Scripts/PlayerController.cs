@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float joystickScalingFactor = 2f;
 
     [Header("Sprint")]
-    [SerializeField] private float staminaUsageRate = 1f;
+    [SerializeField] private float staminaUsageRate = 4f;
 
     public int goldAmount;
 
@@ -89,7 +89,7 @@ public class PlayerController : MonoBehaviour
 
         if (statsManager.GetStamina() <= 0f)
             sprintCooldown = true;
-        else if (sprintCooldown && statsManager.GetStamina() >= statsManager.GetMaxStamina() - 1f)
+        else if (sprintCooldown && statsManager.GetStamina() >= statsManager.GetMaxStamina() * 0.99f)
             sprintCooldown = false;
 
         bool sprinting = allowsMovement && sprintInput && !sprintCooldown && moveInput.sqrMagnitude > 0.01f;

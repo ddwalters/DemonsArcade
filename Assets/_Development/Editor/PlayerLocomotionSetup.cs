@@ -28,9 +28,13 @@ public static class PlayerLocomotionSetup
 
     private static readonly string[] OneShotClips =
     {
-        "Jumping",
-        "Running Jump",
         "Falling To Landing"
+    };
+
+    private static readonly string[] JumpAnimationClips =
+    {
+        "Jumping",
+        "Running Jump"
     };
 
     [MenuItem("Tools/Player/Rebuild Locomotion Setup")]
@@ -67,6 +71,8 @@ public static class PlayerLocomotionSetup
             ConfigureImport(Clips + clip + ".fbx", true, true, true);
         foreach (string clip in OneShotClips)
             ConfigureImport(Clips + clip + ".fbx", true, true, false);
+        foreach (string clip in JumpAnimationClips)
+            ConfigureImport(Clips + clip + ".fbx", true, false, false, true);
 
         var controller = BuildController(walkingSpeed, runningSpeed);
         ConfigurePrefab(controller);
@@ -98,7 +104,8 @@ public static class PlayerLocomotionSetup
         return speed;
     }
 
-    private static void ConfigureImport(string path, bool animation, bool inPlace = true, bool loop = true)
+    private static void ConfigureImport(string path, bool animation, bool inPlace = true, bool loop = true,
+        bool extractJumpRootTranslation = false)
     {
         var importer = AssetImporter.GetAtPath(path) as ModelImporter;
         if (importer == null)
@@ -119,10 +126,23 @@ public static class PlayerLocomotionSetup
                 clip.loopPose = loop;
                 clip.lockRootRotation = true;
                 clip.keepOriginalOrientation = true;
-                clip.lockRootHeightY = true;
-                clip.keepOriginalPositionY = true;
-                clip.lockRootPositionXZ = inPlace;
-                clip.keepOriginalPositionXZ = true;
+                if (extractJumpRootTranslation)
+                {
+                    // Extract the authored jump root travel so it is not doubled with motor movement.
+                    // Root motion remains disabled on the player Animator; only pose articulation is applied.
+                    clip.lockRootHeightY = false;
+                    clip.keepOriginalPositionY = false;
+                    clip.heightFromFeet = true;
+                    clip.lockRootPositionXZ = false;
+                    clip.keepOriginalPositionXZ = false;
+                }
+                else
+                {
+                    clip.lockRootHeightY = true;
+                    clip.keepOriginalPositionY = true;
+                    clip.lockRootPositionXZ = inPlace;
+                    clip.keepOriginalPositionXZ = true;
+                }
             }
 
             importer.clipAnimations = clips;
@@ -168,10 +188,12 @@ public static class PlayerLocomotionSetup
         var jump = previousStates.FirstOrDefault(state => state.name == "Jump") ?? machine.AddState("Jump");
         var sprintJump = previousStates.FirstOrDefault(state => state.name == "Sprint Jump") ?? machine.AddState("Sprint Jump");
         var landing = previousStates.FirstOrDefault(state => state.name == "Landing") ?? machine.AddState("Landing");
+        var sprintLanding = previousStates.FirstOrDefault(state => state.name == "Sprint Landing") ?? machine.AddState("Sprint Landing");
 
         foreach (var state in previousStates)
         {
-            if (state != ground && state != air && state != jump && state != sprintJump && state != landing)
+            if (state != ground && state != air && state != jump && state != sprintJump &&
+                state != landing && state != sprintLanding)
                 machine.RemoveState(state);
         }
 
@@ -189,6 +211,8 @@ public static class PlayerLocomotionSetup
             sprintJump.RemoveTransition(transition);
         foreach (var transition in landing.transitions.ToArray())
             landing.RemoveTransition(transition);
+        foreach (var transition in sprintLanding.transitions.ToArray())
+            sprintLanding.RemoveTransition(transition);
 
         machine.defaultState = ground;
         var childStates = machine.states;
@@ -205,6 +229,8 @@ public static class PlayerLocomotionSetup
                 childState.position = new Vector3(700f, 0f, 0f);
             else if (childState.state == landing)
                 childState.position = new Vector3(950f, 0f, 0f);
+            else if (childState.state == sprintLanding)
+                childState.position = new Vector3(950f, 140f, 0f);
 
             childStates[i] = childState;
         }
@@ -219,6 +245,8 @@ public static class PlayerLocomotionSetup
         controller.AddParameter("Jumping", AnimatorControllerParameterType.Bool);
         controller.AddParameter("SprintJump", AnimatorControllerParameterType.Bool);
         controller.AddParameter("VerticalVelocity", AnimatorControllerParameterType.Float);
+        controller.AddParameter("JumpTime", AnimatorControllerParameterType.Float);
+        controller.AddParameter("LandingActive", AnimatorControllerParameterType.Bool);
 
         var blend = AssetDatabase.LoadAllAssetsAtPath(ControllerPath).OfType<BlendTree>().FirstOrDefault();
         if (blend == null)
@@ -244,30 +272,35 @@ public static class PlayerLocomotionSetup
         air.motion = Clip("Falling Idle");
         jump.motion = Clip("Jumping");
         sprintJump.motion = Clip("Running Jump");
-        landing.motion = Clip("Falling To Landing");
+        landing.motion = Clip("Jumping");
+        sprintLanding.motion = Clip("Running Jump");
+        SetMotionTimeParameter(jump, "JumpTime");
+        SetMotionTimeParameter(sprintJump, "JumpTime");
+        SetMotionTimeParameter(landing, "JumpTime");
+        SetMotionTimeParameter(sprintLanding, "JumpTime");
 
         AddJumpTransition(ground, jump, false);
         AddJumpTransition(ground, sprintJump, true);
+        AddUnplannedFallTransition(ground, air);
 
-        var takeoffFall = ground.AddTransition(air);
-        takeoffFall.hasExitTime = false;
-        takeoffFall.duration = 0.1f;
-        takeoffFall.AddCondition(AnimatorConditionMode.IfNot, 0f, "Grounded");
-        takeoffFall.AddCondition(AnimatorConditionMode.IfNot, 0f, "Jumping");
-
-        AddLandingTransition(jump, landing);
-        AddLandingTransition(sprintJump, landing);
-        AddDescentTransition(jump, air);
-        AddDescentTransition(sprintJump, air);
-        AddLandingTransition(air, landing);
+        AddLandingTransitions(jump, landing, sprintLanding);
+        AddLandingTransitions(sprintJump, landing, sprintLanding);
+        AddGroundedFallbackTransition(jump, ground);
+        AddGroundedFallbackTransition(sprintJump, ground);
+        AddJumpTimeoutTransition(jump, air);
+        AddJumpTimeoutTransition(sprintJump, air);
+        AddJumpTransition(air, jump, false);
+        AddJumpTransition(air, sprintJump, true);
+        AddLandingTransitions(air, landing, sprintLanding);
+        AddGroundedFallbackTransition(air, ground);
         AddJumpTransition(landing, jump, false);
         AddJumpTransition(landing, sprintJump, true);
+        AddJumpTransition(sprintLanding, jump, false);
+        AddJumpTransition(sprintLanding, sprintJump, true);
         AddUnplannedFallTransition(landing, air);
-
-        var recover = landing.AddTransition(ground);
-        recover.hasExitTime = true;
-        recover.exitTime = 0.9f;
-        recover.duration = 0.12f;
+        AddUnplannedFallTransition(sprintLanding, air);
+        AddLandingRecoveryTransition(landing, ground);
+        AddLandingRecoveryTransition(sprintLanding, ground);
 
         EditorUtility.SetDirty(blend);
         EditorUtility.SetDirty(controller);
@@ -279,25 +312,51 @@ public static class PlayerLocomotionSetup
         var transition = source.AddTransition(destination);
         transition.hasExitTime = false;
         transition.duration = 0.06f;
+        transition.interruptionSource = TransitionInterruptionSource.DestinationThenSource;
+        transition.orderedInterruption = true;
         transition.AddCondition(AnimatorConditionMode.If, 0f, "Jumping");
         transition.AddCondition(sprintJump ? AnimatorConditionMode.If : AnimatorConditionMode.IfNot,
             0f, "SprintJump");
     }
 
-    private static void AddLandingTransition(AnimatorState source, AnimatorState destination)
+    private static void AddLandingTransitions(AnimatorState source, AnimatorState landing,
+        AnimatorState sprintLanding)
+    {
+        AddGroundContactTransition(source, landing, false);
+        AddGroundContactTransition(source, sprintLanding, true);
+    }
+
+    private static void AddGroundContactTransition(AnimatorState source, AnimatorState destination,
+        bool sprintLanding)
+    {
+        var transition = source.AddTransition(destination);
+        transition.hasExitTime = false;
+        transition.duration = 0.02f;
+        transition.interruptionSource = TransitionInterruptionSource.None;
+        transition.AddCondition(AnimatorConditionMode.If, 0f, "Grounded");
+        transition.AddCondition(AnimatorConditionMode.If, 0f, "LandingActive");
+        transition.AddCondition(sprintLanding ? AnimatorConditionMode.If : AnimatorConditionMode.IfNot,
+            0f, "SprintJump");
+    }
+
+    private static void AddGroundedFallbackTransition(AnimatorState source, AnimatorState grounded)
+    {
+        var transition = source.AddTransition(grounded);
+        transition.hasExitTime = false;
+        transition.duration = 0.08f;
+        transition.interruptionSource = TransitionInterruptionSource.None;
+        transition.AddCondition(AnimatorConditionMode.If, 0f, "Grounded");
+        transition.AddCondition(AnimatorConditionMode.IfNot, 0f, "LandingActive");
+        transition.AddCondition(AnimatorConditionMode.IfNot, 0f, "Jumping");
+    }
+
+    private static void AddJumpTimeoutTransition(AnimatorState source, AnimatorState destination)
     {
         var transition = source.AddTransition(destination);
         transition.hasExitTime = false;
         transition.duration = 0.08f;
-        transition.AddCondition(AnimatorConditionMode.If, 0f, "Grounded");
-    }
-
-    private static void AddDescentTransition(AnimatorState source, AnimatorState destination)
-    {
-        var transition = source.AddTransition(destination);
-        transition.hasExitTime = false;
-        transition.duration = 0.12f;
-        transition.AddCondition(AnimatorConditionMode.Less, 0f, "VerticalVelocity");
+        transition.AddCondition(AnimatorConditionMode.IfNot, 0f, "Grounded");
+        transition.AddCondition(AnimatorConditionMode.IfNot, 0f, "Jumping");
     }
 
     private static void AddUnplannedFallTransition(AnimatorState source, AnimatorState destination)
@@ -307,6 +366,24 @@ public static class PlayerLocomotionSetup
         transition.duration = 0.1f;
         transition.AddCondition(AnimatorConditionMode.IfNot, 0f, "Grounded");
         transition.AddCondition(AnimatorConditionMode.IfNot, 0f, "Jumping");
+    }
+
+    private static void AddLandingRecoveryTransition(AnimatorState source, AnimatorState destination)
+    {
+        var transition = source.AddTransition(destination);
+        transition.hasExitTime = false;
+        transition.duration = 0.08f;
+        transition.offset = 0.05f;
+        transition.interruptionSource = TransitionInterruptionSource.SourceThenDestination;
+        transition.orderedInterruption = true;
+        transition.AddCondition(AnimatorConditionMode.If, 0f, "Grounded");
+        transition.AddCondition(AnimatorConditionMode.IfNot, 0f, "LandingActive");
+    }
+
+    private static void SetMotionTimeParameter(AnimatorState state, string parameterName)
+    {
+        state.timeParameterActive = true;
+        state.timeParameter = parameterName;
     }
 
     private static float GaitTimeScale(AnimationClip clip, float? authoredSpeed, float targetSpeed)

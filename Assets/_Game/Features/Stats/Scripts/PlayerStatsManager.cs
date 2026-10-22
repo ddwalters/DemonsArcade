@@ -7,7 +7,7 @@ public class PlayerStatsManager : MonoBehaviour
 {
     private PlayerStatsData statsData;
 
-    [SerializeField, Min(0f)] private float staminaRecoveryRate = 15f;
+    [SerializeField, Min(0f)] private float staminaRecoveryRate = 1.5f;
 
     [SerializeField] private Image healthFill;
     [SerializeField] private Image staminaFill;
@@ -131,7 +131,7 @@ public class PlayerStatsManager : MonoBehaviour
 
     private void IncreaseHealthStat()
     {
-        statsData.maxHealth += statsData.lvl;
+        statsData.maxHealth += statsData.lvl / 10f;
         statsData.currentHealth = statsData.maxHealth;
         UpdateHealthBar();
     }
@@ -167,7 +167,7 @@ public class PlayerStatsManager : MonoBehaviour
 
     private void IncreaseStaminaStat()
     {
-        int increase = Mathf.RoundToInt(statsData.lvl * 1.35f);
+        float increase = Mathf.RoundToInt(statsData.lvl * 1.35f) / 10f;
         statsData.maxStamina += increase;
         statsData.currentStamina = statsData.maxStamina;
         UpdateStaminaBar();
@@ -197,7 +197,7 @@ public class PlayerStatsManager : MonoBehaviour
 
     private void IncreaseManaStat()
     {
-        float increase = Mathf.RoundToInt(statsData.lvl * 0.35f);
+        float increase = Mathf.RoundToInt(statsData.lvl * 0.35f) / 20f;
         statsData.maxMana += increase;
         statsData.currentMana = statsData.maxMana;
         UpdateManaBar();
@@ -247,9 +247,24 @@ public class PlayerStatsManager : MonoBehaviour
     {
         StopAllCoroutines();
         temporaryEffects = 0;
-        statsData = data;
+        statsData = data ?? new PlayerStatsData();
+        MigrateResourceScale();
         isUsingStamina = false;
         UpdateAllBars();
+    }
+
+    private void MigrateResourceScale()
+    {
+        if (statsData.resourceScaleVersion >= 2)
+            return;
+
+        statsData.maxHealth /= 10f;
+        statsData.currentHealth /= 10f;
+        statsData.maxStamina /= 10f;
+        statsData.currentStamina /= 10f;
+        statsData.maxMana /= 20f;
+        statsData.currentMana /= 20f;
+        statsData.resourceScaleVersion = 2;
     }
 
     private void PlayerDeath()

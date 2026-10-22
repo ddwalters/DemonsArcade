@@ -163,7 +163,7 @@ public static class SaveFeaturePlayChecks
         Require(saved.inventory.Single(container => container.slot == 6).items.Count == 1, "Equipment is in the snapshot.");
         player.goldAmount = 0;
         inventory.RemoveItem(6, instance);
-        stats.DamagePlayer(20);
+        stats.DamagePlayer(2);
         Require(saves.Load(saved), "A save can be loaded.");
         deadline = EditorApplication.timeSinceStartup + 120;
         while (saves.IsLoading)

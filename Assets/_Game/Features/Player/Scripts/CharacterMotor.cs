@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -22,12 +23,49 @@ public class CharacterMotor : MonoBehaviour
     [SerializeField, Min(0f)] private float airAcceleration = 4f;
     [SerializeField, Min(0f)] private float knockbackBraking = 8f;
 
+    [Header("Jump animation timing")]
+    [SerializeField, Min(0.01f)] private float idleLandingRecoveryTime = 0.18f;
+    [SerializeField, Min(0.01f)] private float movingLandingRecoveryTime = 0.1f;
+    [SerializeField, Min(0f)] private float jumpAnimationFallGrace = 0.12f;
+    [SerializeField, Min(0f)] private float groundProbeContactTolerance = 0.02f;
+    [SerializeField, Min(0f)] private float fallPresentationGrace = 0.07f;
+    [SerializeField, Range(0f, 0.05f)] private float jumpContactPhaseLead = 0.002f;
+
+    [Serializable]
+    private struct JumpAnimationPhases
+    {
+        [Range(0f, 1f), Tooltip("Clip time where the character leaves the ground.")]
+        public float takeoff;
+        [Range(0f, 1f), Tooltip("Clip time where vertical velocity reaches zero.")]
+        public float apex;
+        [Range(0f, 1f), Tooltip("Clip time where the feet make landing contact.")]
+        public float contact;
+        [Range(0f, 1f), Tooltip("Clip time where the landing recovery is complete.")]
+        public float recovered;
+
+        public JumpAnimationPhases(float takeoff, float apex, float contact, float recovered)
+        {
+            this.takeoff = takeoff;
+            this.apex = apex;
+            this.contact = contact;
+            this.recovered = recovered;
+        }
+    }
+
+    [Header("Jump clip phase markers")]
+    [SerializeField] private JumpAnimationPhases normalJumpPhases =
+        new JumpAnimationPhases(16f / 57f, 24f / 57f, 34f / 57f, 48f / 57f);
+    [SerializeField] private JumpAnimationPhases sprintJumpPhases =
+        new JumpAnimationPhases(2f / 27f, 10f / 27f, 19f / 27f, 1f);
+
     private static readonly int MoveX = Animator.StringToHash("MoveX");
     private static readonly int MoveY = Animator.StringToHash("MoveY");
     private static readonly int Grounded = Animator.StringToHash("Grounded");
     private static readonly int Jumping = Animator.StringToHash("Jumping");
     private static readonly int SprintJump = Animator.StringToHash("SprintJump");
-    private static readonly int VerticalVelocity = Animator.StringToHash("VerticalVelocity");
+    private static readonly int VerticalVelocityParameter = Animator.StringToHash("VerticalVelocity");
+    private static readonly int JumpTime = Animator.StringToHash("JumpTime");
+    private static readonly int LandingActive = Animator.StringToHash("LandingActive");
 
     private CharacterController controller;
     private Vector2 animationInput;
@@ -39,9 +77,19 @@ public class CharacterMotor : MonoBehaviour
     private float coyoteTimeRemaining;
     private float jumpRequestAge;
     private float jumpGroundingGrace;
+    private float jumpAnimationElapsed;
+    private float jumpAnimationFlightTime;
+    private float jumpAnimationLaunchSpeed;
+    private float jumpAnimationTime;
+    private float landingRecoveryElapsed;
+    private float landingRecoveryDuration;
+    private float airbornePresentationElapsed;
     private bool jumpAnimationActive;
+    private bool landingAnimationActive;
     private bool sprintJumpAnimation;
     private bool jumpRequested;
+    private bool hasInitializedGroundState;
+    private bool presentationGroundedLatch;
     private bool foundWalkableGroundContact;
     private Vector3 walkableGroundContactNormal = Vector3.up;
 
@@ -51,6 +99,10 @@ public class CharacterMotor : MonoBehaviour
     public Vector3 PlanarVelocity => planarVelocity;
     public float PlanarSpeed => planarVelocity.magnitude;
     public float ActualPlanarSpeed => actualPlanarSpeed;
+    public float VerticalVelocity => verticalVelocity;
+    public float JumpAnimationTime => jumpAnimationTime;
+    public bool IsJumpAnimationActive => jumpAnimationActive;
+    public bool IsLandingAnimationActive => landingAnimationActive;
 
     private void Awake()
     {
@@ -106,6 +158,7 @@ public class CharacterMotor : MonoBehaviour
                 transform.rotation, targetFacing, turnSpeed * deltaTime);
         }
 
+        bool previouslyGrounded = IsGrounded;
         bool groundedAtStart = TryGetGround(out Vector3 groundNormal);
         IsGrounded = groundedAtStart;
         if (groundedAtStart)
@@ -120,6 +173,7 @@ public class CharacterMotor : MonoBehaviour
         }
 
         bool jumpIsBuffered = jumpRequested && jumpRequestAge <= jumpBufferTime;
+        bool acceptedJumpThisTick = false;
         if (jumpIsBuffered && (groundedAtStart || coyoteTimeRemaining > 0f))
         {
             verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
@@ -128,6 +182,13 @@ public class CharacterMotor : MonoBehaviour
             jumpGroundingGrace = 0.1f;
             jumpAnimationActive = true;
             sprintJumpAnimation = sprinting && hasMovementInput;
+            landingAnimationActive = false;
+            landingRecoveryElapsed = 0f;
+            jumpAnimationElapsed = 0f;
+            jumpAnimationLaunchSpeed = verticalVelocity;
+            jumpAnimationFlightTime = jumpAnimationLaunchSpeed * 2f / Mathf.Max(0.01f, -gravity);
+            jumpAnimationTime = GetTakeoffPhase(sprintJumpAnimation);
+            acceptedJumpThisTick = true;
             IsGrounded = false;
             groundedAtStart = false;
         }
@@ -180,8 +241,6 @@ public class CharacterMotor : MonoBehaviour
         {
             IsGrounded = true;
             coyoteTimeRemaining = coyoteTime;
-            jumpAnimationActive = false;
-            sprintJumpAnimation = false;
             if (foundWalkableGroundContact)
                 groundNormal = walkableGroundContactNormal;
             else
@@ -195,6 +254,63 @@ public class CharacterMotor : MonoBehaviour
             groundNormal = Vector3.up;
         }
 
+        bool landedThisTick = hasInitializedGroundState && !previouslyGrounded && IsGrounded;
+        bool meaningfulLanding = jumpAnimationActive || airbornePresentationElapsed >= fallPresentationGrace;
+        bool beganLandingThisTick = false;
+        if (IsGrounded)
+        {
+            if ((landedThisTick && meaningfulLanding) ||
+                (IsGrounded && jumpAnimationActive && !acceptedJumpThisTick))
+            {
+                BeginLandingRecovery(hasMovementInput || planarVelocity.magnitude > 0.5f);
+                beganLandingThisTick = true;
+            }
+
+            airbornePresentationElapsed = 0f;
+            presentationGroundedLatch = true;
+        }
+        else
+        {
+            airbornePresentationElapsed += deltaTime;
+            if (acceptedJumpThisTick || airbornePresentationElapsed >= fallPresentationGrace)
+                presentationGroundedLatch = false;
+            else if (previouslyGrounded)
+                presentationGroundedLatch = true;
+        }
+
+        if (jumpAnimationActive)
+        {
+            jumpAnimationElapsed += deltaTime;
+            if (jumpAnimationElapsed > jumpAnimationFlightTime + jumpAnimationFallGrace)
+            {
+                // Fall back to a stable loop if the character remains airborne past the clip's landing window.
+                jumpAnimationActive = false;
+            }
+            else
+            {
+                jumpAnimationTime = CalculateAirborneJumpPhase(sprintJumpAnimation, verticalVelocity);
+            }
+        }
+
+        if (landingAnimationActive)
+        {
+            if (!beganLandingThisTick)
+                landingRecoveryElapsed += deltaTime;
+            float recoveryProgress = landingRecoveryDuration > 0f
+                ? Mathf.Clamp01(landingRecoveryElapsed / landingRecoveryDuration)
+                : 1f;
+            jumpAnimationTime = Mathf.Lerp(GetContactPhase(sprintJumpAnimation),
+                GetRecoveredPhase(sprintJumpAnimation), recoveryProgress);
+
+            if (recoveryProgress >= 1f)
+            {
+                landingAnimationActive = false;
+                sprintJumpAnimation = false;
+            }
+        }
+
+        hasInitializedGroundState = true;
+
         externalVelocity = Vector3.MoveTowards(
             externalVelocity, Vector3.zero, knockbackBraking * deltaTime);
 
@@ -205,7 +321,7 @@ public class CharacterMotor : MonoBehaviour
                 0f, planarVelocity.magnitude)
             : 0f;
 
-        UpdateAnimator(GetGaitValue(actualPlanarSpeed), IsGrounded, deltaTime);
+        UpdateAnimator(GetGaitValue(actualPlanarSpeed), presentationGroundedLatch, deltaTime);
     }
 
     private Vector3 GetRequestedDirection(Vector2 input, Vector3? worldMovement)
@@ -229,7 +345,8 @@ public class CharacterMotor : MonoBehaviour
         float radius = Mathf.Max(0.01f, controller.radius * 0.9f);
         Vector3 center = transform.TransformPoint(controller.center);
         Vector3 capsuleBottom = center + Vector3.down * (controller.height * 0.5f - controller.radius);
-        Vector3 origin = capsuleBottom + Vector3.up * 0.05f;
+        const float originLift = 0.05f;
+        Vector3 origin = capsuleBottom + Vector3.up * originLift;
         float distance = groundProbeDistance + 0.1f;
         if (!Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit,
                 distance, groundMask, QueryTriggerInteraction.Ignore))
@@ -238,8 +355,63 @@ public class CharacterMotor : MonoBehaviour
         if (Vector3.Angle(hit.normal, Vector3.up) > controller.slopeLimit)
             return false;
 
+        // The cast uses a slightly smaller sphere than the controller. Correct its vertical
+        // clearance for the probe lift and slope, then allow the CharacterController's skin gap.
+        float verticalGap = hit.distance - originLift -
+            (controller.radius - radius) / Mathf.Max(0.01f, hit.normal.y);
+        float contactAllowance = groundProbeContactTolerance +
+            controller.skinWidth / Mathf.Max(0.01f, hit.normal.y);
+        if (verticalGap > contactAllowance)
+            return false;
+
         normal = hit.normal;
         return true;
+    }
+
+    private void BeginLandingRecovery(bool hasMovementInput)
+    {
+        jumpAnimationActive = false;
+        landingAnimationActive = true;
+        landingRecoveryElapsed = 0f;
+        landingRecoveryDuration = hasMovementInput
+            ? movingLandingRecoveryTime
+            : idleLandingRecoveryTime;
+        jumpAnimationTime = GetContactPhase(sprintJumpAnimation);
+    }
+
+    private float GetTakeoffPhase(bool sprintJump) => GetJumpPhases(sprintJump).takeoff;
+
+    private float GetApexPhase(bool sprintJump) => GetJumpPhases(sprintJump).apex;
+
+    private float GetContactPhase(bool sprintJump) => GetJumpPhases(sprintJump).contact;
+
+    private float GetRecoveredPhase(bool sprintJump) => GetJumpPhases(sprintJump).recovered;
+
+    private JumpAnimationPhases GetJumpPhases(bool sprintJump)
+    {
+        JumpAnimationPhases phases = sprintJump ? sprintJumpPhases : normalJumpPhases;
+        phases.takeoff = Mathf.Clamp01(phases.takeoff);
+        phases.apex = Mathf.Clamp(phases.apex, phases.takeoff, 1f);
+        phases.contact = Mathf.Clamp(phases.contact, phases.apex, 1f);
+        phases.recovered = Mathf.Clamp(phases.recovered, phases.contact, 1f);
+        return phases;
+    }
+
+    private float CalculateAirborneJumpPhase(bool sprintJump, float currentVerticalVelocity)
+    {
+        float launchSpeed = Mathf.Max(0.01f, jumpAnimationLaunchSpeed);
+        float takeoff = GetTakeoffPhase(sprintJump);
+        float apex = GetApexPhase(sprintJump);
+        float contact = Mathf.Max(apex, GetContactPhase(sprintJump) - jumpContactPhaseLead);
+
+        if (currentVerticalVelocity > 0f)
+        {
+            float ascentProgress = 1f - Mathf.Clamp01(currentVerticalVelocity / launchSpeed);
+            return Mathf.Lerp(takeoff, apex, ascentProgress);
+        }
+
+        float descentProgress = Mathf.Clamp01(-currentVerticalVelocity / launchSpeed);
+        return Mathf.Lerp(apex, contact, descentProgress);
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
@@ -293,7 +465,9 @@ public class CharacterMotor : MonoBehaviour
         animator.SetBool(Grounded, grounded);
         animator.SetBool(Jumping, jumpAnimationActive);
         animator.SetBool(SprintJump, sprintJumpAnimation);
-        animator.SetFloat(VerticalVelocity, verticalVelocity);
+        animator.SetFloat(VerticalVelocityParameter, verticalVelocity);
+        animator.SetFloat(JumpTime, jumpAnimationTime);
+        animator.SetBool(LandingActive, landingAnimationActive);
     }
 
     public void AddImpulse(Vector3 velocityChange)
@@ -305,6 +479,11 @@ public class CharacterMotor : MonoBehaviour
             IsGrounded = false;
             coyoteTimeRemaining = 0f;
             jumpGroundingGrace = 0.1f;
+            jumpAnimationActive = false;
+            landingAnimationActive = false;
+            sprintJumpAnimation = false;
+            airbornePresentationElapsed = fallPresentationGrace;
+            presentationGroundedLatch = false;
         }
     }
 
@@ -319,9 +498,20 @@ public class CharacterMotor : MonoBehaviour
         coyoteTimeRemaining = 0f;
         jumpRequestAge = 0f;
         jumpGroundingGrace = 0f;
+        jumpAnimationElapsed = 0f;
+        jumpAnimationFlightTime = 0f;
+        jumpAnimationLaunchSpeed = 0f;
+        jumpAnimationTime = 0f;
+        landingRecoveryElapsed = 0f;
+        landingRecoveryDuration = 0f;
+        airbornePresentationElapsed = 0f;
         jumpAnimationActive = false;
+        landingAnimationActive = false;
         sprintJumpAnimation = false;
         jumpRequested = false;
+        presentationGroundedLatch = IsGrounded;
+        if (!IsGrounded)
+            airbornePresentationElapsed = fallPresentationGrace;
 
         if (animator != null && animator.isActiveAndEnabled)
         {
@@ -330,7 +520,9 @@ public class CharacterMotor : MonoBehaviour
             animator.SetBool(Grounded, IsGrounded);
             animator.SetBool(Jumping, false);
             animator.SetBool(SprintJump, false);
-            animator.SetFloat(VerticalVelocity, 0f);
+            animator.SetFloat(VerticalVelocityParameter, 0f);
+            animator.SetFloat(JumpTime, 0f);
+            animator.SetBool(LandingActive, false);
         }
     }
 
@@ -342,5 +534,8 @@ public class CharacterMotor : MonoBehaviour
         transform.SetPositionAndRotation(position, rotation);
         controller.enabled = wasEnabled;
         IsGrounded = false;
+        hasInitializedGroundState = false;
+        presentationGroundedLatch = false;
+        airbornePresentationElapsed = fallPresentationGrace;
     }
 }

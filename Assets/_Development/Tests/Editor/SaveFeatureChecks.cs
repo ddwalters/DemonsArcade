@@ -47,7 +47,7 @@ public static class SaveFeatureChecks
             save.world.Add(new SavedWorldObject { id = "pickup", collected = true });
             store.Write(save);
             var loaded = store.Read(first.id, save.id);
-            Require(loaded.gold == 123 && loaded.position == save.position && loaded.stats.currentHealth == 100,
+            Require(loaded.gold == 123 && loaded.position == save.position && loaded.stats.currentHealth == 10,
                 "Player data survives disk serialization.");
             Require(loaded.inventory[0].items[0].definitionId == definition.SaveId && loaded.world[0].collected,
                 "Inventory and collected world objects survive disk serialization.");

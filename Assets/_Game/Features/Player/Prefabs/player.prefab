@@ -738,7 +738,7 @@ MonoBehaviour:
   sensitivity: 10
   joystickScalingFactor: 20
   turnSpeed: 720
-  staminaUsageRate: 40
+  staminaUsageRate: 4
   goldAmount: 0
 --- !u!114 &1094290876629132184
 MonoBehaviour:
@@ -770,7 +770,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 062b3d139175ac242bc66f5871320e11, type: 3}
   m_Name:
   m_EditorClassIdentifier:
-  staminaRecoveryRate: 15
+  staminaRecoveryRate: 1.5
   healthFill: {fileID: 0}
   staminaFill: {fileID: 0}
   manaFill: {fileID: 0}
@@ -828,6 +828,22 @@ MonoBehaviour:
   coyoteTime: 0.1
   airAcceleration: 4
   knockbackBraking: 8
+  idleLandingRecoveryTime: 0.18
+  movingLandingRecoveryTime: 0.1
+  jumpAnimationFallGrace: 0.12
+  groundProbeContactTolerance: 0.02
+  fallPresentationGrace: 0.07
+  jumpContactPhaseLead: 0.002
+  normalJumpPhases:
+    takeoff: 0.28070176
+    apex: 0.42105263
+    contact: 0.5964912
+    recovered: 0.84210527
+  sprintJumpPhases:
+    takeoff: 0.074074075
+    apex: 0.37037036
+    contact: 0.7037037
+    recovered: 1
 --- !u!114 &7869586009327930913
 MonoBehaviour:
   m_ObjectHideFlags: 0
