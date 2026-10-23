@@ -26,6 +26,7 @@ namespace NodeTree.Editor
         private readonly EnumField _sideField;
         private readonly Image _preview;
         private readonly Func<string, PortraitSide?> _findExistingSide;
+        private readonly bool _lockLeft;
         private List<DialogOwner> _owners = new List<DialogOwner>();
 
         public string OwnerId { get; private set; } = string.Empty;
@@ -33,9 +34,10 @@ namespace NodeTree.Editor
         public PortraitSide Side { get; private set; } = PortraitSide.Left;
 
         // findExistingSide returns the side this owner already uses elsewhere in the tree, or null.
-        public OwnerPickerElement(Func<string, PortraitSide?> findExistingSide)
+        public OwnerPickerElement(Func<string, PortraitSide?> findExistingSide, bool lockLeft = false)
         {
             _findExistingSide = findExistingSide;
+            _lockLeft = lockLeft;
 
             var foldout = new Foldout { text = "Speaker", value = true };
 
@@ -54,6 +56,11 @@ namespace NodeTree.Editor
 
             _sideField = new EnumField("Side", PortraitSide.Left);
             _sideField.RegisterValueChangedCallback(evt => Side = (PortraitSide)evt.newValue);
+            if (_lockLeft)
+            {
+                _sideField.SetEnabled(false);
+                _sideField.tooltip = "Dialog Options always show the speaker on the left; the option buttons cover the right.";
+            }
             foldout.Add(_sideField);
 
             var row = new VisualElement();
@@ -89,7 +96,7 @@ namespace NodeTree.Editor
         {
             OwnerId = ownerId ?? string.Empty;
             Mood = mood ?? string.Empty;
-            Side = side;
+            Side = _lockLeft ? PortraitSide.Left : side;
 
             _sideField.SetValueWithoutNotify(Side);
             RefreshOwners();
@@ -131,7 +138,7 @@ namespace NodeTree.Editor
 
             // Reuse the side this character already has in the tree; the user can still override it.
             var existing = _findExistingSide?.Invoke(OwnerId);
-            if (existing.HasValue)
+            if (existing.HasValue && !_lockLeft)
             {
                 Side = existing.Value;
                 _sideField.SetValueWithoutNotify(Side);

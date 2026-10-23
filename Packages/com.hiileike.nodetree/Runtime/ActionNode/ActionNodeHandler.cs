@@ -8,6 +8,8 @@ namespace NodeTree
     public class ActionNodeData : NodeData
     {
         public string EventKey;
+
+        public override bool SupportsRepeatSetting => true;
     }
 
     [Preserve]

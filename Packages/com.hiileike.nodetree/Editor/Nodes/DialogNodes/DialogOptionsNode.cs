@@ -15,25 +15,11 @@ namespace NodeTree.Editor
         private VisualElement _conditionListContainer;
         private EnumField _failBehaviorField;
 
-        // Style fields
-        private FloatField _textSpeedField;
-        private ObjectField _typingTickClipField;
-        private ObjectField _fontAssetField;
-        private FloatField _fontSizeField;
-        private ColorField _fontColorField;
-        private EnumFlagsField _fontStyleField;
-
         public string OwnerId => _ownerPicker?.OwnerId ?? string.Empty;
         public PortraitSide Side => _ownerPicker?.Side ?? PortraitSide.Left;
 
         public string DialogText { get; set; }
-        public AudioClip TypingTickClip { get; set; }
         public List<string> ResponseOptions { get; set; } = new List<string>();
-        public float TextSpeed { get; set; } = 0f;
-        public TMP_FontAsset FontAsset { get; set; }
-        public float FontSize { get; set; } = 36f;
-        public Color FontColor { get; set; } = Color.white;
-        public FontStyles FontStyle { get; set; } = FontStyles.Normal;
 
         private List<ConditionBase> _conditions = new List<ConditionBase>();
         private ConditionFailBehavior _conditionFailBehavior;
@@ -48,7 +34,7 @@ namespace NodeTree.Editor
             _dialogTextField = richText.textField;
             mainContainer.Add(richText.container);
 
-            _ownerPicker = new OwnerPickerElement(id => OwnerPickerElement.FindSideInGraph(this, id));
+            _ownerPicker = new OwnerPickerElement(id => OwnerPickerElement.FindSideInGraph(this, id), lockLeft: true);
             mainContainer.Add(_ownerPicker);
 
             var addButton = new Button(() =>
@@ -60,7 +46,9 @@ namespace NodeTree.Editor
             addButton.tooltip = "Adds a dialog option, requires a paired node to save.";
             titleButtonContainer.Add(addButton);
 
-            BuildStyleSection();
+            var general = BuildGeneralFoldout(offByDefault: true);
+            mainContainer.Add(BuildTextStyleFoldout());
+            mainContainer.Add(general);
             BuildConditionSection();
             RefreshOutputPorts();
         }
@@ -70,16 +58,10 @@ namespace NodeTree.Editor
             return new DialogOptionsNodeData
             {
                 DialogText = DialogText,
-                TypingTickClip = TypingTickClip,
                 ResponseOptions = new List<string>(ResponseOptions),
-                TextSpeed = TextSpeed,
                 OwnerId = _ownerPicker.OwnerId,
                 Mood = _ownerPicker.Mood,
                 Side = _ownerPicker.Side,
-                FontAsset = FontAsset,
-                FontSize = FontSize,
-                FontColor = FontColor,
-                FontStyle = FontStyle,
                 Conditions = new List<ConditionBase>(_conditions),
                 ConditionFailBehavior = _conditionFailBehavior,
             };
@@ -91,59 +73,16 @@ namespace NodeTree.Editor
             if (data is not DialogOptionsNodeData d) return;
 
             DialogText = d.DialogText ?? string.Empty;
-            TypingTickClip = d.TypingTickClip;
             ResponseOptions = new List<string>(d.ResponseOptions ?? new List<string>());
-            TextSpeed = d.TextSpeed;
-            FontAsset = d.FontAsset;
-            FontSize = d.FontSize > 0 ? d.FontSize : 36f;
-            FontColor = d.FontColor;
-            FontStyle = d.FontStyle;
             _conditions = new List<ConditionBase>(d.Conditions ?? new List<ConditionBase>());
             _conditionFailBehavior = d.ConditionFailBehavior;
             _ownerPicker.SetValues(d.OwnerId, d.Mood, d.Side);
 
             _dialogTextField?.SetValueWithoutNotify(DialogText);
-            _typingTickClipField?.SetValueWithoutNotify(TypingTickClip);
-            _textSpeedField?.SetValueWithoutNotify(TextSpeed);
-            _fontAssetField?.SetValueWithoutNotify(FontAsset);
-            _fontSizeField?.SetValueWithoutNotify(FontSize);
-            _fontColorField?.SetValueWithoutNotify(FontColor);
-            _fontStyleField?.SetValueWithoutNotify(FontStyle);
             _failBehaviorField?.SetValueWithoutNotify(_conditionFailBehavior);
 
             RefreshConditionList();
             RefreshOutputPorts();
-        }
-
-        private void BuildStyleSection()
-        {
-            var foldout = new Foldout { text = "Text Style", value = false };
-
-            _textSpeedField = new FloatField("Text Speed") { value = TextSpeed, tooltip = "Seconds per character. 0 = use graph default." };
-            _textSpeedField.RegisterValueChangedCallback(evt => TextSpeed = Mathf.Max(0f, evt.newValue));
-            foldout.Add(_textSpeedField);
-
-            _typingTickClipField = new ObjectField("Tick Sound") { objectType = typeof(AudioClip), tooltip = "Per-character typing sound. Null = use global default on DialogRunner." };
-            _typingTickClipField.RegisterValueChangedCallback(evt => TypingTickClip = evt.newValue as AudioClip);
-            foldout.Add(_typingTickClipField);
-
-            _fontAssetField = new ObjectField("Font") { objectType = typeof(TMP_FontAsset) };
-            _fontAssetField.RegisterValueChangedCallback(evt => FontAsset = evt.newValue as TMP_FontAsset);
-            foldout.Add(_fontAssetField);
-
-            _fontSizeField = new FloatField("Size") { value = FontSize };
-            _fontSizeField.RegisterValueChangedCallback(evt => FontSize = evt.newValue);
-            foldout.Add(_fontSizeField);
-
-            _fontColorField = new ColorField("Color") { value = FontColor, showAlpha = false };
-            _fontColorField.RegisterValueChangedCallback(evt => FontColor = evt.newValue);
-            foldout.Add(_fontColorField);
-
-            _fontStyleField = new EnumFlagsField("Style", FontStyles.Normal);
-            _fontStyleField.RegisterValueChangedCallback(evt => FontStyle = (FontStyles)evt.newValue);
-            foldout.Add(_fontStyleField);
-
-            mainContainer.Add(foldout);
         }
 
         private void BuildConditionSection()

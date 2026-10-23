@@ -13,9 +13,13 @@ public class PrototypeDialogueSession : MonoBehaviour
     private InteractionController interaction;
     private PlayerModeController mode;
     private InputAction continueInput;
+    private InputAction backInput;
     private InputAction sourceInput;
     private InputActionAsset dialogueControls;
     private InputActionReference continueReference;
+    private InputActionReference backReference;
+    private InputActionReference previousContinueReference;
+    private InputActionReference previousBackReference;
     private bool locked;
     private bool playerWasEnabled;
     private bool interactionWasEnabled;
@@ -40,11 +44,24 @@ public class PrototypeDialogueSession : MonoBehaviour
         dialogueControls = ScriptableObject.CreateInstance<InputActionAsset>();
         dialogueControls.AddActionMap(map);
         continueInput = map.FindAction(sourceInput.name, true);
+        continueInput.AddBinding("<Mouse>/leftButton");
+        continueInput.AddBinding("<Keyboard>/space");
+        continueInput.AddBinding("<Keyboard>/rightArrow");
+
+        backInput = map.AddAction("DialogueBack", InputActionType.Button);
+        backInput.AddBinding("<Keyboard>/x");
+        backInput.AddBinding("<Mouse>/rightButton");
+        backInput.AddBinding("<Keyboard>/leftArrow");
+
         continueReference = InputActionReference.Create(continueInput);
+        backReference = InputActionReference.Create(backInput);
+        previousContinueReference = runner.continueAction;
+        previousBackReference = runner.backAction;
         runner.continueAction = continueReference;
-        continueInput.Enable();
-        if (continueHint != null)
-            continueHint.text = continueInput.GetBindingDisplayString() + "  Continue / reveal text    |    Esc / gamepad Cancel  Close";
+        runner.backAction = backReference;
+        continueInput.Disable();
+        backInput.Disable();
+        UpdateContinueHint();
     }
 
     private void LateUpdate()
@@ -52,15 +69,20 @@ public class PrototypeDialogueSession : MonoBehaviour
         if (runner == null || player == null)
             return;
 
+        if (!runner.IsDialogActive && !locked)
+        {
+            continueInput?.Disable();
+            backInput?.Disable();
+        }
+
         if (runner.IsDialogActive && !locked)
         {
             // Settings may have changed since this scene started.
             continueInput.Disable();
+            backInput.Disable();
             for (int i = 0; i < sourceInput.bindings.Count; i++)
                 continueInput.ApplyBindingOverride(i, sourceInput.bindings[i].effectivePath);
-            continueInput.Enable();
-            if (continueHint != null)
-                continueHint.text = continueInput.GetBindingDisplayString() + "  Continue / reveal text    |    Esc / gamepad Cancel  Close";
+            UpdateContinueHint();
             playerWasEnabled = player.enabled;
             interactionWasEnabled = interaction != null && interaction.enabled;
             modeWasEnabled = mode != null && mode.enabled;
@@ -71,6 +93,8 @@ public class PrototypeDialogueSession : MonoBehaviour
             if (mode != null)
                 mode.enabled = false;
             locked = true;
+            continueInput.Enable();
+            backInput.Enable();
         }
 
         if (runner.IsDialogActive &&
@@ -84,6 +108,8 @@ public class PrototypeDialogueSession : MonoBehaviour
 
     private void ReleasePlayer()
     {
+        continueInput?.Disable();
+        backInput?.Disable();
         if (player != null)
             player.enabled = playerWasEnabled;
         if (interaction != null)
@@ -93,6 +119,20 @@ public class PrototypeDialogueSession : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         locked = false;
+    }
+
+    private void UpdateContinueHint()
+    {
+        if (continueHint == null || sourceInput == null)
+            return;
+
+        string interactBinding = sourceInput.GetBindingDisplayString(group: "Keyboard & Mouse");
+        if (string.IsNullOrEmpty(interactBinding))
+            interactBinding = "E";
+
+        continueHint.text = interactBinding +
+            " / LMB / Space / Right: Continue   |   " +
+            "X / RMB / Left: Back   |   Esc / Gamepad Cancel: Close";
     }
 
     private void SceneChanged(Scene previous, Scene next)
@@ -106,9 +146,18 @@ public class PrototypeDialogueSession : MonoBehaviour
         SceneManager.activeSceneChanged -= SceneChanged;
         if (locked)
             ReleasePlayer();
+        if (runner != null)
+        {
+            if (runner.continueAction == continueReference)
+                runner.continueAction = previousContinueReference;
+            if (runner.backAction == backReference)
+                runner.backAction = previousBackReference;
+        }
         dialogueControls?.Disable();
         if (continueReference != null)
             Destroy(continueReference);
+        if (backReference != null)
+            Destroy(backReference);
         if (dialogueControls != null)
             Destroy(dialogueControls);
     }

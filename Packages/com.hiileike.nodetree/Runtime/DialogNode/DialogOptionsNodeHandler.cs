@@ -25,6 +25,13 @@ namespace NodeTree
         public string OwnerId;
         public string Mood;
         public PortraitSide Side;
+
+        public override bool SupportsRepeatSetting => true;
+
+        public override bool ApplyLegacySettings(DialogSettings target)
+        {
+            return target.ApplyLegacyTextStyle(TextSpeed, TypingTickClip, FontAsset, FontSize, FontColor, FontStyle);
+        }
     }
 
     [Preserve]
@@ -48,9 +55,10 @@ namespace NodeTree
             }
 
             uiManager.ClearOptions();
-            uiManager.ShowSpeaker(_data.OwnerId, _data.Mood, _data.Side);
-            uiManager.ApplyTextStyle(_data.FontAsset, _data.FontSize, _data.FontColor, _data.FontStyle);
-            uiManager.DisplayText(_data.DialogText, _data.TextSpeed, _data.TypingTickClip);
+            uiManager.ShowSpeaker(_data.OwnerId, _data.Mood, PortraitSide.Left);
+            var settings = DialogSettingsResolver.Resolve(_data, graph);
+            uiManager.ApplyTextStyle(settings.FontAsset, settings.FontSize, settings.FontColor, settings.FontStyle);
+            uiManager.DisplayText(_data.DialogText, settings.TextSpeed, settings.TypingTickClip);
 
             for (int i = 0; i < _data.ResponseOptions.Count; i++)
             {

@@ -20,6 +20,14 @@ namespace NodeTree
         public Vector2 Position;
         public bool HasSeen;
 
+        public bool HasSettings;
+        public bool UseTreeDefaults = true;
+        public DialogSettings Settings = new DialogSettings();
+
+        public virtual bool SupportsRepeatSetting => false;
+
+        public virtual bool ApplyLegacySettings(DialogSettings target) => false;
+
         [SerializeReference]
         public List<ConditionBase> Conditions = new List<ConditionBase>();
         public ConditionFailBehavior ConditionFailBehavior;
@@ -48,7 +56,12 @@ namespace NodeTree
         public List<EdgeData> Edges = new List<EdgeData>();
 
         [Header("Tree Settings")]
-        public float defaultTextSpeed = 0.05f;
+        [Tooltip("Edit these from the Dialog Settings panel in the Node Tree window.")]
+        public bool UseGlobalDefaults = true;
+        public DialogSettings Settings = new DialogSettings();
+
+        [HideInInspector]
+        public float defaultTextSpeed = DialogSettings.DefaultTextSpeed;
 
         [Header("Decorum")]
         public Sprite IndicatorIcon;

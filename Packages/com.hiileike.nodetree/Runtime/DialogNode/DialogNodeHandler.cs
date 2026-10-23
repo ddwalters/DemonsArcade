@@ -23,6 +23,13 @@ namespace NodeTree
         public string OwnerId;
         public string Mood;
         public PortraitSide Side;
+
+        public override bool SupportsRepeatSetting => true;
+
+        public override bool ApplyLegacySettings(DialogSettings target)
+        {
+            return target.ApplyLegacyTextStyle(TextSpeed, TypingTickClip, FontAsset, FontSize, FontColor, FontStyle);
+        }
     }
 
     [Preserve]
@@ -49,11 +56,12 @@ namespace NodeTree
 
             uiManager.ClearOptions();
             uiManager.ShowSpeaker(_data.OwnerId, _data.Mood, _data.Side);
-            uiManager.ApplyTextStyle(_data.FontAsset, _data.FontSize, _data.FontColor, _data.FontStyle);
+            var settings = DialogSettingsResolver.Resolve(_data, graph);
+            uiManager.ApplyTextStyle(settings.FontAsset, settings.FontSize, settings.FontColor, settings.FontStyle);
 
             var connectedEdge = graph.Edges.FirstOrDefault(x => x.OutputNodeGuid == _data.Guid && x.OutputPortIndex == 0);
             string nextGuid = connectedEdge?.InputNodeGuid;
-            uiManager.DisplayText(_data.DialogText, _data.TextSpeed, _data.TypingTickClip, () => uiManager.GoToNode(nextGuid));
+            uiManager.DisplayText(_data.DialogText, settings.TextSpeed, settings.TypingTickClip, () => uiManager.GoToNode(nextGuid));
 
             _data.HasSeen = true;
         }

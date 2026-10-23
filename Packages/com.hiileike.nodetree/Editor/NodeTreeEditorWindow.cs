@@ -34,6 +34,7 @@ namespace NodeTree.Editor
             wnd.titleContent = new GUIContent(graph.name);
             wnd.minSize = new Vector2(450, 200);
             wnd.currentGraph = graph;
+            DialogSettingsContext.CurrentGraph = graph;
             if (wnd.mainGraphView != null)
                 wnd.LoadGraph(graph);
         }
@@ -55,6 +56,7 @@ namespace NodeTree.Editor
             ownerListView = visualTreeDesigner.Q<ListView>("owner-list-view");
             ownerSearchField = visualTreeDesigner.Q<ToolbarSearchField>("owner-search-field");
             mainGraphView = visualTreeDesigner.Q<TreeGraphView>("tree-graph-view");
+            visualTreeDesigner.Q<VisualElement>("settings-panel-container").Add(new DialogSettingsPanel());
 
             var toolbar = new Toolbar();
             toolbar.style.alignSelf = Align.FlexEnd;
@@ -264,6 +266,7 @@ namespace NodeTree.Editor
                 return;
 
             currentGraph = graph;
+            DialogSettingsContext.CurrentGraph = graph;
 
             mainGraphView.DeleteElements(mainGraphView.graphElements);
 
@@ -312,6 +315,8 @@ namespace NodeTree.Editor
                     mainGraphView.AddElement(newEdge);
                 }
             }
+
+            DialogSettingsContext.NotifyChanged();
         }
 
         private BaseNode CreateNodeFromData(NodeData nodeData)

@@ -13,11 +13,12 @@ MonoBehaviour:
   m_Name: RowanDialogue
   m_EditorClassIdentifier: Hiileike.Nodetree::NodeTree.NodeTreeGraphSO
   Nodes:
-  - rid: 5520813321165733981
-  - rid: 5520813321165733982
-  - rid: 5520813321165733983
-  - rid: 5520813321165733984
-  - rid: 5520813321165733985
+  - rid: 5520813330650366243
+  - rid: 5520813330650366244
+  - rid: 5520813330650366245
+  - rid: 5520813330650366246
+  - rid: 5520813330650366247
+  - rid: 5520813330650366248
   Edges:
   - OutputNodeGuid: start
     InputNodeGuid: hello
@@ -25,18 +26,21 @@ MonoBehaviour:
   - OutputNodeGuid: hello
     InputNodeGuid: course
     OutputPortIndex: 0
-  - OutputNodeGuid: course
-    InputNodeGuid: bye
-    OutputPortIndex: 0
   - OutputNodeGuid: bye
     InputNodeGuid: end
+    OutputPortIndex: 0
+  - OutputNodeGuid: course
+    InputNodeGuid: cb06c459-628c-4548-a9b6-c8d2ec67882a
+    OutputPortIndex: 0
+  - OutputNodeGuid: cb06c459-628c-4548-a9b6-c8d2ec67882a
+    InputNodeGuid: bye
     OutputPortIndex: 0
   defaultTextSpeed: 0.018
   IndicatorIcon: {fileID: 0}
   references:
     version: 2
     RefIds:
-    - rid: 5520813321165733981
+    - rid: 5520813330650366243
       type: {class: StartNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
       data:
         Guid: start
@@ -44,24 +48,15 @@ MonoBehaviour:
         HasSeen: 0
         Conditions: []
         ConditionFailBehavior: 0
-    - rid: 5520813321165733982
-      type: {class: EndNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
-      data:
-        Guid: end
-        Position: {x: 1200, y: 100}
-        HasSeen: 0
-        Conditions: []
-        ConditionFailBehavior: 0
-    - rid: 5520813321165733983
+    - rid: 5520813330650366244
       type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
       data:
         Guid: hello
-        Position: {x: 300, y: 100}
+        Position: {x: 146, y: 100}
         HasSeen: 0
         Conditions: []
         ConditionFailBehavior: 0
-        DialogText: Welcome to the practice yard! I am testing the same walking and
-          stair movement as you.
+        DialogText: Sup biaattchhh
         TypingTickClip: {fileID: 0}
         FontAsset: {fileID: 0}
         FontSize: 26
@@ -71,40 +66,15 @@ MonoBehaviour:
         OwnerId: 926223b3de174829a2257ab40f857843
         Mood: 
         Side: 0
-    - rid: 5520813321165733984
-      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
-      data:
-        Guid: bye
-        Position: {x: 892, y: 79}
-        HasSeen: 0
-        Conditions: []
-        ConditionFailBehavior: 0
-        DialogText: 'Catch me again whenever you like. I will pick up my patrol where
-          we stopped.
-
-
-          Use your interaction button to continue; Escape
-          or controller Back/Cancel closes this conversation.'
-        TypingTickClip: {fileID: 0}
-        FontAsset: {fileID: 0}
-        FontSize: 26
-        FontColor: {r: 1, g: 1, b: 1, a: 1}
-        FontStyle: 0
-        TextSpeed: 0
-        OwnerId: 926223b3de174829a2257ab40f857843
-        Mood: 
-        Side: 0
-    - rid: 5520813321165733985
+    - rid: 5520813330650366245
       type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
       data:
         Guid: course
-        Position: {x: 600, y: 100}
+        Position: {x: 446, y: 100}
         HasSeen: 0
         Conditions: []
         ConditionFailBehavior: 0
-        DialogText: Try the green box for a short jump. The orange box is deliberately
-          too tall. My patrol takes me up the stairs, through the doorway, and back
-          around.
+        DialogText: Go climb som stairs before I punt you from this ledge
         TypingTickClip: {fileID: 0}
         FontAsset: {fileID: 0}
         FontSize: 26
@@ -114,3 +84,47 @@ MonoBehaviour:
         OwnerId: 926223b3de174829a2257ab40f857843
         Mood: 
         Side: 0
+    - rid: 5520813330650366246
+      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: cb06c459-628c-4548-a9b6-c8d2ec67882a
+        Position: {x: 741, y: 100}
+        HasSeen: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+        DialogText: umm...
+        TypingTickClip: {fileID: 0}
+        FontAsset: {fileID: 0}
+        FontSize: 36
+        FontColor: {r: 1, g: 1, b: 1, a: 1}
+        FontStyle: 0
+        TextSpeed: 0
+        OwnerId: 534f2ae3776649cf99cc6aff2ea0ff74
+        Mood: 
+        Side: 1
+    - rid: 5520813330650366247
+      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: bye
+        Position: {x: 1051, y: 110}
+        HasSeen: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+        DialogText: Huh, did I just hear a dung beetle talk?
+        TypingTickClip: {fileID: 0}
+        FontAsset: {fileID: 0}
+        FontSize: 26
+        FontColor: {r: 1, g: 1, b: 1, a: 1}
+        FontStyle: 0
+        TextSpeed: 0
+        OwnerId: 926223b3de174829a2257ab40f857843
+        Mood: 
+        Side: 0
+    - rid: 5520813330650366248
+      type: {class: EndNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: end
+        Position: {x: 1404, y: 112}
+        HasSeen: 0
+        Conditions: []
+        ConditionFailBehavior: 0

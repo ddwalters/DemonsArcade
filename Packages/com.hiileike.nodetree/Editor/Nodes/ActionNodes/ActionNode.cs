@@ -29,6 +29,7 @@ namespace NodeTree.Editor
             _keyField.RegisterValueChangedCallback(evt => EventKey = evt.newValue);
             mainContainer.Add(_keyField);
 
+            mainContainer.Add(BuildGeneralFoldout(offByDefault: true));
             BuildConditionSection();
             RefreshOutputPorts();
         }
