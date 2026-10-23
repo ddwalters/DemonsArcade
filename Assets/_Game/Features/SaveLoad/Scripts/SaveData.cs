@@ -48,6 +48,7 @@ public class SaveData
     public Quaternion rotation;
     public PlayerStatsData stats;
     public int gold;
+    public SavedParty party;
     public List<SavedContainer> inventory = new();
     public List<SavedWorldObject> world = new();
 }

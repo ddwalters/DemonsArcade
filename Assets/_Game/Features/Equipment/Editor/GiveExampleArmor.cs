@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class GiveExampleArmor
 {
-    private const string MenuPath = "Tools/Prototyping/Give Example Armor";
+    private const string MenuPath = "Tools/Equipment/Give Example Armor";
     private static readonly string[] ExampleItemNames =
     {
         "Winter Hat",

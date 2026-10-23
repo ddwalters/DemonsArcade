@@ -18,7 +18,7 @@ public class PlayerStatsData
     public PlayerStatsData()
     {
         resourceScaleVersion = 2;
-        inventoryType = InventoryType.FourByFourFull;
+        inventoryType = InventoryType.EightColumnFull;
 
         lvl = 1;
         nextLevelXP = 500;

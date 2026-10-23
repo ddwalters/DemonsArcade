@@ -1,0 +1,230 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ae2a7f2f014708499c628fd68af88ac, type: 3}
+  m_Name: QuestGiverDialogue
+  m_EditorClassIdentifier: Hiileike.Nodetree::NodeTree.NodeTreeGraphSO
+  Nodes:
+  - rid: 5520813330650366258
+  - rid: 5520813330650366259
+  - rid: 5520813330650366260
+  - rid: 5520813330650366261
+  - rid: 5520813330650366262
+  - rid: 5520813330650366263
+  - rid: 5520813330650366264
+  Edges:
+  - OutputNodeGuid: start
+    InputNodeGuid: completed_check
+    OutputPortIndex: 0
+  - OutputNodeGuid: completed_check
+    InputNodeGuid: already_complete
+    OutputPortIndex: 0
+  - OutputNodeGuid: completed_check
+    InputNodeGuid: quest_prompt
+    OutputPortIndex: 1
+  - OutputNodeGuid: already_complete
+    InputNodeGuid: end
+    OutputPortIndex: 0
+  - OutputNodeGuid: quest_prompt
+    InputNodeGuid: yes_action
+    OutputPortIndex: 0
+  - OutputNodeGuid: quest_prompt
+    InputNodeGuid: no_response
+    OutputPortIndex: 1
+  - OutputNodeGuid: yes_action
+    InputNodeGuid: end
+    OutputPortIndex: 0
+  - OutputNodeGuid: no_response
+    InputNodeGuid: end
+    OutputPortIndex: 0
+  UseGlobalDefaults: 0
+  Settings:
+    IsRepeatable: 1
+    CanRewind: 0
+    TextSpeed: 0.05
+    TypingTickClip: {fileID: 0}
+    FontAsset: {fileID: 0}
+    FontSize: 36
+    FontColor: {r: 1, g: 1, b: 1, a: 1}
+    FontStyle: 0
+  defaultTextSpeed: 0.05
+  IndicatorIcon: {fileID: 0}
+  references:
+    version: 2
+    RefIds:
+    - rid: 5520813330650366258
+      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: no_response
+        Position: {x: 664, y: 194}
+        HasSeen: 0
+        HasSettings: 1
+        UseTreeDefaults: 1
+        Settings:
+          IsRepeatable: 1
+          CanRewind: 0
+          TextSpeed: 0.05
+          TypingTickClip: {fileID: 0}
+          FontAsset: {fileID: 0}
+          FontSize: 36
+          FontColor: {r: 1, g: 1, b: 1, a: 1}
+          FontStyle: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+        DialogText: Maybe another time.
+        TypingTickClip: {fileID: 0}
+        FontAsset: {fileID: 0}
+        FontSize: 36
+        FontColor: {r: 1, g: 1, b: 1, a: 1}
+        FontStyle: 0
+        TextSpeed: 0
+        OwnerId: c129af73d1974264834c77e9822ff748
+        Mood: 
+        Side: 0
+    - rid: 5520813330650366259
+      type: {class: StartNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: start
+        Position: {x: -466, y: 38}
+        HasSeen: 0
+        HasSettings: 1
+        UseTreeDefaults: 1
+        Settings:
+          IsRepeatable: 1
+          CanRewind: 0
+          TextSpeed: 0.05
+          TypingTickClip: {fileID: 0}
+          FontAsset: {fileID: 0}
+          FontSize: 36
+          FontColor: {r: 1, g: 1, b: 1, a: 1}
+          FontStyle: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+    - rid: 5520813330650366260
+      type: {class: BoolConditionNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: completed_check
+        Position: {x: -314, y: 42}
+        HasSeen: 0
+        HasSettings: 1
+        UseTreeDefaults: 1
+        Settings:
+          IsRepeatable: 1
+          CanRewind: 0
+          TextSpeed: 0.05
+          TypingTickClip: {fileID: 0}
+          FontAsset: {fileID: 0}
+          FontSize: 36
+          FontColor: {r: 1, g: 1, b: 1, a: 1}
+          FontStyle: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+        Key: quest.alden.completed
+    - rid: 5520813330650366261
+      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: already_complete
+        Position: {x: 104, y: -306}
+        HasSeen: 0
+        HasSettings: 1
+        UseTreeDefaults: 1
+        Settings:
+          IsRepeatable: 1
+          CanRewind: 0
+          TextSpeed: 0.05
+          TypingTickClip: {fileID: 0}
+          FontAsset: {fileID: 0}
+          FontSize: 36
+          FontColor: {r: 1, g: 1, b: 1, a: 1}
+          FontStyle: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+        DialogText: This quest is already complete.
+        TypingTickClip: {fileID: 0}
+        FontAsset: {fileID: 0}
+        FontSize: 36
+        FontColor: {r: 1, g: 1, b: 1, a: 1}
+        FontStyle: 0
+        TextSpeed: 0
+        OwnerId: c129af73d1974264834c77e9822ff748
+        Mood: 
+        Side: 0
+    - rid: 5520813330650366262
+      type: {class: DialogOptionsNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: quest_prompt
+        Position: {x: 71, y: 215}
+        HasSeen: 0
+        HasSettings: 1
+        UseTreeDefaults: 0
+        Settings:
+          IsRepeatable: 1
+          CanRewind: 0
+          TextSpeed: 0.05
+          TypingTickClip: {fileID: 0}
+          FontAsset: {fileID: 0}
+          FontSize: 36
+          FontColor: {r: 1, g: 1, b: 1, a: 1}
+          FontStyle: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+        DialogText: Would you like to complete this test quest?
+        ResponseOptions:
+        - Yes
+        - No
+        TypingTickClip: {fileID: 0}
+        FontAsset: {fileID: 0}
+        FontSize: 36
+        FontColor: {r: 1, g: 1, b: 1, a: 1}
+        FontStyle: 0
+        TextSpeed: 0
+        OwnerId: c129af73d1974264834c77e9822ff748
+        Mood: 
+        Side: 0
+    - rid: 5520813330650366263
+      type: {class: EndNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: end
+        Position: {x: 999, y: -173}
+        HasSeen: 0
+        HasSettings: 1
+        UseTreeDefaults: 1
+        Settings:
+          IsRepeatable: 1
+          CanRewind: 0
+          TextSpeed: 0.05
+          TypingTickClip: {fileID: 0}
+          FontAsset: {fileID: 0}
+          FontSize: 36
+          FontColor: {r: 1, g: 1, b: 1, a: 1}
+          FontStyle: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+    - rid: 5520813330650366264
+      type: {class: ActionNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: yes_action
+        Position: {x: 557, y: -7}
+        HasSeen: 0
+        HasSettings: 1
+        UseTreeDefaults: 0
+        Settings:
+          IsRepeatable: 0
+          CanRewind: 0
+          TextSpeed: 0.05
+          TypingTickClip: {fileID: 0}
+          FontAsset: {fileID: 0}
+          FontSize: 36
+          FontColor: {r: 1, g: 1, b: 1, a: 1}
+          FontStyle: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+        EventKey: quest.alden.complete

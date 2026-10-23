@@ -15,8 +15,10 @@ public class CharacterInventoryPreview : MonoBehaviour
 
     private static readonly Vector3 PreviewWorldPosition = new(0f, -10000f, 0f);
 
+    private static readonly HashSet<int> activePreviewSlots = new();
+    private int previewSlot = -1;
     private RawImage target;
-    private PlayerController player;
+    private GameObject player;
     private PlayerEquipment equipment;
     private Texture originalTargetTexture;
 
@@ -25,6 +27,7 @@ public class CharacterInventoryPreview : MonoBehaviour
     private Camera previewCamera;
     private RenderTexture previewTexture;
 
+    private IEnumerable<ItemData> previewEquipment;
     private bool refreshRequested;
     private bool renderRequested;
 
@@ -32,8 +35,9 @@ public class CharacterInventoryPreview : MonoBehaviour
     /// Binds the paper-doll image and player whose current model and equipment should be shown.
     /// Calling this again replaces any previous binding and preview objects.
     /// </summary>
-    public void Initialize(RawImage image, PlayerController playerController)
+    public void Initialize(RawImage image, GameObject playerController, IEnumerable<ItemData> equipmentItems = null)
     {
+        previewEquipment = equipmentItems;
         if (target == image && player == playerController)
         {
             if (isActiveAndEnabled)
@@ -173,7 +177,9 @@ public class CharacterInventoryPreview : MonoBehaviour
     {
         previewRoot = new GameObject("Inventory Character Preview");
         previewRoot.layer = PreviewLayer;
-        previewRoot.transform.position = PreviewWorldPosition;
+        previewSlot = 0;
+        while (!activePreviewSlots.Add(previewSlot)) previewSlot++;
+        previewRoot.transform.position = PreviewWorldPosition + Vector3.right * (previewSlot * 200f);
         previewRoot.SetActive(false);
 
         characterClone = Instantiate(sourceAnimator.gameObject, previewRoot.transform, false);
@@ -183,6 +189,12 @@ public class CharacterInventoryPreview : MonoBehaviour
         characterClone.transform.localScale = sourceAnimator.transform.lossyScale;
 
         DisableCloneBehavioursAndPhysics(characterClone);
+        if (previewEquipment != null)
+        {
+            var visuals = previewRoot.AddComponent<EquipmentVisualController>();
+            visuals.BindAnimator(characterClone.GetComponent<Animator>());
+            visuals.ApplyEquipment(previewEquipment);
+        }
         SetLayerRecursively(characterClone.transform, PreviewLayer);
         CopyRendererPropertyBlocks(sourceAnimator.gameObject, characterClone);
 
@@ -191,6 +203,8 @@ public class CharacterInventoryPreview : MonoBehaviour
         CreatePreviewLight();
 
         previewRoot.SetActive(true);
+        SetLayerRecursively(characterClone.transform, PreviewLayer);
+        DisableCloneBehavioursAndPhysics(characterClone);
         FrameCharacter();
 
         if (target != null && previewTexture != null)
@@ -261,12 +275,13 @@ public class CharacterInventoryPreview : MonoBehaviour
         GameObject lightObject = new("Inventory Character Preview Light");
         lightObject.layer = PreviewLayer;
         lightObject.transform.SetParent(previewRoot.transform, false);
-        lightObject.transform.localRotation = Quaternion.Euler(30f, -25f, 0f);
+        lightObject.transform.localPosition = new Vector3(1f, 3f, 3f);
 
         Light light = lightObject.AddComponent<Light>();
-        light.type = LightType.Directional;
+        light.type = LightType.Point;
+        light.range = 12f;
         light.color = Color.white;
-        light.intensity = 1f;
+        light.intensity = 5f;
         light.shadows = LightShadows.None;
         light.cullingMask = 1 << PreviewLayer;
     }
@@ -480,6 +495,8 @@ public class CharacterInventoryPreview : MonoBehaviour
             ReleaseObject(previewTexture);
         }
 
+        if (previewSlot >= 0) activePreviewSlots.Remove(previewSlot);
+        previewSlot = -1;
         previewRoot = null;
         characterClone = null;
         previewCamera = null;

@@ -7,7 +7,8 @@ public enum PlayerMode
     Inventory,
     Looting,
     Paused,
-    Dead
+    Dead,
+    Dialogue
 }
 
 [DefaultExecutionOrder(-100)]
@@ -45,7 +46,7 @@ public class PlayerModeController : MonoBehaviour
 
     private void HandleMenuInput(bool escape, bool tab, bool interact)
     {
-        if (Mode == PlayerMode.Dead || SaveManager.Instance?.IsLoading == true)
+        if (Mode == PlayerMode.Dead || Mode == PlayerMode.Dialogue || SaveManager.Instance?.IsLoading == true)
             return;
 
         if (escape && UIController.Current != null && UIController.Current.HandleEscape())

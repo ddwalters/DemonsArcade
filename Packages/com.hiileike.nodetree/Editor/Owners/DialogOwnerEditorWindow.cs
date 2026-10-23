@@ -9,6 +9,22 @@ namespace NodeTree.Editor
 {
     public class DialogOwnerEditorWindow : EditorWindow
     {
+        // Optional project editor integrations; the package has no dependency on game types.
+        public static event System.Action<DialogOwner, VisualElement> ExtendCharacterDetails;
+        public static event System.Func<DialogOwner, string> CharacterDeletionWarning;
+
+        private static string ExternalDeletionWarnings(DialogOwner owner)
+        {
+            var messages = new List<string>();
+            if (CharacterDeletionWarning != null)
+                foreach (System.Func<DialogOwner, string> callback in CharacterDeletionWarning.GetInvocationList())
+                {
+                    string message = callback(owner);
+                    if (!string.IsNullOrWhiteSpace(message)) messages.Add(message);
+                }
+            return string.Join("\n\n", messages);
+        }
+
         private ListView _ownerList;
         private ScrollView _detailPane;
         private DialogOwnerDatabaseSO _database;
@@ -256,9 +272,11 @@ namespace NodeTree.Editor
             captureButton.tooltip = "Pose a model and save the frame as a mood portrait for this character.";
             _detailPane.Add(captureButton);
 
+            ExtendCharacterDetails?.Invoke(owner, _detailPane);
+
             var deleteButton = new Button(() =>
             {
-                if (!EditorUtility.DisplayDialog("Delete character", "Delete '" + owner.DisplayName + "'? Nodes using it will lose their speaker.", "Delete", "Cancel"))
+                if (!EditorUtility.DisplayDialog("Delete character", "Delete '" + owner.DisplayName + "'? Nodes using it will lose their speaker.\n\n" + ExternalDeletionWarnings(owner), "Delete", "Cancel"))
                     return;
 
                 _selectedId = null;

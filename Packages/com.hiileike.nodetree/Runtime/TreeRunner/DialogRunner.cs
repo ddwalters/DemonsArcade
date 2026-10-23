@@ -79,6 +79,9 @@ namespace NodeTree
         [Tooltip("Leave empty to load Resources/NodeTree/DialogOwners.")]
         [SerializeField] private DialogOwnerDatabaseSO ownerDatabase;
 
+        [Tooltip("Keep a standalone runner between scenes. Disable when the runner belongs to a scene UI hierarchy.")]
+        [SerializeField] private bool persistAcrossScenes = true;
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -88,7 +91,8 @@ namespace NodeTree
             }
 
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            if (persistAcrossScenes)
+                DontDestroyOnLoad(gameObject);
 
             if (dialogCanvas != null)
                 dialogCanvas.SetActive(false);

@@ -48,8 +48,7 @@ public class ItemCatalog : ScriptableObject
             return;
         }
 
-        var grids = inventoryTypes[type].GetComponentsInChildren<InventoryGrid>(true);
-        Vector2Int size = Array.Find(grids, grid => grid.id == 0).gridSize;
+        Vector2Int size = inventoryTypes.GetGridSize(type, items);
         var occupied = new HashSet<Vector2Int>();
         foreach (var item in items)
         {

@@ -30,7 +30,7 @@ public class PlayerStatsManager : MonoBehaviour
     // A new scene changes the view, not the live player session.
     public void GetNewComponents()
     {
-        BindHUD(GameObject.Find("DeathScreen")?.GetComponent<Animator>());
+        BindHUD(GetComponent<PlayerController>() != null ? GameObject.Find("DeathScreen")?.GetComponent<Animator>() : null);
     }
 
     public void BindHUD(Animator deathScreen)
@@ -55,37 +55,8 @@ public class PlayerStatsManager : MonoBehaviour
         PlayerModeController.ForPlayer(GetComponent<PlayerController>())?.ResetToGameplay();
     }
 
-    #region Core Stats
-    private void LevelUp()
-    {
-        if (statsData.lvl >= 100)
-            return;
+    public void GainEXP(int expGain) => CharacterProgression.GainExperience(GetPlayerStats(), expGain);
 
-        statsData.lvl++;
-        IncreaseStats();
-    }
-
-    private void IncreaseStats()
-    {
-        IncreaseHealthStat();
-        IncreaseStaminaStat();
-        IncreaseManaStat();
-    }
-
-    public void GainEXP(int expGain)
-    {
-        if (statsData.lvl >= 100)
-            return;
-
-        statsData.currentXP += expGain;
-        while (statsData.currentXP >= statsData.nextLevelXP && statsData.lvl < 100)
-        {
-            LevelUp();
-            statsData.currentXP -= statsData.nextLevelXP;
-            statsData.nextLevelXP *= 3;
-        }
-    }
-    #endregion
 
     #region Health
     public void DamagePlayer(float damageAmount)

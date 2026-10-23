@@ -15,10 +15,34 @@ public class Inventory : MonoBehaviour
     public InventoryTypeCollection inventoryType;
     public Item selectedItem { get; private set; }
     public InventoryItemTooltip tooltip;
+    [SerializeField] private InventoryPlayerPanel playerPanel;
+    [SerializeField] private InventoryPlayerPanel compactPlayerPanel;
 
+    public string SelectedMemberId { get; private set; } = PartyManager.PlayerId;
+    public PartyMember SelectedMember => inventoryManager?.Party?.Get(SelectedMemberId);
     private InventoryManager inventoryManager;
+    public void SelectPartyMember(string memberId)
+    {
+        if (selectedItem != null || inventoryManager?.Party?.Contains(memberId) != true) return;
+        SelectedMemberId = memberId;
+        foreach (int id in openGrids.Keys.ToArray()) CreateGrid(id, id == 0);
+    }
+    private void Update()
+    {
+        if (selectedItem == null && openGrids.TryGetValue(0, out var root) &&
+            inventoryManager.Party?.Contains(SelectedMemberId) == true)
+        {
+            var main = root.GetComponentsInChildren<InventoryGrid>().First(grid => grid.id == 0);
+            if (main.gridSize != GridSize(0)) SelectPartyMember(SelectedMemberId);
+        }
+        if (openGrids.ContainsKey(0) && inventoryManager.Party?.Contains(SelectedMemberId) == false)
+        {
+            CloseAllGrids();
+            SelectedMemberId = PartyManager.PlayerId;
+            CreateGrid(0, true);
+        }
+    }
     private Canvas canvas;
-    private Transform playerGridHolder;
     private Transform worldGridHolder;
     private readonly Dictionary<int, GameObject> openGrids = new();
 
@@ -30,7 +54,12 @@ public class Inventory : MonoBehaviour
             DestroyImmediate(view);
     }
 
-    private void Awake() => BindComponents();
+    private void Awake()
+    {
+        BindComponents();
+        playerPanel?.gameObject.SetActive(false);
+        compactPlayerPanel?.gameObject.SetActive(false);
+    }
 
     private void BindComponents()
     {
@@ -40,9 +69,6 @@ public class Inventory : MonoBehaviour
         if (canvas == null)
             canvas = GetComponentInParent<Canvas>();
 
-        if (playerGridHolder == null)
-            playerGridHolder = GameObject.Find("PlayerInventory")?.transform;
-
         if (worldGridHolder == null)
             worldGridHolder = GameObject.Find("WorldInventory")?.transform;
     }
@@ -50,9 +76,9 @@ public class Inventory : MonoBehaviour
     private InventoryGrid MainGrid(GameObject prefab) =>
         prefab.GetComponentsInChildren<InventoryGrid>(true).First(g => g.id == 0);
 
-    private GameObject GridPrefab(int id) => inventoryType[inventoryManager.GetItems(id).type];
+    private GameObject GridPrefab(int id) => inventoryType[inventoryManager.GetItems(id, SelectedMemberId).type];
     private Vector2Int GridSize(int id) => InventoryManager.IsEquipmentGrid(id)
-        ? Vector2Int.one : MainGrid(GridPrefab(id)).gridSize;
+        ? Vector2Int.one : inventoryType.GetGridSize(inventoryManager.GetItems(id, SelectedMemberId).type, inventoryManager.GetItems(id, SelectedMemberId).list);
 
     public bool AddItem(int gridId, ItemData definition)
     {
@@ -60,7 +86,8 @@ public class Inventory : MonoBehaviour
         if (definition == null)
             return false;
 
-        Vector2Int size = GridSize(gridId);
+        var container = inventoryManager.GetItems(gridId);
+        Vector2Int size = InventoryManager.IsEquipmentGrid(gridId) ? Vector2Int.one : inventoryType.GetGridSize(container.type, container.list);
         for (int y = 0; y < size.y; y++)
             for (int x = 0; x < size.x; x++)
                 for (int rotation = 0; rotation < 2; rotation++)
@@ -79,60 +106,69 @@ public class Inventory : MonoBehaviour
     public void CreateGrid(int gridId, bool isPlayerGrid)
     {
         BindComponents();
-        if (openGrids.TryGetValue(gridId, out var previous))
-        {
-            previous.SetActive(false);
-            DestroyView(previous);
-        }
-        var root = Instantiate(GridPrefab(gridId), isPlayerGrid ? playerGridHolder : worldGridHolder);
-        var main = MainGrid(root);
-        main.id = gridId;
-        if (!isPlayerGrid)
-            foreach (Transform child in root.transform)
-                if (child != main.transform)
-                    child.gameObject.SetActive(false);
-
-        InventoryPlayerPanel playerPanel = null;
         if (isPlayerGrid && gridId == 0)
         {
-            InventoryGrid[] equipmentSlots = root.GetComponentsInChildren<InventoryGrid>(true)
-                .Where(slot => slot != main && InventoryManager.IsEquipmentGrid(slot.id)).ToArray();
-            GameObject panelRoot = new("PlayerInventoryPanel", typeof(RectTransform), typeof(CanvasRenderer));
-            panelRoot.layer = 5;
-            RectTransform panelRect = (RectTransform)panelRoot.transform;
-            panelRect.SetParent(playerGridHolder, false);
-            panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 0.5f);
-            panelRect.pivot = new Vector2(0.5f, 0.5f);
-            panelRect.anchoredPosition = Vector2.zero;
-            playerPanel = panelRoot.AddComponent<InventoryPlayerPanel>();
-            playerPanel.Initialize(root, main, equipmentSlots, inventoryManager,
-                FindAnyObjectByType<PlayerController>());
-            openGrids[gridId] = panelRoot;
-
-            // Populate after the view builder has added ring grid clones so every grid gets
-            // the inventory owner binding and any saved records.
-            PopulateGrid(main);
-            foreach (InventoryGrid slot in playerPanel.EquipmentGrids)
-                PopulateGrid(slot);
+            InventoryPlayerPanel panel = openGrids.TryGetValue(0, out var existing)
+                ? existing.GetComponent<InventoryPlayerPanel>() : null;
+            if (panel == null)
+            {
+                bool compact = FindAnyObjectByType<PlayerModeController>()?.Mode == PlayerMode.Looting;
+                panel = compact ? compactPlayerPanel : playerPanel;
+                if (panel == null)
+                {
+                    Debug.LogError("Assign the inventory panel instances from the Canvas hierarchy.", this);
+                    return;
+                }
+                openGrids[0] = panel.gameObject;
+            }
+            panel.gameObject.SetActive(true);
+            panel.BagGrid.gridSize = GridSize(0);
+            RefreshGrid(panel.BagGrid);
+            foreach (var slot in panel.EquipmentGrids) RefreshGrid(slot);
+            panel.Initialize(this, inventoryManager);
         }
         else
         {
-            openGrids[gridId] = root;
-            PopulateGrid(main);
+            GameObject root;
+            InventoryGrid main;
+            if (openGrids.TryGetValue(gridId, out root))
+            {
+                main = root.GetComponentsInChildren<InventoryGrid>(true).First(grid => grid.id == gridId);
+            }
+            else
+            {
+                root = Instantiate(GridPrefab(gridId), worldGridHolder);
+                main = MainGrid(root);
+                main.id = gridId;
+                foreach (Transform child in root.transform)
+                    if (child != main.transform) child.gameObject.SetActive(false);
+                openGrids[gridId] = root;
+            }
+            main.gridSize = GridSize(gridId);
+            RefreshGrid(main);
         }
-
         foreach (var entry in openGrids)
         {
             var layout = entry.Value.GetComponent<InventoryPanelLayout>() ?? entry.Value.AddComponent<InventoryPanelLayout>();
-            InventoryPlayerPanel entryPlayerPanel = entry.Value.GetComponent<InventoryPlayerPanel>();
-            layout.Configure(canvas, entryPlayerPanel != null, openGrids.Count > 1, entryPlayerPanel);
+            var panel = entry.Value.GetComponent<InventoryPlayerPanel>();
+            layout.Configure(canvas, panel != null, openGrids.Count > 1, panel);
         }
+    }
+
+    private void RefreshGrid(InventoryGrid grid)
+    {
+        foreach (var item in grid.rectTransform.GetComponentsInChildren<Item>(true))
+        {
+            item.gameObject.SetActive(false);
+            DestroyView(item.gameObject);
+        }
+        PopulateGrid(grid);
     }
 
     private void PopulateGrid(InventoryGrid grid)
     {
         grid.Bind(this);
-        foreach (var record in inventoryManager.GetItems(grid.id).list)
+        foreach (var record in inventoryManager.GetItems(grid.id, SelectedMemberId).list)
         {
             Item view = Instantiate(itemPrefab, grid.rectTransform);
             view.Bind(record, this, grid);
@@ -170,11 +206,11 @@ public class Inventory : MonoBehaviour
         bool moved;
         if (overlap == null)
             moved = inventoryManager.TryMoveItem(selectedItem.inventoryGrid.id, selectedItem.Instance,
-                gridOnMouse.id, position, selectedItem.rotateIndex, gridOnMouse.gridSize);
+                gridOnMouse.id, position, selectedItem.rotateIndex, gridOnMouse.gridSize, SelectedMemberId);
         else
             moved = inventoryManager.TrySwapItems(selectedItem.inventoryGrid.id, selectedItem.Instance,
                 gridOnMouse.id, overlap.Instance, overlap.indexPosition, selectedItem.rotateIndex,
-                selectedItem.inventoryGrid.gridSize, gridOnMouse.gridSize);
+                selectedItem.inventoryGrid.gridSize, gridOnMouse.gridSize, SelectedMemberId);
 
         if (moved)
             CompleteDrop();
@@ -202,7 +238,8 @@ public class Inventory : MonoBehaviour
                 continue;
 
             root.SetActive(false);
-            DestroyView(root);
+            if (root.GetComponent<InventoryPlayerPanel>() == null)
+                DestroyView(root);
         }
 
         openGrids.Clear();
@@ -214,7 +251,7 @@ public class Inventory : MonoBehaviour
         if (item == null)
             return;
 
-        inventoryManager.RemoveItem(item.inventoryGrid.id, item.Instance);
+        inventoryManager.RemoveItem(item.inventoryGrid.id, item.Instance, SelectedMemberId);
         if (selectedItem == item)
             selectedItem = null;
 

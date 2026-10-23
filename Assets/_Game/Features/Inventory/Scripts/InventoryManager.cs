@@ -9,6 +9,7 @@ public class InventoryManager : MonoBehaviour
     public const int FirstLootGridId = (int)EquipmentSlot.RingRight + 1;
 
     private Dictionary<int, (List<ItemInstance> list, InventoryType type)> ItemDataInformation;
+    public PartyManager Party { get; private set; }
     private int nextGridId = FirstLootGridId;
     private EquipmentTotals currentEquipment;
     private bool playerInventoryTypeBound;
@@ -40,8 +41,9 @@ public class InventoryManager : MonoBehaviour
         }
 
         DontDestroyOnLoad(gameObject);
+        Party = GetComponent<PartyManager>() ?? gameObject.AddComponent<PartyManager>();
 
-        PlayerStatsManager playerStats = FindAnyObjectByType<PlayerStatsManager>();
+        PlayerStatsManager playerStats = FindAnyObjectByType<PlayerController>()?.GetComponent<PlayerStatsManager>();
         if (playerStats != null)
         {
             Initialize(playerStats.GetPlayerStats().inventoryType);
@@ -50,7 +52,7 @@ public class InventoryManager : MonoBehaviour
         else
         {
             // The inventory can be created before the player during scene startup.
-            Initialize(InventoryType.FourByFourFull);
+            Initialize(InventoryType.EightColumnFull);
         }
 
         SceneManager.sceneLoaded += OnSceneLoaded;
@@ -72,13 +74,15 @@ public class InventoryManager : MonoBehaviour
         for (int id = (int)EquipmentSlot.Helmet; id <= (int)EquipmentSlot.RingRight; id++)
             ItemDataInformation.Add(id, (new List<ItemInstance>(), InventoryType.OneByOneMinimal));
 
+        if (Party != null)
+            for (int id = 0; id < FirstLootGridId; id++) Party.Get(PartyManager.PlayerId).BindContainer(id, ItemDataInformation[id].list);
         currentEquipment = EquipmentCalculator.Calculate(Array.Empty<ItemData>());
     }
 
     private void EnsureInitialized()
     {
         if (ItemDataInformation == null)
-            Initialize(InventoryType.FourByFourFull);
+            Initialize(InventoryType.EightColumnFull);
     }
 
     private void BindPlayerInventoryTypeIfAvailable()
@@ -86,7 +90,7 @@ public class InventoryManager : MonoBehaviour
         if (playerInventoryTypeBound)
             return;
 
-        PlayerStatsManager playerStats = FindAnyObjectByType<PlayerStatsManager>();
+        PlayerStatsManager playerStats = FindAnyObjectByType<PlayerController>()?.GetComponent<PlayerStatsManager>();
         if (playerStats == null)
             return;
 
@@ -142,9 +146,14 @@ public class InventoryManager : MonoBehaviour
         return id;
     }
 
-    public (List<ItemInstance> list, InventoryType type) GetItems(int id)
+    public (List<ItemInstance> list, InventoryType type) GetItems(int id, string ownerId = null)
     {
         EnsureInitialized();
+        if (id >= 0 && id < FirstLootGridId && ownerId != null && ownerId != PartyManager.PlayerId)
+        {
+            var member = Party.Get(ownerId) ?? throw new ArgumentException("Unknown inventory owner.");
+            return (member.GetItems(id), id == 0 ? member.Stats.inventoryType : InventoryType.OneByOneMinimal);
+        }
         return ItemDataInformation[id];
     }
 
@@ -181,12 +190,12 @@ public class InventoryManager : MonoBehaviour
             ItemDataInformation.Remove(id);
     }
 
-    public IEnumerable<ItemData> EnumerateEquippedItems()
+    public IEnumerable<ItemData> EnumerateEquippedItems(string ownerId = null)
     {
         EnsureInitialized();
         for (int id = (int)EquipmentSlot.Helmet; id <= (int)EquipmentSlot.RingRight; id++)
         {
-            foreach (ItemInstance item in ItemDataInformation[id].list)
+            foreach (ItemInstance item in GetItems(id, ownerId).list)
             {
                 if (item != null && item.Definition != null)
                     yield return item.Definition;
@@ -195,15 +204,16 @@ public class InventoryManager : MonoBehaviour
     }
 
     public bool CanPlace(int gridId, ItemData definition, Vector2Int position, int rotation,
-        Vector2Int gridSize, ItemInstance ignore = null, ItemInstance otherIgnore = null)
+        Vector2Int gridSize, ItemInstance ignore = null, ItemInstance otherIgnore = null, string ownerId = null)
     {
         EnsureInitialized();
-        if (definition == null || !ItemDataInformation.TryGetValue(gridId, out var grid))
+        if (definition == null || (gridId >= FirstLootGridId && !ItemDataInformation.ContainsKey(gridId)))
             return false;
 
         if (IsEquipmentGrid(gridId))
-            return CanEquip(definition, (EquipmentSlot)gridId) && grid.list.TrueForAll(item => ReferenceEquals(item, ignore) || ReferenceEquals(item, otherIgnore));
+            return CanEquip(definition, (EquipmentSlot)gridId) && GetItems(gridId, ownerId).list.TrueForAll(item => ReferenceEquals(item, ignore) || ReferenceEquals(item, otherIgnore));
 
+        var grid = GetItems(gridId, ownerId);
         Vector2Int size = InventoryPlacement.Size(definition, rotation);
         if (!InventoryPlacement.Fits(position, size, gridSize))
             return false;
@@ -226,40 +236,40 @@ public class InventoryManager : MonoBehaviour
         item.Rotation = IsEquipmentGrid(gridId) ? 0 : rotation % 4;
     }
 
-    private void Transfer(int sourceId, ItemInstance item, int destinationId, Vector2Int position, int rotation)
+    private void Transfer(int sourceId, ItemInstance item, int destinationId, Vector2Int position, int rotation, string ownerId)
     {
-        GetItems(sourceId).list.Remove(item);
-        GetItems(destinationId).list.Add(item);
+        GetItems(sourceId, ownerId).list.Remove(item);
+        GetItems(destinationId, ownerId).list.Add(item);
         Configure(item, destinationId, position, rotation);
     }
 
     // Validation happens before either container or the item record changes.
     public bool TryMoveItem(int sourceId, ItemInstance item, int destinationId,
-        Vector2Int position, int rotation, Vector2Int destinationSize)
+        Vector2Int position, int rotation, Vector2Int destinationSize, string ownerId = null)
     {
         EnsureInitialized();
-        var source = GetItems(sourceId).list;
-        if (!source.Contains(item) || !CanPlace(destinationId, item.Definition, position, rotation, destinationSize, item))
+        var source = GetItems(sourceId, ownerId).list;
+        if (!source.Contains(item) || !CanPlace(destinationId, item.Definition, position, rotation, destinationSize, item, null, ownerId))
             return false;
 
-        Transfer(sourceId, item, destinationId, position, rotation);
-        RefreshEquipment(sourceId, destinationId);
+        Transfer(sourceId, item, destinationId, position, rotation, ownerId);
+        RefreshEquipment(sourceId, destinationId, ownerId);
         return true;
     }
 
     public bool TrySwapItems(int sourceId, ItemInstance item, int destinationId, ItemInstance other,
-        Vector2Int position, int rotation, Vector2Int sourceSize, Vector2Int destinationSize)
+        Vector2Int position, int rotation, Vector2Int sourceSize, Vector2Int destinationSize, string ownerId = null)
     {
         EnsureInitialized();
-        var source = GetItems(sourceId).list;
-        var destination = GetItems(destinationId).list;
+        var source = GetItems(sourceId, ownerId).list;
+        var destination = GetItems(destinationId, ownerId).list;
         if (ReferenceEquals(item, other) || !source.Contains(item) || !destination.Contains(other))
             return false;
 
         Vector2Int oldPosition = item.Position;
         int otherRotation = other.Rotation;
-        if (!CanPlace(destinationId, item.Definition, position, rotation, destinationSize, item, other) ||
-            !CanPlace(sourceId, other.Definition, oldPosition, otherRotation, sourceSize, item, other))
+        if (!CanPlace(destinationId, item.Definition, position, rotation, destinationSize, item, other, ownerId) ||
+            !CanPlace(sourceId, other.Definition, oldPosition, otherRotation, sourceSize, item, other, ownerId))
             return false;
 
         if (sourceId == destinationId && !IsEquipmentGrid(sourceId) &&
@@ -267,44 +277,67 @@ public class InventoryManager : MonoBehaviour
                 oldPosition, InventoryPlacement.Size(other.Definition, otherRotation)))
             return false;
 
-        Transfer(sourceId, item, destinationId, position, rotation);
-        Transfer(destinationId, other, sourceId, oldPosition, otherRotation);
-        RefreshEquipment(sourceId, destinationId);
+        Transfer(sourceId, item, destinationId, position, rotation, ownerId);
+        Transfer(destinationId, other, sourceId, oldPosition, otherRotation, ownerId);
+        RefreshEquipment(sourceId, destinationId, ownerId);
         return true;
     }
 
-    public bool TryAddItem(int gridId, ItemInstance item, Vector2Int gridSize)
+    public bool TryAddItem(int gridId, ItemInstance item, Vector2Int gridSize, string ownerId = null)
     {
         EnsureInitialized();
         if (item == null)
             return false;
 
-        if (!CanPlace(gridId, item.Definition, item.Position, item.Rotation, gridSize))
+        if (!CanPlace(gridId, item.Definition, item.Position, item.Rotation, gridSize, null, null, ownerId))
             return false;
 
         Configure(item, gridId, item.Position, item.Rotation);
-        var list = GetItems(gridId).list;
+        var list = GetItems(gridId, ownerId).list;
         list.Add(item);
-        RefreshEquipment(gridId, gridId);
+        RefreshEquipment(gridId, gridId, ownerId);
         return true;
     }
 
-    public void RemoveItem(int gridId, ItemInstance item)
+    public void RemoveItem(int gridId, ItemInstance item, string ownerId = null)
     {
         EnsureInitialized();
-        if (GetItems(gridId).list.Remove(item))
-            RefreshEquipment(gridId, gridId);
+        if (GetItems(gridId, ownerId).list.Remove(item))
+            RefreshEquipment(gridId, gridId, ownerId);
     }
 
-    private void RefreshEquipment(int source, int destination)
+    private void RefreshEquipment(int source, int destination, string ownerId = null)
     {
         if (!IsEquipmentGrid(source) && !IsEquipmentGrid(destination))
             return;
 
-        RecomputeEquipment();
+        RebuildMemberEquipment(ownerId);
 
+        if (ownerId != null && ownerId != PartyManager.PlayerId) return;
         if (source == (int)EquipmentSlot.RightHand || destination == (int)EquipmentSlot.RightHand)
             RefreshRightHandWeapon();
+    }
+
+    public void RebuildMemberEquipment(string ownerId)
+    {
+        if (ownerId == null || ownerId == PartyManager.PlayerId) { RecomputeEquipment(); return; }
+        var member = Party.Get(ownerId);
+        if (member == null) return;
+        var items = EnumerateEquippedItems(ownerId).ToArray();
+        member.Equipment = EquipmentCalculator.Calculate(items);
+        if (member.Actor != null)
+        {
+            var equipment = member.Actor.GetComponent<PlayerEquipment>() ?? member.Actor.AddComponent<PlayerEquipment>();
+            if (member.Actor.GetComponent<EquipmentVisualController>() == null) member.Actor.AddComponent<EquipmentVisualController>();
+            equipment.SetEquipment(member.Equipment, items);
+            var weapons = member.Actor.GetComponent<WeaponsHandler>();
+            if (weapons != null)
+            {
+                weapons.RemoveItemFromPlayerRightHand();
+                var hand = member.GetItems((int)EquipmentSlot.RightHand);
+                if (hand.Count > 0) weapons.AddItemToPlayerRightHand(hand[0].Definition.itemStats);
+            }
+        }
     }
 
     private void RecomputeEquipment()
@@ -316,6 +349,7 @@ public class InventoryManager : MonoBehaviour
         if (playerEquipment != null)
             playerEquipment.SetEquipment(currentEquipment, equippedItems);
 
+        if (Party != null) Party.Get(PartyManager.PlayerId).Equipment = currentEquipment;
         EquipmentChanged?.Invoke(currentEquipment);
     }
 

@@ -143,6 +143,7 @@ public class SaveManager : MonoBehaviour
             for (int slot = 0; slot <= (int)EquipmentSlot.RingRight; slot++)
                 save.inventory.Add(new SavedContainer { slot = slot, items = catalog.Capture(inventory.GetItems(slot).list) });
 
+            save.party = inventory.Party.Capture(catalog);
             store.Write(save);
             SavesChanged?.Invoke();
             return true;
@@ -170,6 +171,7 @@ public class SaveManager : MonoBehaviour
             foreach (var container in save.inventory)
                 catalog.ValidateContainer(container, save.stats.inventoryType);
 
+            PartyManager.Validate(save.party, catalog);
             foreach (var state in save.world)
                 catalog.Restore(state.items);
 
@@ -321,6 +323,8 @@ public class SaveManager : MonoBehaviour
                     inventory.ReplaceItems(slot, new List<ItemInstance>());
 
             inventory.RebuildEquipment();
+            inventory.Party.Restore(save.party, catalog);
+            foreach (var character in inventory.Party.Characters) inventory.RebuildMemberEquipment(character.Id);
         }
 
         foreach (var target in FindObjectsByType<WorldSaveObject>())

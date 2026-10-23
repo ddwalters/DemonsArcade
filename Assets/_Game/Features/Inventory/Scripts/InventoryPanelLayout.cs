@@ -73,7 +73,7 @@ public class InventoryPanelLayout : MonoBehaviour
 
     private void FitPlayerPanel()
     {
-        playerPanelView.ApplyResponsiveLayout(split);
+        playerPanelView.RefreshBagLayout();
         panel.localScale = originalScale;
 
         Rect available = canvasRect.rect;

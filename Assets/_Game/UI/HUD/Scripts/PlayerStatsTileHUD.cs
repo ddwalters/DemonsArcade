@@ -22,16 +22,23 @@ public class PlayerStatsTileHUD : MonoBehaviour
     private int lastManaTileCount = -1;
     private int lastManaFilledCount = -1;
 
+    public void SetPartyHudActive(bool active)
+    {
+        if (healthGroup != null) healthGroup.gameObject.SetActive(!active);
+        if (manaGroup != null) manaGroup.gameObject.SetActive(!active);
+        if (staminaGroup != null) staminaGroup.gameObject.SetActive(!active);
+    }
+
     private void Start()
     {
-        statsManager = FindAnyObjectByType<PlayerStatsManager>();
+        statsManager = FindAnyObjectByType<PlayerController>()?.GetComponent<PlayerStatsManager>();
         RefreshTiles(force: true);
     }
 
     private void Update()
     {
         if (statsManager == null)
-            statsManager = FindAnyObjectByType<PlayerStatsManager>();
+            statsManager = FindAnyObjectByType<PlayerController>()?.GetComponent<PlayerStatsManager>();
 
         RefreshTiles(force: false);
     }
