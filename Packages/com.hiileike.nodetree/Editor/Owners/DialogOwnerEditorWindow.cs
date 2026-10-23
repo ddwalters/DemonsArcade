@@ -252,6 +252,10 @@ namespace NodeTree.Editor
                 DialogOwnerDatabaseUtility.Commit(_database);
             }) { text = "Add Portrait" });
 
+            var captureButton = new Button(() => PortraitCaptureWindow.Open(owner.Id)) { text = "Capture Portrait From Model..." };
+            captureButton.tooltip = "Pose a model and save the frame as a mood portrait for this character.";
+            _detailPane.Add(captureButton);
+
             var deleteButton = new Button(() =>
             {
                 if (!EditorUtility.DisplayDialog("Delete character", "Delete '" + owner.DisplayName + "'? Nodes using it will lose their speaker.", "Delete", "Cancel"))
