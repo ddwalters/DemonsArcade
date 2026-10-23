@@ -36,6 +36,7 @@ public class EquipmentVisualDefinition : ScriptableObject
     [SerializeField] private Vector3 localPosition;
     [SerializeField] private Vector3 localEulerAngles;
     [SerializeField] private Vector3 localScale = Vector3.one;
+    [SerializeField] private bool localTransformUsesWorldUnits;
     [SerializeField] private Color tint = Color.white;
 
     [Header("Body Visibility")]
@@ -47,6 +48,7 @@ public class EquipmentVisualDefinition : ScriptableObject
     public Vector3 LocalPosition => localPosition;
     public Quaternion LocalRotation => Quaternion.Euler(localEulerAngles);
     public Vector3 LocalScale => localScale;
+    public bool LocalTransformUsesWorldUnits => localTransformUsesWorldUnits;
     public Color Tint => tint;
     public EquipmentBodyRegion HiddenBodyRegions => hiddenBodyRegions;
 }

@@ -19,8 +19,10 @@ public class InventoryItemTooltip : MonoBehaviour
     private const float StatChipHeight = 22f;
     private const float StatChipSpacing = 3f;
     private const int MaxStatColumns = 3;
+    private const string BuffIconMaterialResourcePath = "TooltipBuffIcon";
 
     private readonly List<StatChipView> statChips = new();
+    private static Material buffIconMaterial;
 
     private RectTransform rootRectTransform;
     private RectTransform statRowRectTransform;
@@ -307,6 +309,7 @@ public class InventoryItemTooltip : MonoBehaviour
             {
                 StatChipView chip = GetStatChip(mappedStatCount++);
                 chip.icon.sprite = icon;
+                chip.icon.color = GetStatIconColor(stat.Stat);
                 chip.value.text = FormatPoints(stat.Value);
                 chip.value.color = stat.Value < 0
                     ? new Color(1f, 0.65f, 0.62f, 1f)
@@ -354,32 +357,23 @@ public class InventoryItemTooltip : MonoBehaviour
         chipObject.transform.SetParent(statRowRectTransform, false);
 
         HorizontalLayoutGroup chipLayout = chipObject.GetComponent<HorizontalLayoutGroup>();
-        chipLayout.spacing = 2f;
+        chipLayout.spacing = 1f;
         chipLayout.childAlignment = TextAnchor.MiddleCenter;
         chipLayout.childControlWidth = false;
         chipLayout.childControlHeight = false;
         chipLayout.childForceExpandWidth = false;
         chipLayout.childForceExpandHeight = false;
 
-        GameObject iconBackingObject = new GameObject("IconBacking", typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage));
-        RectTransform iconBackingRect = (RectTransform)iconBackingObject.transform;
-        iconBackingRect.SetParent(chipObject.transform, false);
-        iconBackingRect.sizeDelta = new Vector2(18f, 18f);
-        RawImage iconBacking = iconBackingObject.GetComponent<RawImage>();
-        iconBacking.texture = Texture2D.whiteTexture;
-        iconBacking.color = new Color(0.86f, 0.84f, 0.77f, 1f);
-        iconBacking.raycastTarget = false;
-
         GameObject iconObject = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         RectTransform iconRect = (RectTransform)iconObject.transform;
-        iconRect.SetParent(iconBackingRect, false);
-        iconRect.anchorMin = new Vector2(0.12f, 0.12f);
-        iconRect.anchorMax = new Vector2(0.88f, 0.88f);
-        iconRect.offsetMin = Vector2.zero;
-        iconRect.offsetMax = Vector2.zero;
+        iconRect.SetParent(chipObject.transform, false);
+        iconRect.sizeDelta = new Vector2(18f, 18f);
         Image icon = iconObject.GetComponent<Image>();
         icon.preserveAspect = true;
         icon.raycastTarget = false;
+        if (buffIconMaterial == null)
+            buffIconMaterial = Resources.Load<Material>(BuffIconMaterialResourcePath);
+        icon.material = buffIconMaterial;
 
         GameObject valueObject = new GameObject("Value", typeof(RectTransform), typeof(CanvasRenderer), typeof(TextMeshProUGUI));
         RectTransform valueRect = (RectTransform)valueObject.transform;
@@ -392,7 +386,7 @@ public class InventoryItemTooltip : MonoBehaviour
             : ItemName != null ? ItemName.fontSharedMaterial : null;
         value.fontSize = 12f;
         value.fontStyle = FontStyles.Bold;
-        value.alignment = TextAlignmentOptions.Center;
+        value.alignment = TextAlignmentOptions.MidlineLeft;
         value.margin = Vector4.zero;
         value.textWrappingMode = TextWrappingModes.NoWrap;
         value.raycastTarget = false;
@@ -407,17 +401,47 @@ public class InventoryItemTooltip : MonoBehaviour
 
     private bool TryGetIcon(EquipmentStat stat, out Sprite icon)
     {
-        for (int i = 0; statIcons != null && i < statIcons.Length; i++)
+        int passCount = stat == EquipmentStat.FireResistance ? 2 : 1;
+        for (int pass = 0; pass < passCount; pass++)
         {
-            if (statIcons[i].stat != stat || statIcons[i].icon == null)
-                continue;
+            EquipmentStat candidate = pass == 0 ? stat : EquipmentStat.HeatResistance;
+            for (int i = 0; statIcons != null && i < statIcons.Length; i++)
+            {
+                if (statIcons[i].stat != candidate || statIcons[i].icon == null)
+                    continue;
 
-            icon = statIcons[i].icon;
-            return true;
+                icon = statIcons[i].icon;
+                return true;
+            }
         }
 
         icon = null;
         return false;
+    }
+
+    private static Color GetStatIconColor(EquipmentStat stat)
+    {
+        switch (stat)
+        {
+            case EquipmentStat.Defense:
+                return new Color(0.96f, 0.79f, 0.35f, 1f);
+            case EquipmentStat.Attack:
+                return new Color(0.34f, 0.86f, 0.44f, 1f);
+            case EquipmentStat.ColdResistance:
+                return new Color(0.35f, 0.72f, 1f, 1f);
+            case EquipmentStat.HeatResistance:
+                return new Color(1f, 0.55f, 0.29f, 1f);
+            case EquipmentStat.FireResistance:
+                return new Color(1f, 0.33f, 0.27f, 1f);
+            case EquipmentStat.ShockResistance:
+                return new Color(1f, 0.85f, 0.3f, 1f);
+            case EquipmentStat.SlipResistance:
+                return new Color(0.4f, 0.86f, 0.82f, 1f);
+            case EquipmentStat.StaminaRecovery:
+                return new Color(0.78f, 0.91f, 0.32f, 1f);
+            default:
+                return Color.white;
+        }
     }
 
     private void ApplyBorderColor(Color color)

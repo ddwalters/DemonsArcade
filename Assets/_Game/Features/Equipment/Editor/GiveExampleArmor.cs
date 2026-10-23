@@ -9,6 +9,7 @@ public static class GiveExampleArmor
     {
         "Winter Hat",
         "Winter Coat",
+        "Winter Pants",
         "Winter Boots"
     };
 

@@ -37,11 +37,6 @@ public class CharacterMotor : MonoBehaviour
     private static readonly JumpAnimationPhases SprintJumpPhases =
         new JumpAnimationPhases(2f / 27f, 10f / 27f, 19f / 27f, 1f);
 
-    private static readonly Vector2[] SupportRayOffsets =
-    {
-        Vector2.zero, Vector2.right, Vector2.left, Vector2.up, Vector2.down
-    };
-
     private static readonly int MoveY = Animator.StringToHash("MoveY");
     private static readonly int Grounded = Animator.StringToHash("Grounded");
     private static readonly int Jumping = Animator.StringToHash("Jumping");
@@ -71,7 +66,6 @@ public class CharacterMotor : MonoBehaviour
     private const float KnockbackBraking = 8f;
     private const float GroundProbeDistance = 0.15f;
     private const float ProbeOriginLift = 0.05f;
-    private const float SupportRaySpread = 0.6f;
     private const float GroundProbeContactTolerance = 0.02f;
     private const float IdleLandingRecoveryTime = 0.18f;
     private const float MovingLandingRecoveryTime = 0.1f;
@@ -86,11 +80,9 @@ public class CharacterMotor : MonoBehaviour
     private const float StepProbeReach = 0.08f;
     private const float StepMinimumApproachCos = 0.5f;
     private const float StepVerticalNormalY = 0.3f;
-    private const float StepTreadSample = 0.05f;
-    private const float StepTreadDepthMargin = 0.05f;
+    private const float StepMargin = 0.05f;
     private const float StepLiftMargin = 0.02f;
     private const float StepSkinLift = 0.01f;
-    private const float StepAdvance = 0.06f;
     private const float StepGraceTime = 0.4f;
     private const float StepGroundSearch = 0.2f;
     private const float MinimumStepRise = 0.015f;
@@ -539,7 +531,7 @@ public class CharacterMotor : MonoBehaviour
         float walkableNormalY = Mathf.Cos(controller.slopeLimit * Mathf.Deg2Rad);
         Vector3 treadOrigin = new Vector3(treadSamplePoint.x, supportY + maximumRise + StepLiftMargin,
             treadSamplePoint.z);
-        float treadSearch = maximumRise + StepLiftMargin + StepTreadDepthMargin;
+        float treadSearch = maximumRise + StepLiftMargin + StepMargin;
         if (!Physics.Raycast(treadOrigin, Vector3.down, out RaycastHit tread, treadSearch, groundLayers,
                 QueryTriggerInteraction.Ignore) || tread.normal.y < walkableNormalY)
         {
@@ -608,9 +600,9 @@ public class CharacterMotor : MonoBehaviour
                 continue;
 
             nearestPlaneDistance = planeDistance;
-            treadSamplePoint = hit.point - faceNormal * StepTreadSample;
+            treadSamplePoint = hit.point - faceNormal * StepMargin;
             advanceDistance = Mathf.Max(0f, planeDistance - controller.radius) /
-                Mathf.Max(StepMinimumApproachCos, approachCos) + StepAdvance;
+                Mathf.Max(StepMinimumApproachCos, approachCos) + StepMargin;
         }
 
         return nearestPlaneDistance < float.MaxValue;
@@ -764,55 +756,12 @@ public class CharacterMotor : MonoBehaviour
             return true;
         }
 
-        return TryGetGroundFromSupportRays(out normal);
+        return false;
     }
 
     private bool IsWalkableGroundHit(RaycastHit hit)
     {
         return Vector3.Angle(hit.normal, Vector3.up) <= controller.slopeLimit;
-    }
-
-    private bool TryGetGroundFromSupportRays(out Vector3 normal)
-    {
-        float radius = controller.radius;
-        Vector3 right = Vector3.ProjectOnPlane(transform.right, Vector3.up).normalized;
-        Vector3 forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
-        Vector3 capsuleBottom = transform.TransformPoint(controller.center) +
-                                Vector3.down * (controller.height * 0.5f - radius);
-
-        float minimumNormalY = Mathf.Max(0.01f, Mathf.Cos(controller.slopeLimit * Mathf.Deg2Rad));
-        float maximumContactAllowance = GroundProbeContactTolerance + controller.skinWidth / minimumNormalY;
-        float rayOriginY = capsuleBottom.y - radius + ProbeOriginLift + maximumContactAllowance;
-        float rayDistance = ProbeOriginLift + maximumContactAllowance * 2f;
-
-        foreach (Vector2 local in SupportRayOffsets)
-        {
-            Vector3 origin = capsuleBottom + (right * local.x + forward * local.y) * (radius * SupportRaySpread);
-            origin.y = rayOriginY;
-            if (TryGetGroundFromSupportRay(origin, capsuleBottom.y - radius, rayDistance, out normal))
-                return true;
-        }
-
-        normal = Vector3.up;
-        return false;
-    }
-
-    private bool TryGetGroundFromSupportRay(Vector3 origin, float footLevel, float rayDistance, out Vector3 normal)
-    {
-        normal = Vector3.up;
-        if (!Physics.Raycast(origin, Vector3.down, out RaycastHit hit, rayDistance,
-                groundLayers, QueryTriggerInteraction.Ignore) || !IsWalkableGroundHit(hit))
-        {
-            return false;
-        }
-
-        float contactAllowance = GroundProbeContactTolerance +
-            controller.skinWidth / Mathf.Max(0.01f, hit.normal.y);
-        if (footLevel - hit.point.y > contactAllowance)
-            return false;
-
-        normal = hit.normal;
-        return true;
     }
 
     private void UpdateFallAmount(float actualDownwardSpeed, bool acceptedJumpThisTick,

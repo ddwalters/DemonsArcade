@@ -10,8 +10,6 @@ public class StepSmoothing : MonoBehaviour
     private const float FullEffectSpeed = 1f;
     private const float RayMargin = 0.1f;
     private const float HeightTolerance = 1.25f;
-    private const float FlatTolerance = 0.01f;
-    private const float HoverBlend = 0.05f;
 
     private static readonly float[] SampleWeights = { 1f, 2f, 3f, 2f, 1f };
 
@@ -20,7 +18,6 @@ public class StepSmoothing : MonoBehaviour
     private Transform modelRoot;
     private Vector3 modelRestLocalPosition;
     private bool hasHeights;
-    private float hover;
     private float bodyHeight;
     private float bodyVelocity;
     private float cameraHeight;
@@ -32,7 +29,6 @@ public class StepSmoothing : MonoBehaviour
     {
         motor = characterMotor;
         controller = motor.GetComponent<CharacterController>();
-        hover = controller.skinWidth;
 
         modelRoot = animator != null && animator.transform != transform ? animator.transform : null;
         if (modelRoot != null)
@@ -67,7 +63,7 @@ public class StepSmoothing : MonoBehaviour
             SampleGround(center, feetY, travel / speed, profile, out float windowAverage))
         {
             float effect = Mathf.Clamp01((speed - MinimumSpeed) / (FullEffectSpeed - MinimumSpeed));
-            targetHeight = Mathf.Lerp(feetY, windowAverage + hover, effect);
+            targetHeight = Mathf.Lerp(feetY, windowAverage + controller.skinWidth, effect);
         }
 
         float limit = motor.MaxStepHeight;
@@ -106,8 +102,6 @@ public class StepSmoothing : MonoBehaviour
 
         float weightedSum = 0f;
         float weightTotal = 0f;
-        float lowest = centerHeight;
-        float highest = centerHeight;
         float halfSpan = (SampleCount - 1) * 0.5f;
         for (int i = 0; i < SampleCount; i++)
         {
@@ -118,14 +112,9 @@ public class StepSmoothing : MonoBehaviour
                 : centerHeight;
             weightedSum += height * SampleWeights[i];
             weightTotal += SampleWeights[i];
-            lowest = Mathf.Min(lowest, height);
-            highest = Mathf.Max(highest, height);
         }
 
         windowAverage = weightedSum / weightTotal;
-        if (highest - lowest <= FlatTolerance)
-            hover = Mathf.Lerp(hover, feetY - centerHeight, HoverBlend);
-
         return true;
     }
 

@@ -380,6 +380,12 @@ public class EquipmentVisualController : MonoBehaviour
             visualTransform.localPosition = request.Definition.LocalPosition;
             visualTransform.localRotation = request.Definition.LocalRotation;
             visualTransform.localScale = request.Definition.LocalScale;
+            if (request.Definition.LocalTransformUsesWorldUnits)
+            {
+                Vector3 attachmentScale = attachment.lossyScale;
+                visualTransform.localPosition = DivideByScale(visualTransform.localPosition, attachmentScale);
+                visualTransform.localScale = DivideByScale(visualTransform.localScale, attachmentScale);
+            }
 
             ApplyVisualTint(visualInstance, request.Definition.Tint);
 
@@ -443,6 +449,14 @@ public class EquipmentVisualController : MonoBehaviour
             renderer.SetPropertyBlock(propertyBlock);
             propertyBlock.Clear();
         }
+    }
+
+    private static Vector3 DivideByScale(Vector3 value, Vector3 scale)
+    {
+        return new Vector3(
+            value.x / Mathf.Max(Mathf.Abs(scale.x), 0.0001f),
+            value.y / Mathf.Max(Mathf.Abs(scale.y), 0.0001f),
+            value.z / Mathf.Max(Mathf.Abs(scale.z), 0.0001f));
     }
 
     private static void DisableVisualPhysicsAndAnimators(GameObject visualRoot)

@@ -7,12 +7,16 @@ public sealed class EquipmentVisualBoneAttachment
 {
     [SerializeField] private Transform visualPart;
     [SerializeField] private HumanBodyBones attachmentBone;
+    [SerializeField] private HumanBodyBones endBone = HumanBodyBones.LastBone;
+    [SerializeField] private bool fitToBoneSegment;
     [SerializeField] private Vector3 localPosition;
     [SerializeField] private Vector3 localEulerAngles;
     [SerializeField] private Vector3 localScale = Vector3.one;
 
     public Transform VisualPart => visualPart;
     public HumanBodyBones AttachmentBone => attachmentBone;
+    public HumanBodyBones EndBone => endBone;
+    public bool FitToBoneSegment => fitToBoneSegment;
     public Vector3 LocalPosition => localPosition;
     public Quaternion LocalRotation => Quaternion.Euler(localEulerAngles);
     public Vector3 LocalScale => localScale;
@@ -22,10 +26,14 @@ public sealed class EquipmentVisualBoneAttachment
         HumanBodyBones bone,
         Vector3 position,
         Vector3 eulerAngles,
-        Vector3 scale)
+        Vector3 scale,
+        bool fitSegment = false,
+        HumanBodyBones segmentEndBone = HumanBodyBones.LastBone)
     {
         visualPart = part;
         attachmentBone = bone;
+        endBone = segmentEndBone;
+        fitToBoneSegment = fitSegment;
         localPosition = position;
         localEulerAngles = eulerAngles;
         localScale = scale;
@@ -68,6 +76,7 @@ public sealed class EquipmentVisualBoneAttachments : MonoBehaviour
         }
 
         var resolvedBones = new Transform[attachments.Length];
+        var resolvedEndBones = new Transform[attachments.Length];
         for (int i = 0; i < attachments.Length; i++)
         {
             EquipmentVisualBoneAttachment attachment = attachments[i];
@@ -100,6 +109,31 @@ public sealed class EquipmentVisualBoneAttachments : MonoBehaviour
                 return false;
             }
 
+            if (attachment.FitToBoneSegment)
+            {
+                if (attachment.EndBone == HumanBodyBones.LastBone)
+                {
+                    failure = $"{attachment.AttachmentBone} has no end bone configured for segment fitting";
+                    return false;
+                }
+
+                try
+                {
+                    resolvedEndBones[i] = rigAnimator.GetBoneTransform(attachment.EndBone);
+                }
+                catch (Exception exception)
+                {
+                    failure = $"{attachment.EndBone} could not be resolved ({exception.Message})";
+                    return false;
+                }
+
+                if (resolvedEndBones[i] == null)
+                {
+                    failure = $"the humanoid rig does not contain {attachment.EndBone}";
+                    return false;
+                }
+            }
+
             for (int previousIndex = 0; previousIndex < i; previousIndex++)
             {
                 if (attachments[previousIndex].VisualPart == attachment.VisualPart)
@@ -117,9 +151,17 @@ public sealed class EquipmentVisualBoneAttachments : MonoBehaviour
                 EquipmentVisualBoneAttachment attachment = attachments[i];
                 Transform part = attachment.VisualPart;
                 part.SetParent(resolvedBones[i], false);
-                part.localPosition = attachment.LocalPosition;
-                part.localRotation = attachment.LocalRotation;
-                part.localScale = attachment.LocalScale;
+                if (attachment.FitToBoneSegment)
+                {
+                    FitPartToBoneSegment(part, resolvedBones[i], resolvedEndBones[i], attachment.LocalScale);
+                }
+                else
+                {
+                    part.localPosition = attachment.LocalPosition;
+                    part.localRotation = attachment.LocalRotation;
+                    part.localScale = attachment.LocalScale;
+                }
+
                 attachedParts.Add(part.gameObject);
             }
         }
@@ -131,6 +173,28 @@ public sealed class EquipmentVisualBoneAttachments : MonoBehaviour
         }
 
         return true;
+    }
+
+    private static void FitPartToBoneSegment(
+        Transform part,
+        Transform startBone,
+        Transform endBone,
+        Vector3 scaleRatios)
+    {
+        Vector3 localEndPosition = startBone.InverseTransformPoint(endBone.position);
+        float localLength = localEndPosition.magnitude;
+        float worldLength = Vector3.Distance(startBone.position, endBone.position);
+        Vector3 lossyScale = startBone.lossyScale;
+
+        if (localLength <= Mathf.Epsilon || worldLength <= Mathf.Epsilon)
+            throw new InvalidOperationException("The configured humanoid segment has zero length.");
+
+        part.localPosition = localEndPosition * 0.5f;
+        part.localRotation = Quaternion.FromToRotation(Vector3.up, localEndPosition.normalized);
+        part.localScale = new Vector3(
+            worldLength * scaleRatios.x / Mathf.Max(Mathf.Abs(lossyScale.x), 0.0001f),
+            localLength * Mathf.Max(scaleRatios.y, 1f),
+            worldLength * scaleRatios.z / Mathf.Max(Mathf.Abs(lossyScale.z), 0.0001f));
     }
 
     public void RestorePartsToVisualRoot()
