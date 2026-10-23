@@ -5,6 +5,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(CharacterMotor))]
 [RequireComponent(typeof(Seeker))]
+[RequireComponent(typeof(NpcConversationFacing))]
 public class PrototypePatrolNpc : InteractableBase
 {
     [Header("Patrol")]
@@ -23,6 +24,7 @@ public class PrototypePatrolNpc : InteractableBase
     private CharacterMotor motor;
     private CharacterController characterController;
     private Seeker seeker;
+    private NpcConversationFacing conversationFacing;
     private int currentWaypointIndex;
     private int currentPathPointIndex;
     private int pathRequestVersion;
@@ -39,6 +41,9 @@ public class PrototypePatrolNpc : InteractableBase
         motor = GetComponent<CharacterMotor>();
         characterController = GetComponent<CharacterController>();
         seeker = GetComponent<Seeker>();
+        conversationFacing = GetComponent<NpcConversationFacing>();
+        if (conversationFacing == null)
+            conversationFacing = gameObject.AddComponent<NpcConversationFacing>();
         ResolveDialogRunner();
         SetToolTip("Talk");
         UpdateInteractableState();
@@ -60,6 +65,7 @@ public class PrototypePatrolNpc : InteractableBase
     {
         InvalidateCurrentPathRequest();
         motor?.Stop();
+        conversationFacing?.EndConversation();
     }
 
     private void OnValidate()
@@ -86,6 +92,7 @@ public class PrototypePatrolNpc : InteractableBase
         if (wasDialogActive)
         {
             wasDialogActive = false;
+            conversationFacing?.EndConversation();
             nextPathRequestTime = Time.time;
         }
 
@@ -141,6 +148,22 @@ public class PrototypePatrolNpc : InteractableBase
             return;
 
         runner.StartDialog(dialogue);
+        if (runner.IsDialogActive)
+        {
+            PausePatrol();
+            wasDialogActive = true;
+            conversationFacing?.BeginConversation(FindConversationParticipant());
+        }
+    }
+
+    private static Transform FindConversationParticipant()
+    {
+        PlayerController player = FindAnyObjectByType<PlayerController>();
+        if (player != null)
+            return player.transform;
+
+        InteractionController interactor = FindAnyObjectByType<InteractionController>();
+        return interactor != null ? interactor.transform : null;
     }
 
     private void ResolveDialogRunner()
