@@ -6,16 +6,17 @@ public class InteractionController : MonoBehaviour
 {
     private const int NearbyColliderCapacity = 64;
     private const float NameHeightOffset = 0.25f;
+    private const float HeadYawLimit = 35f;
+    private const float HeadPitchLimit = 20f;
+    private const float HeadLookWeight = 0.55f;
+    private const float HeadLookSmoothness = 8f;
 
+    [Tooltip("How close an object must be to interact with it.")]
     [SerializeField, Min(0.1f)] private float interactionDistance = 2f;
+    [Tooltip("How far to either side of where the character faces an object can be and still be targeted.")]
     [SerializeField, Range(0f, 90f)] private float interactionHalfAngle = 60f;
+    [Tooltip("Layers that count as interactable.")]
     [SerializeField] private LayerMask interactableLayer;
-
-    [Header("Head look")]
-    [SerializeField, Range(0f, 90f)] private float headYawLimit = 35f;
-    [SerializeField, Range(0f, 90f)] private float headPitchLimit = 20f;
-    [SerializeField, Range(0f, 1f)] private float headLookWeight = 0.55f;
-    [SerializeField, Min(0f)] private float headLookSmoothness = 8f;
 
     private readonly Collider[] nearbyColliders = new Collider[NearbyColliderCapacity];
     private readonly List<Renderer> targetRenderers = new();
@@ -125,12 +126,12 @@ public class InteractionController : MonoBehaviour
             float horizontalLength = new Vector2(localDirection.x, localDirection.z).magnitude;
             float yaw = Mathf.Atan2(localDirection.x, localDirection.z) * Mathf.Rad2Deg;
             float pitch = Mathf.Atan2(localDirection.y, horizontalLength) * Mathf.Rad2Deg;
-            yaw = Mathf.Clamp(yaw, -headYawLimit, headYawLimit) * headLookWeight;
-            pitch = Mathf.Clamp(pitch, -headPitchLimit, headPitchLimit) * headLookWeight;
+            yaw = Mathf.Clamp(yaw, -HeadYawLimit, HeadYawLimit) * HeadLookWeight;
+            pitch = Mathf.Clamp(pitch, -HeadPitchLimit, HeadPitchLimit) * HeadLookWeight;
             targetHeadOffset = Quaternion.Euler(-pitch, yaw, 0f);
         }
 
-        float blend = 1f - Mathf.Exp(-headLookSmoothness * Time.deltaTime);
+        float blend = 1f - Mathf.Exp(-HeadLookSmoothness * Time.deltaTime);
         smoothedHeadLookOffset = Quaternion.Slerp(smoothedHeadLookOffset, targetHeadOffset, blend);
 
         lastAnimatedHeadRotation = headBone.localRotation;

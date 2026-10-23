@@ -39,6 +39,7 @@ public class PlayerController : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         motor = GetComponent<CharacterMotor>();
         cameraRig = GetComponent<PlayerCameraRig>();
+        statsManager = GetComponent<PlayerStatsManager>();
         mode = PlayerModeController.ForPlayer(this);
         controls = new NewControls();
 
@@ -61,7 +62,6 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        statsManager = GetComponent<PlayerStatsManager>();
         sensitivity = PlayerPrefs.GetFloat("Settings.Sensitivity", sensitivity);
     }
 
@@ -116,16 +116,13 @@ public class PlayerController : MonoBehaviour
     public void RestoreLocation(Vector3 position, Quaternion rotation)
     {
         StopMotion();
-        motor = GetComponent<CharacterMotor>();
         motor.Teleport(position, rotation);
-        cameraRig = GetComponent<PlayerCameraRig>();
         cameraRig.ResetView();
     }
 
     public void StopMotion()
     {
-        motor = GetComponent<CharacterMotor>();
         motor.Stop();
-        GetComponent<PlayerStatsManager>()?.SetStaminaUse(false);
+        statsManager?.SetStaminaUse(false);
     }
 }

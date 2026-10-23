@@ -52,28 +52,31 @@ and contact tolerances are editable on `CharacterMotor` in the Inspector.
 
 ## Steps and foot placement
 
-Every `CharacterMotor` gets step handling automatically, so the player, Rowan and any
-future humanoid share it. Nothing is wired per prefab.
+Every `CharacterMotor` gets step handling automatically, so the player and any humanoid NPC
+share it. Nothing is wired per prefab. All tuning is in one asset,
+`Features/Player/Resources/DefaultHumanoidLocomotionProfile` (assign another profile on a
+motor to override it for one character).
 
-- `CharacterLocomotionProfile` holds the limits as ratios of the measured leg length,
-  so a rescaled or customised character needs no retuning. Assign one on the motor to
-  override the defaults for a model. Without one the motor uses the shared asset at
-  `Features/Player/Resources/DefaultHumanoidLocomotionProfile` - edit that to tune every
-  humanoid at once. Turn on `Draw Debug` in the profile to see the foot targets. Call
-  `CharacterMotor.RefreshRigMetrics()` after changing a character's size or rig.
-- `CharacterMotor` handles steps itself. With `Use Motor Step Up` on it casts thin rays at foot
-  height to find a riser, reads the tread height with a ray beyond it, and lifts the capsule
-  onto the tread when it is within the maximum step height, leaving the `CharacterController`
-  step offset at a small value for tiny bumps. Anything taller is a wall, so nothing can creep
-  over it. It also snaps down onto steps lower than that height instead of falling, and raises
-  `SteppedVertically` with the signed height of each step it takes.
-- `StepSmoothing` turns those steps into a decaying vertical offset applied to the
-  model root and the camera pivot. The capsule and collision are never moved by it.
-- `FootPlacementIK` runs in `OnAnimatorIK` (the Locomotion layer has IK Pass on). It probes
-  the whole foot, heel and toe, not just the ankle. A swinging foot looks ahead and is lifted
-  a clearance above the highest tread in range. A planted foot that straddles a tread edge is
-  slid onto one tread (`Tread Snapping`, off by default). The pelvis follows the lower foot partly and a knee
-  hint keeps the knees forward. All correction is clamped to the profile limits.
+- **Stepping:** the motor casts thin rays at ground height to find a riser, reads the tread
+  height with a ray beyond it, and lifts the capsule onto the tread when it is within `Max Step
+  Height`. Anything taller is a wall. The capsule only moves vertically, and the character
+  counts as grounded for a short moment so normal movement carries it over the edge. It also
+  snaps down onto lower steps instead of falling. Steps are found along the input direction, so angled approaches work.
+  A small probe around the capsule's center detects an unsupported rim, while lower treads within
+  `Max Step Height` remain valid. If the center is over open air, the motor nudges the character away
+  from the remaining support at a minimum escape speed. The escape direction stays steady while the
+  character clears the rim, and walking back toward support cancels the correction. Forced escape
+  motion does not trigger a step-up attempt.
+- **Smooth path:** the capsule still moves in steps, but the model and camera do not follow
+  them. `StepSmoothing` averages the real ground height a short distance ahead of and behind
+  the character along its travel direction (`Step Smoothing Distance`), which turns stairs into
+  a smooth ramp that leads the capsule instead of lagging it. The effect fades out at low speed
+  so standing on stairs does not lower the body. The camera follows the same height with a
+  little extra smoothing (`Camera Ease Time`).
+- **Feet:** `FootPlacementIK` runs in `OnAnimatorIK` (the Locomotion layer has IK Pass on).
+  Each foot probes the ground under itself independently, so one foot can rest on a higher
+  step than the other. A stepping foot looks ahead and clears the highest step in range. The
+  hips follow part of the lower foot's drop and the knees are pushed forward.
 ## Retained animation assets
 
 The Humanoid clip library contains only `CalmIdle`, `Walking`, `Running`,

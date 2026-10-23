@@ -1,56 +1,26 @@
-using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(CharacterController))]
 public class CharacterMotor : MonoBehaviour
 {
-    [Header("Ground movement")]
-    private Animator animator;
+    [Header("Movement")]
     [SerializeField, Min(0f)] private float walkSpeed = 2.2f;
     [SerializeField, Min(0f)] private float sprintSpeed = 5f;
-    [SerializeField, Min(0f)] private float acceleration = 30f;
-    [SerializeField, Min(0f)] private float braking = 40f;
-    [SerializeField, Min(0f)] private float turnSpeed = 720f;
-    [SerializeField, Min(0.01f)] private float animationBlendTime = 0.08f;
-    [SerializeField] private LayerMask groundMask = ~((1 << 9) | (1 << 5));
-    [SerializeField, Min(0f)] private float groundProbeDistance = 0.15f;
-
-    [Header("Steps")]
-    [Tooltip("Leave empty to use the shared Resources/DefaultHumanoidLocomotionProfile. Assign one to override it for this character.")]
-    [SerializeField] private CharacterLocomotionProfile locomotionProfile;
-    [Tooltip("Read only. Measured from the rig at startup.")]
-    [SerializeField] private float measuredLegLength;
-    [Tooltip("Read only. The profile's step ratio times the measured leg length.")]
-    [SerializeField] private float effectiveMaxStepHeight;
-
-    [Header("Air movement")]
-    [SerializeField] private float gravity = -24f;
     [SerializeField, Min(0f)] private float jumpHeight = 1.1f;
-    [SerializeField, Min(0f)] private float jumpBufferTime = 0.12f;
-    [SerializeField, Min(0f)] private float coyoteTime = 0.1f;
-    [SerializeField, Min(0f)] private float airAcceleration = 4f;
-    [SerializeField, Min(0f)] private float knockbackBraking = 8f;
+    [Tooltip("Layers the character can stand on.")]
+    [FormerlySerializedAs("groundMask")]
+    [SerializeField] private LayerMask groundLayers = ~((1 << 9) | (1 << 5));
 
-    [Header("Jump animation timing")]
-    [SerializeField, Min(0.01f)] private float idleLandingRecoveryTime = 0.18f;
-    [SerializeField, Min(0.01f)] private float movingLandingRecoveryTime = 0.1f;
-    [SerializeField, Min(0f)] private float jumpAnimationFallGrace = 0.12f;
-    [SerializeField, Min(0f)] private float groundProbeContactTolerance = 0.02f;
-    [SerializeField, Min(0f)] private float fallPresentationGrace = 0.07f;
-    [SerializeField, Range(0f, 1f)] private float jumpApexPoseWeight = 0.65f;
-    [SerializeField, Min(0.01f)] private float fullFallAnimationTime = 1f;
-    [SerializeField, Range(0f, 0.05f)] private float jumpContactPhaseLead = 0.002f;
+    [Header("Stepping and feet")]
+    [Tooltip("Leave empty to use Resources/DefaultHumanoidLocomotionProfile. Assign one to override it for this character.")]
+    [SerializeField] private CharacterLocomotionProfile locomotionProfile;
 
-    [Serializable]
     private struct JumpAnimationPhases
     {
-        [Range(0f, 1f), Tooltip("Clip time where the character leaves the ground.")]
         public float takeoff;
-        [Range(0f, 1f), Tooltip("Clip time where vertical velocity reaches zero.")]
         public float apex;
-        [Range(0f, 1f), Tooltip("Clip time where the feet make landing contact.")]
         public float contact;
-        [Range(0f, 1f), Tooltip("Clip time where the landing recovery is complete.")]
         public float recovered;
 
         public JumpAnimationPhases(float takeoff, float apex, float contact, float recovered)
@@ -62,11 +32,15 @@ public class CharacterMotor : MonoBehaviour
         }
     }
 
-    [Header("Jump clip phase markers")]
-    [SerializeField] private JumpAnimationPhases normalJumpPhases =
+    private static readonly JumpAnimationPhases NormalJumpPhases =
         new JumpAnimationPhases(16f / 57f, 24f / 57f, 34f / 57f, 48f / 57f);
-    [SerializeField] private JumpAnimationPhases sprintJumpPhases =
+    private static readonly JumpAnimationPhases SprintJumpPhases =
         new JumpAnimationPhases(2f / 27f, 10f / 27f, 19f / 27f, 1f);
+
+    private static readonly Vector2[] SupportRayOffsets =
+    {
+        Vector2.zero, Vector2.right, Vector2.left, Vector2.up, Vector2.down
+    };
 
     private static readonly int MoveY = Animator.StringToHash("MoveY");
     private static readonly int Grounded = Animator.StringToHash("Grounded");
@@ -77,30 +51,56 @@ public class CharacterMotor : MonoBehaviour
     private static readonly int LandingActive = Animator.StringToHash("LandingActive");
     private static readonly int FallAmount = Animator.StringToHash("FallAmount");
     private const float MinimumFallAnimationSpeed = 0.15f;
+    private const float MinimumSurfaceNormalY = 0.5f;
+    private const float SmallSnapDrop = 0.1f;
+    private const float MinimumChainDrop = 0.03f;
+    private const float LedgeEscapeSpeed = 2f;
+    private const float LedgeSupportSearch = 0.6f;
+    private const float LedgeInwardIntent = -0.2f;
+    private const float LedgeSupportInset = 0.12f;
+    private const float LedgeProbeMargin = 0.1f;
+    private const int LedgeProbeCount = 8;
+    private const float Acceleration = 30f;
+    private const float Braking = 40f;
+    private const float TurnSpeed = 720f;
+    private const float AnimationBlendTime = 0.08f;
+    private const float Gravity = -24f;
+    private const float JumpBufferTime = 0.12f;
+    private const float CoyoteTime = 0.1f;
+    private const float AirAcceleration = 4f;
+    private const float KnockbackBraking = 8f;
+    private const float GroundProbeDistance = 0.15f;
+    private const float ProbeOriginLift = 0.05f;
+    private const float SupportRaySpread = 0.6f;
+    private const float GroundProbeContactTolerance = 0.02f;
+    private const float IdleLandingRecoveryTime = 0.18f;
+    private const float MovingLandingRecoveryTime = 0.1f;
+    private const float JumpAnimationFallGrace = 0.12f;
+    private const float FallPresentationGrace = 0.07f;
+    private const float JumpApexPoseWeight = 0.65f;
+    private const float FullFallAnimationTime = 1f;
+    private const float JumpContactPhaseLead = 0.002f;
     private const string SharedProfileResource = "DefaultHumanoidLocomotionProfile";
     private const float StepRayHeight = 0.012f;
     private const float StepRaySpread = 0.6f;
     private const float StepProbeReach = 0.08f;
+    private const float StepMinimumApproachCos = 0.5f;
     private const float StepVerticalNormalY = 0.3f;
     private const float StepTreadSample = 0.05f;
     private const float StepTreadDepthMargin = 0.05f;
     private const float StepLiftMargin = 0.02f;
     private const float StepSkinLift = 0.01f;
     private const float StepAdvance = 0.06f;
-    private const float StepUpGraceTime = 0.15f;
-    private const float StepRejectLogInterval = 0.5f;
+    private const float StepGraceTime = 0.4f;
     private const float StepGroundSearch = 0.2f;
     private const float MinimumStepRise = 0.015f;
     private const float StepHeightTolerance = 0.005f;
-    private const float ControllerStepOffsetWithMotorStepUp = 0.05f;
-    private const float MinimumReportedStep = 0.02f;
-    private const float MaximumReportedStepRatio = 1.25f;
+    private const float ControllerStepOffset = 0.05f;
 
     private CharacterController controller;
+    private Animator animator;
     private CharacterLocomotionProfile profile;
     private StepSmoothing stepSmoothing;
-    private float legLength;
-    private float lastStepRejectLogTime;
     private float stepUpGraceRemaining;
     private float animationGait;
     private Vector3 planarVelocity;
@@ -119,6 +119,7 @@ public class CharacterMotor : MonoBehaviour
     private float airbornePresentationElapsed;
     private float fallAnimationElapsed;
     private float fallAmount;
+    private Vector3 ledgeEscapeDirection;
     private bool jumpAnimationActive;
     private bool landingAnimationActive;
     private bool sprintJumpAnimation;
@@ -126,16 +127,24 @@ public class CharacterMotor : MonoBehaviour
     private bool hasInitializedGroundState;
     private bool presentationGroundedLatch;
     private bool foundWalkableGroundContact;
-    private Vector3 walkableGroundContactNormal = Vector3.up;
+    private bool restedOnContact;
+    private bool fallingOntoStep;
+    private float stairChainRemaining;
+    private float leftGroundHeight;
+
+    private JumpAnimationPhases JumpPhases => sprintJumpAnimation ? SprintJumpPhases : NormalJumpPhases;
 
     public bool IsGrounded { get; private set; }
+    public bool HasGroundSupport => IsGrounded || coyoteTimeRemaining > 0f || fallingOntoStep;
     public CharacterLocomotionProfile Profile => profile;
-    public float LegLength => legLength;
-    public float MaxStepHeight => profile.MaxStepHeight(legLength);
-    public LayerMask GroundMask => groundMask;
+    public float MaxStepHeight => profile.MaxStepHeight;
     public Vector3 PlanarVelocity => planarVelocity;
 
-    public event Action<float> SteppedVertically;
+    public bool TryFindWalkableGround(Vector3 origin, float distance, out RaycastHit hit)
+    {
+        return Physics.Raycast(origin, Vector3.down, out hit, distance, groundLayers,
+            QueryTriggerInteraction.Ignore) && hit.normal.y >= MinimumSurfaceNormalY;
+    }
 
     private void Awake()
     {
@@ -145,7 +154,7 @@ public class CharacterMotor : MonoBehaviour
             animator.applyRootMotion = false;
 
         profile = locomotionProfile != null ? locomotionProfile : LoadSharedProfile();
-        RefreshRigMetrics();
+        controller.stepOffset = ControllerStepOffset;
         AddLocomotionComponents();
     }
 
@@ -153,18 +162,6 @@ public class CharacterMotor : MonoBehaviour
     {
         CharacterLocomotionProfile shared = Resources.Load<CharacterLocomotionProfile>(SharedProfileResource);
         return shared != null ? shared : CharacterLocomotionProfile.CreateDefault();
-    }
-
-    public void RefreshRigMetrics()
-    {
-        if (!HumanoidLegMetrics.TryMeasure(animator, out legLength))
-            legLength = controller.height * 0.5f;
-
-        if (profile.UsesMotorStepUp)
-            controller.stepOffset = Mathf.Min(ControllerStepOffsetWithMotorStepUp, controller.height);
-
-        measuredLegLength = legLength;
-        effectiveMaxStepHeight = MaxStepHeight;
     }
 
     private void AddLocomotionComponents()
@@ -227,16 +224,17 @@ public class CharacterMotor : MonoBehaviour
         {
             Quaternion targetFacing = Quaternion.LookRotation(requestedDirection, Vector3.up);
             transform.rotation = Quaternion.RotateTowards(
-                transform.rotation, targetFacing, turnSpeed * deltaTime);
+                transform.rotation, targetFacing, TurnSpeed * deltaTime);
         }
 
         bool previouslyGrounded = IsGrounded;
         stepUpGraceRemaining = Mathf.Max(0f, stepUpGraceRemaining - deltaTime);
+        stairChainRemaining = Mathf.Max(0f, stairChainRemaining - deltaTime);
         bool groundedAtStart = TryGetGround(out Vector3 groundNormal) || stepUpGraceRemaining > 0f;
         IsGrounded = groundedAtStart;
         if (groundedAtStart)
         {
-            coyoteTimeRemaining = coyoteTime;
+            coyoteTimeRemaining = CoyoteTime;
             if (verticalVelocity < 0f)
                 verticalVelocity = -2f;
         }
@@ -245,22 +243,11 @@ public class CharacterMotor : MonoBehaviour
             coyoteTimeRemaining = Mathf.Max(0f, coyoteTimeRemaining - deltaTime);
         }
 
-        bool jumpIsBuffered = jumpRequested && jumpRequestAge <= jumpBufferTime;
+        bool jumpIsBuffered = jumpRequested && jumpRequestAge <= JumpBufferTime;
         bool acceptedJumpThisTick = false;
         if (jumpIsBuffered && (groundedAtStart || coyoteTimeRemaining > 0f))
         {
-            verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            jumpRequested = false;
-            coyoteTimeRemaining = 0f;
-            jumpGroundingGrace = 0.1f;
-            jumpAnimationActive = true;
-            sprintJumpAnimation = sprinting && hasMovementInput;
-            landingAnimationActive = false;
-            landingRecoveryElapsed = 0f;
-            jumpAnimationElapsed = 0f;
-            jumpAnimationLaunchSpeed = verticalVelocity;
-            jumpAnimationFlightTime = jumpAnimationLaunchSpeed * 2f / Mathf.Max(0.01f, -gravity);
-            jumpAnimationTime = GetTakeoffPhase(sprintJumpAnimation);
+            BeginJump(sprinting && hasMovementInput);
             acceptedJumpThisTick = true;
             IsGrounded = false;
             groundedAtStart = false;
@@ -268,154 +255,251 @@ public class CharacterMotor : MonoBehaviour
         else if (jumpRequested)
         {
             jumpRequestAge += deltaTime;
-            if (jumpRequestAge > jumpBufferTime)
+            if (jumpRequestAge > JumpBufferTime)
                 jumpRequested = false;
         }
 
         jumpGroundingGrace = Mathf.Max(0f, jumpGroundingGrace - deltaTime);
         if (groundedAtStart)
         {
-            float rate = hasMovementInput ? acceleration : braking;
+            float rate = hasMovementInput ? Acceleration : Braking;
             planarVelocity = Vector3.MoveTowards(planarVelocity, targetVelocity, rate * deltaTime);
         }
         else if (hasMovementInput)
         {
             // Keep launch momentum and allow only modest steering while airborne.
-            planarVelocity = Vector3.MoveTowards(planarVelocity, targetVelocity, airAcceleration * deltaTime);
+            planarVelocity = Vector3.MoveTowards(planarVelocity, targetVelocity, AirAcceleration * deltaTime);
         }
 
         if (IsGrounded && verticalVelocity < 0f)
             verticalVelocity = -2f;
         else
-            verticalVelocity += gravity * deltaTime;
+            verticalVelocity += Gravity * deltaTime;
 
         Vector3 locomotionDisplacement = planarVelocity * deltaTime;
-        if (groundedAtStart)
-            locomotionDisplacement = Vector3.ProjectOnPlane(locomotionDisplacement, groundNormal);
-
+        float horizontalShare = groundedAtStart ? AlignToSurface(ref locomotionDisplacement, groundNormal) : 1f;
         Vector3 externalDisplacement = externalVelocity * deltaTime;
-        Vector3 displacement = locomotionDisplacement + externalDisplacement +
+        Vector3 ledgePush = UpdateLedgeEscape(groundedAtStart, acceptedJumpThisTick, hasMovementInput,
+            requestedDirection, deltaTime);
+        Vector3 ledgeDisplacement = ledgePush * deltaTime;
+        Vector3 displacement = locomotionDisplacement + externalDisplacement + ledgeDisplacement +
             Vector3.up * (verticalVelocity * deltaTime);
 
         foundWalkableGroundContact = false;
-        walkableGroundContactNormal = Vector3.up;
         Vector3 startingPosition = transform.position;
-        if (profile.UsesMotorStepUp && groundedAtStart && !acceptedJumpThisTick && verticalVelocity <= 0f &&
-            TryStepUp(locomotionDisplacement + externalDisplacement, out float stepRise))
+        if (groundedAtStart && !acceptedJumpThisTick && verticalVelocity <= 0f)
         {
-            controller.Move(Vector3.up * stepRise);
-            stepUpGraceRemaining = StepUpGraceTime;
+            // Forced edge escape is a correction, not an approach direction for a stair step.
+            Vector3 stepTravel = Vector3.ProjectOnPlane(locomotionDisplacement + externalDisplacement, Vector3.up);
+            Vector3 stepDirection = hasMovementInput ? requestedDirection : stepTravel.normalized;
+            float stepDistance = hasMovementInput
+                ? Mathf.Max(stepTravel.magnitude, movementSpeed * deltaTime)
+                : stepTravel.magnitude;
+            if (TryStepUp(stepDirection, stepDistance, out float stepRise))
+            {
+                controller.Move(Vector3.up * stepRise);
+                stepUpGraceRemaining = StepGraceTime;
+            }
         }
 
         CollisionFlags collisions = controller.Move(displacement);
-        if (ShouldSnapToGround(previouslyGrounded, acceptedJumpThisTick, collisions))
+        restedOnContact = (collisions & CollisionFlags.Below) != 0 || foundWalkableGroundContact;
+        if (ShouldSnapToGround(acceptedJumpThisTick, collisions))
             SnapToGround();
 
+        if (stepUpGraceRemaining > 0f && (foundWalkableGroundContact || TryGetGround(out _)))
+            stepUpGraceRemaining = 0f;
+
         Vector3 actualDisplacement = transform.position - startingPosition;
-        if (groundedAtStart && !acceptedJumpThisTick && (collisions & CollisionFlags.Sides) != 0)
-            LimitVelocityToAchievedMotion(actualDisplacement - externalDisplacement, deltaTime);
+        if (groundedAtStart && !acceptedJumpThisTick && stepUpGraceRemaining <= 0f &&
+            (collisions & CollisionFlags.Sides) != 0)
+            LimitVelocityToAchievedMotion(actualDisplacement - externalDisplacement - ledgeDisplacement, deltaTime);
 
         if ((collisions & CollisionFlags.Above) != 0 && verticalVelocity > 0f)
             verticalVelocity = 0f;
 
-        Vector3 probedGroundNormal = Vector3.up;
-        bool hasGroundProbe = verticalVelocity <= 0f && TryGetGround(out probedGroundNormal);
         bool hasWalkableGround = verticalVelocity <= 0f &&
-            (foundWalkableGroundContact || hasGroundProbe || stepUpGraceRemaining > 0f);
+            (foundWalkableGroundContact || TryGetGround(out _) || stepUpGraceRemaining > 0f);
         if (hasWalkableGround)
         {
             IsGrounded = true;
-            coyoteTimeRemaining = coyoteTime;
-            if (foundWalkableGroundContact)
-                groundNormal = walkableGroundContactNormal;
-            else
-                groundNormal = probedGroundNormal;
+            coyoteTimeRemaining = CoyoteTime;
             if (verticalVelocity < 0f)
                 verticalVelocity = -2f;
         }
         else
         {
             IsGrounded = false;
-            groundNormal = Vector3.up;
-        }
-
-        if (previouslyGrounded && IsGrounded && !acceptedJumpThisTick)
-        {
-            float expectedVerticalTravel = locomotionDisplacement.y + externalDisplacement.y;
-            ReportVerticalStep(actualDisplacement.y - expectedVerticalTravel);
+            CarryLedgeEscapeMomentum();
         }
 
         float actualDownwardSpeed = Mathf.Max(0f, -actualDisplacement.y / deltaTime);
         UpdateFallAmount(actualDownwardSpeed, acceptedJumpThisTick, collisions, deltaTime);
 
+        bool beganLandingThisTick = UpdateGroundPresentation(previouslyGrounded, acceptedJumpThisTick,
+            hasMovementInput, startingPosition.y, deltaTime);
+        UpdateJumpAndLandingAnimation(beganLandingThisTick, deltaTime);
+
+        hasInitializedGroundState = true;
+
+        externalVelocity = Vector3.MoveTowards(
+            externalVelocity, Vector3.zero, KnockbackBraking * deltaTime);
+
+        float surfaceSpeed = GetResolvedPlanarSpeed(actualDisplacement - externalDisplacement, ledgePush, deltaTime) /
+                             Mathf.Max(MinimumSurfaceNormalY, horizontalShare);
+        UpdateAnimator(GetGaitValue(surfaceSpeed), presentationGroundedLatch, deltaTime);
+    }
+
+    private void BeginJump(bool sprintJump)
+    {
+        verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * Gravity);
+        jumpRequested = false;
+        coyoteTimeRemaining = 0f;
+        jumpGroundingGrace = 0.1f;
+        jumpAnimationActive = true;
+        sprintJumpAnimation = sprintJump;
+        landingAnimationActive = false;
+        landingRecoveryElapsed = 0f;
+        jumpAnimationElapsed = 0f;
+        jumpAnimationLaunchSpeed = verticalVelocity;
+        jumpAnimationFlightTime = jumpAnimationLaunchSpeed * 2f / Mathf.Max(0.01f, -Gravity);
+        jumpAnimationTime = JumpPhases.takeoff;
+    }
+
+    private static float AlignToSurface(ref Vector3 displacement, Vector3 groundNormal)
+    {
+        Vector3 alongSurface = Vector3.ProjectOnPlane(displacement, groundNormal);
+        if (alongSurface.sqrMagnitude <= 0.0000001f)
+            return 1f;
+
+        float requestedLength = displacement.magnitude;
+        displacement = alongSurface * (requestedLength / alongSurface.magnitude);
+        return Vector3.ProjectOnPlane(displacement, Vector3.up).magnitude / requestedLength;
+    }
+
+    private Vector3 UpdateLedgeEscape(bool groundedAtStart, bool acceptedJumpThisTick, bool hasMovementInput,
+        Vector3 requestedDirection, float deltaTime)
+    {
+        bool canApply = (groundedAtStart || restedOnContact) && !acceptedJumpThisTick &&
+                        jumpGroundingGrace <= 0f && stepUpGraceRemaining <= 0f;
+        if (!canApply)
+        {
+            ResetLedgeEscapeDirection();
+            return Vector3.zero;
+        }
+
+        if (!TryGetLedgePush(hasMovementInput ? requestedDirection : Vector3.zero, out Vector3 push))
+            return Vector3.zero;
+
+        if (!hasMovementInput && push.sqrMagnitude > 0.0001f)
+        {
+            Quaternion targetFacing = Quaternion.LookRotation(push, Vector3.up);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetFacing, TurnSpeed * deltaTime);
+        }
+
+        return push;
+    }
+
+    private void CarryLedgeEscapeMomentum()
+    {
+        if (ledgeEscapeDirection == Vector3.zero)
+            return;
+
+        float outwardSpeed = Vector3.Dot(planarVelocity, ledgeEscapeDirection);
+        if (outwardSpeed < LedgeEscapeSpeed)
+            planarVelocity += ledgeEscapeDirection * (LedgeEscapeSpeed - outwardSpeed);
+    }
+
+    private bool UpdateGroundPresentation(bool previouslyGrounded, bool acceptedJumpThisTick,
+        bool hasMovementInput, float startingHeight, float deltaTime)
+    {
         bool landedThisTick = hasInitializedGroundState && !previouslyGrounded && IsGrounded;
-        bool meaningfulLanding = jumpAnimationActive || airbornePresentationElapsed >= fallPresentationGrace;
-        bool beganLandingThisTick = false;
+        if (previouslyGrounded && !IsGrounded)
+            leftGroundHeight = startingHeight;
+
+        float stepDownLanding = leftGroundHeight - transform.position.y;
+        if (landedThisTick && !jumpAnimationActive && airbornePresentationElapsed <= StepGraceTime &&
+            stepDownLanding > MinimumChainDrop && stepDownLanding <= MaxStepHeight + MinimumChainDrop)
+            stairChainRemaining = StepGraceTime;
+
+        bool meaningfulLanding = jumpAnimationActive || airbornePresentationElapsed >= FallPresentationGrace;
+        bool beganLanding = false;
         if (IsGrounded)
         {
-            if ((landedThisTick && meaningfulLanding) ||
-                (IsGrounded && jumpAnimationActive && !acceptedJumpThisTick))
+            if ((landedThisTick && meaningfulLanding) || (jumpAnimationActive && !acceptedJumpThisTick))
             {
                 BeginLandingRecovery(hasMovementInput || planarVelocity.magnitude > 0.5f);
-                beganLandingThisTick = true;
+                beganLanding = true;
             }
 
             airbornePresentationElapsed = 0f;
             presentationGroundedLatch = true;
+            fallingOntoStep = false;
         }
         else
         {
             airbornePresentationElapsed += deltaTime;
-            if (acceptedJumpThisTick || airbornePresentationElapsed >= fallPresentationGrace)
+            fallingOntoStep = !acceptedJumpThisTick && !jumpAnimationActive &&
+                              airbornePresentationElapsed <= StepGraceTime &&
+                              verticalVelocity <= 0f && TryMeasureStepDown(out _);
+            if (acceptedJumpThisTick || (airbornePresentationElapsed >= FallPresentationGrace && !fallingOntoStep))
                 presentationGroundedLatch = false;
             else if (previouslyGrounded)
                 presentationGroundedLatch = true;
         }
 
+        return beganLanding;
+    }
+
+    private void UpdateJumpAndLandingAnimation(bool beganLandingThisTick, float deltaTime)
+    {
         if (jumpAnimationActive)
         {
             jumpAnimationElapsed += deltaTime;
-            if (jumpAnimationElapsed > jumpAnimationFlightTime + jumpAnimationFallGrace)
+            if (jumpAnimationElapsed > jumpAnimationFlightTime + JumpAnimationFallGrace)
             {
                 // Fall back to a stable loop if the character remains airborne past the clip's landing window.
                 jumpAnimationActive = false;
             }
             else
             {
-                jumpAnimationTime = CalculateAirborneJumpPhase(sprintJumpAnimation, verticalVelocity);
+                jumpAnimationTime = CalculateAirborneJumpPhase();
             }
         }
 
-        if (landingAnimationActive)
+        if (!landingAnimationActive)
+            return;
+
+        if (!beganLandingThisTick)
+            landingRecoveryElapsed += deltaTime;
+        float recoveryProgress = landingRecoveryDuration > 0f
+            ? Mathf.Clamp01(landingRecoveryElapsed / landingRecoveryDuration)
+            : 1f;
+        jumpAnimationTime = Mathf.Lerp(JumpPhases.contact, JumpPhases.recovered, recoveryProgress);
+
+        if (recoveryProgress >= 1f)
         {
-            if (!beganLandingThisTick)
-                landingRecoveryElapsed += deltaTime;
-            float recoveryProgress = landingRecoveryDuration > 0f
-                ? Mathf.Clamp01(landingRecoveryElapsed / landingRecoveryDuration)
-                : 1f;
-            jumpAnimationTime = Mathf.Lerp(GetContactPhase(sprintJumpAnimation),
-                GetRecoveredPhase(sprintJumpAnimation), recoveryProgress);
-
-            if (recoveryProgress >= 1f)
-            {
-                landingAnimationActive = false;
-                sprintJumpAnimation = false;
-            }
+            landingAnimationActive = false;
+            sprintJumpAnimation = false;
         }
+    }
 
-        hasInitializedGroundState = true;
-
-        externalVelocity = Vector3.MoveTowards(
-            externalVelocity, Vector3.zero, knockbackBraking * deltaTime);
-
-        Vector3 resolvedPlanarTravel = Vector3.ProjectOnPlane(
-            actualDisplacement - externalDisplacement, Vector3.up);
+    private float GetResolvedPlanarSpeed(Vector3 resolvedDisplacement, Vector3 ledgePush, float deltaTime)
+    {
+        Vector3 resolvedPlanarTravel = Vector3.ProjectOnPlane(resolvedDisplacement, Vector3.up);
         float actualPlanarSpeed = planarVelocity.sqrMagnitude > 0.0001f
             ? Mathf.Clamp(Vector3.Dot(resolvedPlanarTravel, planarVelocity.normalized) / deltaTime,
                 0f, planarVelocity.magnitude)
             : 0f;
 
-        UpdateAnimator(GetGaitValue(actualPlanarSpeed), presentationGroundedLatch, deltaTime);
+        if (ledgePush.sqrMagnitude > 0.0001f)
+        {
+            float actualEscapeSpeed = Mathf.Max(0f,
+                Vector3.Dot(resolvedPlanarTravel, ledgePush.normalized) / deltaTime);
+            actualPlanarSpeed = Mathf.Max(actualPlanarSpeed, actualEscapeSpeed);
+        }
+
+        return actualPlanarSpeed;
     }
 
     private Vector3 GetRequestedDirection(Vector2 input, Vector3? worldMovement)
@@ -430,70 +514,61 @@ public class CharacterMotor : MonoBehaviour
         return direction.sqrMagnitude > 0.000001f ? direction.normalized : Vector3.zero;
     }
 
-    private bool TryStepUp(Vector3 displacement, out float rise)
+    private bool TryStepUp(Vector3 direction, float planarDistance, out float rise)
     {
         rise = 0f;
-        Vector3 planar = Vector3.ProjectOnPlane(displacement, Vector3.up);
-        float planarDistance = planar.magnitude;
-        if (planarDistance <= 0.0001f)
+        if (planarDistance <= 0.0001f || direction.sqrMagnitude <= 0.0001f)
             return false;
 
-        Vector3 direction = planar / planarDistance;
         Vector3 center = transform.TransformPoint(controller.center);
         float feetY = center.y - controller.height * 0.5f;
         float expectedGroundY = feetY - controller.skinWidth;
         float groundY = expectedGroundY;
         if (Physics.Raycast(center, Vector3.down, out RaycastHit groundHit,
-                controller.height * 0.5f + StepGroundSearch, groundMask, QueryTriggerInteraction.Ignore))
+                controller.height * 0.5f + StepGroundSearch, groundLayers, QueryTriggerInteraction.Ignore))
         {
             groundY = groundHit.point.y;
         }
 
         float supportY = Mathf.Max(groundY, expectedGroundY);
-        if (!TryFindRiserFace(center, supportY, direction, planarDistance, out float faceDistance))
+        if (!TryFindRiserFace(center, supportY, direction, planarDistance,
+                out Vector3 treadSamplePoint, out float advance))
             return false;
 
         float maximumRise = MaxStepHeight;
         float walkableNormalY = Mathf.Cos(controller.slopeLimit * Mathf.Deg2Rad);
-        Vector3 treadOrigin = new Vector3(center.x, supportY + maximumRise + StepLiftMargin, center.z) +
-                              direction * (faceDistance + StepTreadSample);
+        Vector3 treadOrigin = new Vector3(treadSamplePoint.x, supportY + maximumRise + StepLiftMargin,
+            treadSamplePoint.z);
         float treadSearch = maximumRise + StepLiftMargin + StepTreadDepthMargin;
-        if (!Physics.Raycast(treadOrigin, Vector3.down, out RaycastHit tread, treadSearch, groundMask,
+        if (!Physics.Raycast(treadOrigin, Vector3.down, out RaycastHit tread, treadSearch, groundLayers,
                 QueryTriggerInteraction.Ignore) || tread.normal.y < walkableNormalY)
         {
-            return RejectStep("no walkable tread within " + maximumRise.ToString("0.00") + " m beyond the riser");
+            return false;
         }
 
         float treadRise = tread.point.y - supportY;
-        if (profile.DrawDebug)
-            Debug.DrawLine(treadOrigin, tread.point, Color.green);
-
         if (treadRise < MinimumStepRise)
             return false;
 
         if (treadRise > maximumRise + StepHeightTolerance)
-        {
-            return RejectStep("rise " + treadRise.ToString("0.00") + " m is above the max step " +
-                              maximumRise.ToString("0.00") + " m");
-        }
+            return false;
 
         float clearanceRadius = Mathf.Max(0.01f, controller.radius - controller.skinWidth * 2f);
         float halfSegment = Mathf.Max(0f, controller.height * 0.5f - controller.radius);
         Vector3 bottom = center + Vector3.down * halfSegment;
         Vector3 top = center + Vector3.up * halfSegment;
         float lift = treadRise + StepSkinLift;
-        if (Physics.CapsuleCast(bottom, top, clearanceRadius, Vector3.up, lift, groundMask,
+        if (Physics.CapsuleCast(bottom, top, clearanceRadius, Vector3.up, lift, groundLayers,
                 QueryTriggerInteraction.Ignore))
         {
-            return RejectStep("no headroom to lift " + lift.ToString("0.00") + " m");
+            return false;
         }
 
         Vector3 liftOffset = Vector3.up * (lift + StepLiftMargin);
-        float advance = Mathf.Max(0f, faceDistance - controller.radius) + StepAdvance;
         if (Physics.CapsuleCast(bottom + liftOffset, top + liftOffset, clearanceRadius, direction, advance,
-                groundMask, QueryTriggerInteraction.Ignore))
+                groundLayers, QueryTriggerInteraction.Ignore))
         {
-            return RejectStep("blocked above the step");
+            return false;
         }
 
         rise = lift;
@@ -506,74 +581,175 @@ public class CharacterMotor : MonoBehaviour
         if (achievedVelocity.sqrMagnitude < planarVelocity.sqrMagnitude)
             planarVelocity = achievedVelocity;
     }
-    private bool RejectStep(string reason)
-    {
-        if (profile.DrawDebug && Time.time - lastStepRejectLogTime >= StepRejectLogInterval)
-        {
-            lastStepRejectLogTime = Time.time;
-            Debug.Log("Step rejected: " + reason, this);
-        }
 
-        return false;
-    }
     private bool TryFindRiserFace(Vector3 center, float groundY, Vector3 direction, float planarDistance,
-        out float faceDistance)
+        out Vector3 treadSamplePoint, out float advanceDistance)
     {
-        faceDistance = float.MaxValue;
+        treadSamplePoint = Vector3.zero;
+        advanceDistance = 0f;
+        float nearestPlaneDistance = float.MaxValue;
         Vector3 side = Vector3.Cross(Vector3.up, direction);
-        float reach = controller.radius + planarDistance + StepProbeReach;
+        float contactReach = controller.radius + planarDistance + StepProbeReach;
+        float rayReach = contactReach / StepMinimumApproachCos;
         for (int i = -1; i <= 1; i++)
         {
             Vector3 origin = new Vector3(center.x, groundY + StepRayHeight, center.z) +
                              side * (controller.radius * StepRaySpread * i);
-            bool hitRiser = Physics.Raycast(origin, direction, out RaycastHit hit, reach, groundMask,
-                QueryTriggerInteraction.Ignore) && hit.normal.y < StepVerticalNormalY;
-            if (profile.DrawDebug)
-                Debug.DrawRay(origin, direction * reach, hitRiser ? Color.magenta : Color.gray);
+            if (!Physics.Raycast(origin, direction, out RaycastHit hit, rayReach, groundLayers,
+                    QueryTriggerInteraction.Ignore) || hit.normal.y >= StepVerticalNormalY)
+            {
+                continue;
+            }
 
-            if (hitRiser && hit.distance < faceDistance)
-                faceDistance = hit.distance;
+            Vector3 faceNormal = Vector3.ProjectOnPlane(hit.normal, Vector3.up).normalized;
+            float approachCos = Vector3.Dot(direction, -faceNormal);
+            float planeDistance = Vector3.Dot(hit.point - center, -faceNormal);
+            if (approachCos <= 0.01f || planeDistance > contactReach || planeDistance >= nearestPlaneDistance)
+                continue;
+
+            nearestPlaneDistance = planeDistance;
+            treadSamplePoint = hit.point - faceNormal * StepTreadSample;
+            advanceDistance = Mathf.Max(0f, planeDistance - controller.radius) /
+                Mathf.Max(StepMinimumApproachCos, approachCos) + StepAdvance;
         }
 
-        return faceDistance < float.MaxValue;
-    }    private void ReportVerticalStep(float stepDelta)
-    {
-        float magnitude = Mathf.Abs(stepDelta);
-        if (magnitude < MinimumReportedStep || magnitude > MaxStepHeight * MaximumReportedStepRatio)
-            return;
-
-        SteppedVertically?.Invoke(stepDelta);
+        return nearestPlaneDistance < float.MaxValue;
     }
 
-    private bool ShouldSnapToGround(bool previouslyGrounded, bool jumpedThisTick, CollisionFlags collisions)
+    private bool ShouldSnapToGround(bool jumpedThisTick, CollisionFlags collisions)
     {
-        return previouslyGrounded && !jumpedThisTick && verticalVelocity <= 0f &&
+        return coyoteTimeRemaining > 0f && !jumpedThisTick && verticalVelocity <= 0f &&
                jumpGroundingGrace <= 0f && stepUpGraceRemaining <= 0f &&
                (collisions & CollisionFlags.Below) == 0 && !foundWalkableGroundContact;
     }
 
-    private void SnapToGround()
+    private bool TryProbeGroundBelow(float searchDistance, out float verticalGap, out Vector3 normal)
     {
+        verticalGap = 0f;
+        normal = Vector3.up;
         float radius = Mathf.Max(0.01f, controller.radius * 0.9f);
         Vector3 center = transform.TransformPoint(controller.center);
         Vector3 capsuleBottom = center + Vector3.down * (controller.height * 0.5f - controller.radius);
-        const float originLift = 0.05f;
-        float maximumDrop = MaxStepHeight;
-        Vector3 origin = capsuleBottom + Vector3.up * originLift;
-        if (!Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit,
-                originLift + maximumDrop + 0.1f, groundMask, QueryTriggerInteraction.Ignore) ||
-            !IsWalkableGroundHit(hit))
+        Vector3 origin = capsuleBottom + Vector3.up * ProbeOriginLift;
+        if (!Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit, searchDistance,
+                groundLayers, QueryTriggerInteraction.Ignore) || !IsWalkableGroundHit(hit))
         {
-            return;
+            return false;
         }
 
-        float verticalGap = hit.distance - originLift -
+        verticalGap = hit.distance - ProbeOriginLift -
             (controller.radius - radius) / Mathf.Max(0.01f, hit.normal.y);
-        if (verticalGap <= groundProbeContactTolerance || verticalGap > maximumDrop)
+        normal = hit.normal;
+        return true;
+    }
+
+    private bool TryMeasureStepDown(out float verticalGap)
+    {
+        return TryProbeGroundBelow(ProbeOriginLift + MaxStepHeight + 0.1f, out verticalGap, out _) &&
+               verticalGap > GroundProbeContactTolerance && verticalGap <= MaxStepHeight;
+    }
+
+    private void SnapToGround()
+    {
+        if (!TryMeasureStepDown(out float verticalGap))
+            return;
+
+        if (stairChainRemaining <= 0f && verticalGap > SmallSnapDrop)
             return;
 
         controller.Move(Vector3.down * verticalGap);
+        stairChainRemaining = StepGraceTime;
     }
+
+    private bool IsCenterSupported(Vector3 center)
+    {
+        float halfHeight = controller.height * 0.5f;
+        if (!Physics.Raycast(center, Vector3.down, out RaycastHit hit, halfHeight + LedgeSupportSearch,
+                groundLayers, QueryTriggerInteraction.Ignore) || !IsWalkableGroundHit(hit))
+        {
+            return false;
+        }
+
+        float normalY = Mathf.Max(0.01f, hit.normal.y);
+        float allowance = controller.radius * (1f / normalY - 1f) + controller.skinWidth / normalY +
+                          GroundProbeContactTolerance;
+        float gap = (center.y - halfHeight) - hit.point.y;
+        return gap <= allowance;
+    }
+
+    private static Vector3 GetLedgeProbeOffset(int index, float radius)
+    {
+        return Quaternion.Euler(0f, index * 360f / LedgeProbeCount, 0f) * Vector3.forward * radius;
+    }
+
+    private bool HasGroundBelow(Vector3 point, float depthBelowFeet)
+    {
+        float reach = controller.height * 0.5f + depthBelowFeet;
+        return Physics.Raycast(point, Vector3.down, out RaycastHit hit, reach, groundLayers,
+            QueryTriggerInteraction.Ignore) && IsWalkableGroundHit(hit);
+    }
+
+    private bool TryGetLedgePush(Vector3 intendedDirection, out Vector3 push)
+    {
+        push = Vector3.zero;
+        Vector3 center = transform.TransformPoint(controller.center);
+        Vector3 awayFromSupport;
+        if (IsCenterSupported(center))
+        {
+            Vector3 voidDirection = Vector3.zero;
+            float supportedDrop = MaxStepHeight + controller.skinWidth + GroundProbeContactTolerance;
+            for (int i = 0; i < LedgeProbeCount; i++)
+            {
+                Vector3 offset = GetLedgeProbeOffset(i, LedgeSupportInset);
+                if (!HasGroundBelow(center + offset, supportedDrop))
+                    voidDirection += offset;
+            }
+
+            if (voidDirection.sqrMagnitude <= 0.0001f)
+            {
+                ResetLedgeEscapeDirection();
+                return false;
+            }
+
+            awayFromSupport = voidDirection.normalized;
+        }
+        else
+        {
+            Vector3 supportDirection = Vector3.zero;
+                        for (int i = 0; i < LedgeProbeCount; i++)
+            {
+                Vector3 offset = GetLedgeProbeOffset(i, controller.radius);
+                if (HasGroundBelow(center + offset, LedgeProbeMargin))
+                    supportDirection += offset;
+            }
+
+            if (supportDirection.sqrMagnitude <= 0.0001f)
+            {
+                ResetLedgeEscapeDirection();
+                return false;
+            }
+
+            awayFromSupport = -supportDirection.normalized;
+        }
+
+        bool hasEscapeDirection = ledgeEscapeDirection != Vector3.zero;
+        if (Vector3.Dot(intendedDirection, awayFromSupport) < LedgeInwardIntent ||
+            (hasEscapeDirection && Vector3.Dot(intendedDirection, ledgeEscapeDirection) < LedgeInwardIntent))
+        {
+            ResetLedgeEscapeDirection();
+            return false;
+        }
+
+        if (!hasEscapeDirection)
+            ledgeEscapeDirection = awayFromSupport;
+
+        // Keep the world-space escape direction until support returns or the player steers inward.
+        float outwardSpeed = Mathf.Max(0f, Vector3.Dot(planarVelocity, ledgeEscapeDirection));
+        push = ledgeEscapeDirection * Mathf.Max(0f, LedgeEscapeSpeed - outwardSpeed);
+        return true;
+    }
+
+    private void ResetLedgeEscapeDirection() => ledgeEscapeDirection = Vector3.zero;
 
     private bool TryGetGround(out Vector3 normal)
     {
@@ -581,30 +757,14 @@ public class CharacterMotor : MonoBehaviour
         if (verticalVelocity > 0f || jumpGroundingGrace > 0f)
             return false;
 
-        float radius = Mathf.Max(0.01f, controller.radius * 0.9f);
-        Vector3 center = transform.TransformPoint(controller.center);
-        Vector3 capsuleBottom = center + Vector3.down * (controller.height * 0.5f - controller.radius);
-        const float originLift = 0.05f;
-        Vector3 origin = capsuleBottom + Vector3.up * originLift;
-        float distance = groundProbeDistance + 0.1f;
-        if (Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit,
-                distance, groundMask, QueryTriggerInteraction.Ignore) &&
-            IsWalkableGroundHit(hit))
+        if (TryProbeGroundBelow(GroundProbeDistance + 0.1f, out float verticalGap, out Vector3 hitNormal) &&
+            verticalGap <= GroundProbeContactTolerance + controller.skinWidth / Mathf.Max(0.01f, hitNormal.y))
         {
-            // The cast uses a slightly smaller sphere than the controller. Correct its vertical
-            // clearance for the probe lift and slope, then allow the CharacterController's skin gap.
-            float verticalGap = hit.distance - originLift -
-                (controller.radius - radius) / Mathf.Max(0.01f, hit.normal.y);
-            float contactAllowance = groundProbeContactTolerance +
-                controller.skinWidth / Mathf.Max(0.01f, hit.normal.y);
-            if (verticalGap <= contactAllowance)
-            {
-                normal = hit.normal;
-                return true;
-            }
+            normal = hitNormal;
+            return true;
         }
 
-        return TryGetGroundFromSupportRays(capsuleBottom, originLift, out normal);
+        return TryGetGroundFromSupportRays(out normal);
     }
 
     private bool IsWalkableGroundHit(RaycastHit hit)
@@ -612,59 +772,43 @@ public class CharacterMotor : MonoBehaviour
         return Vector3.Angle(hit.normal, Vector3.up) <= controller.slopeLimit;
     }
 
-    private bool TryGetGroundFromSupportRays(Vector3 capsuleBottom, float originLift,
-        out Vector3 normal)
+    private bool TryGetGroundFromSupportRays(out Vector3 normal)
     {
-        normal = Vector3.up;
         float radius = controller.radius;
-        float offsetDistance = radius * 0.6f;
-        Vector3 rightDirection = Vector3.ProjectOnPlane(transform.right, Vector3.up).normalized;
-        Vector3 forwardDirection = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
-        Vector3 rightOffset = rightDirection * offsetDistance;
-        Vector3 forwardOffset = forwardDirection * offsetDistance;
+        Vector3 right = Vector3.ProjectOnPlane(transform.right, Vector3.up).normalized;
+        Vector3 forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+        Vector3 capsuleBottom = transform.TransformPoint(controller.center) +
+                                Vector3.down * (controller.height * 0.5f - radius);
 
-        float minimumNormalY = Mathf.Max(0.01f,
-            Mathf.Cos(controller.slopeLimit * Mathf.Deg2Rad));
-        float maximumContactAllowance = groundProbeContactTolerance +
-            controller.skinWidth / minimumNormalY;
-        // Keep the ray search within the same skin/contact band used by the sphere probe.
-        float rayOriginY = capsuleBottom.y - radius + originLift + maximumContactAllowance;
-        float rayDistance = originLift + maximumContactAllowance * 2f;
+        float minimumNormalY = Mathf.Max(0.01f, Mathf.Cos(controller.slopeLimit * Mathf.Deg2Rad));
+        float maximumContactAllowance = GroundProbeContactTolerance + controller.skinWidth / minimumNormalY;
+        float rayOriginY = capsuleBottom.y - radius + ProbeOriginLift + maximumContactAllowance;
+        float rayDistance = ProbeOriginLift + maximumContactAllowance * 2f;
 
-        if (TryGetGroundFromSupportRay(capsuleBottom, Vector3.zero, radius, rayOriginY,
-                rayDistance, out normal) ||
-            TryGetGroundFromSupportRay(capsuleBottom, rightOffset, radius, rayOriginY,
-                rayDistance, out normal) ||
-            TryGetGroundFromSupportRay(capsuleBottom, -rightOffset, radius, rayOriginY,
-                rayDistance, out normal) ||
-            TryGetGroundFromSupportRay(capsuleBottom, forwardOffset, radius, rayOriginY,
-                rayDistance, out normal) ||
-            TryGetGroundFromSupportRay(capsuleBottom, -forwardOffset, radius, rayOriginY,
-                rayDistance, out normal))
+        foreach (Vector2 local in SupportRayOffsets)
         {
-            return true;
+            Vector3 origin = capsuleBottom + (right * local.x + forward * local.y) * (radius * SupportRaySpread);
+            origin.y = rayOriginY;
+            if (TryGetGroundFromSupportRay(origin, capsuleBottom.y - radius, rayDistance, out normal))
+                return true;
         }
 
+        normal = Vector3.up;
         return false;
     }
 
-    private bool TryGetGroundFromSupportRay(Vector3 capsuleBottom, Vector3 offset, float radius,
-        float rayOriginY, float rayDistance, out Vector3 normal)
+    private bool TryGetGroundFromSupportRay(Vector3 origin, float footLevel, float rayDistance, out Vector3 normal)
     {
         normal = Vector3.up;
-        Vector3 origin = capsuleBottom + Vector3.ProjectOnPlane(offset, Vector3.up);
-        origin.y = rayOriginY;
         if (!Physics.Raycast(origin, Vector3.down, out RaycastHit hit, rayDistance,
-                groundMask, QueryTriggerInteraction.Ignore) || !IsWalkableGroundHit(hit))
+                groundLayers, QueryTriggerInteraction.Ignore) || !IsWalkableGroundHit(hit))
         {
             return false;
         }
 
-        float footLevel = capsuleBottom.y - radius;
-        float verticalGap = footLevel - hit.point.y;
-        float contactAllowance = groundProbeContactTolerance +
+        float contactAllowance = GroundProbeContactTolerance +
             controller.skinWidth / Mathf.Max(0.01f, hit.normal.y);
-        if (verticalGap > contactAllowance)
+        if (footLevel - hit.point.y > contactAllowance)
             return false;
 
         normal = hit.normal;
@@ -689,8 +833,7 @@ public class CharacterMotor : MonoBehaviour
             fallAnimationElapsed += deltaTime;
         }
 
-        float fullFallTime = Mathf.Max(0.01f, fullFallAnimationTime);
-        fallAmount = Mathf.Clamp01(fallAnimationElapsed / fullFallTime);
+        fallAmount = Mathf.Clamp01(fallAnimationElapsed / FullFallAnimationTime);
     }
 
     private void BeginLandingRecovery(bool hasMovementInput)
@@ -699,44 +842,23 @@ public class CharacterMotor : MonoBehaviour
         landingAnimationActive = true;
         landingRecoveryElapsed = 0f;
         landingRecoveryDuration = hasMovementInput
-            ? movingLandingRecoveryTime
-            : idleLandingRecoveryTime;
-        jumpAnimationTime = GetContactPhase(sprintJumpAnimation);
+            ? MovingLandingRecoveryTime
+            : IdleLandingRecoveryTime;
+        jumpAnimationTime = JumpPhases.contact;
     }
 
-    private float GetTakeoffPhase(bool sprintJump) => GetJumpPhases(sprintJump).takeoff;
-
-    private float GetApexPhase(bool sprintJump) => GetJumpPhases(sprintJump).apex;
-
-    private float GetContactPhase(bool sprintJump) => GetJumpPhases(sprintJump).contact;
-
-    private float GetRecoveredPhase(bool sprintJump) => GetJumpPhases(sprintJump).recovered;
-
-    private JumpAnimationPhases GetJumpPhases(bool sprintJump)
+    private float CalculateAirborneJumpPhase()
     {
-        JumpAnimationPhases phases = sprintJump ? sprintJumpPhases : normalJumpPhases;
-        phases.takeoff = Mathf.Clamp01(phases.takeoff);
-        phases.apex = Mathf.Clamp(phases.apex, phases.takeoff, 1f);
-        phases.contact = Mathf.Clamp(phases.contact, phases.apex, 1f);
-        phases.recovered = Mathf.Clamp(phases.recovered, phases.contact, 1f);
-        return phases;
-    }
-
-    private float CalculateAirborneJumpPhase(bool sprintJump, float currentVerticalVelocity)
-    {
+        JumpAnimationPhases phases = JumpPhases;
         float launchSpeed = Mathf.Max(0.01f, jumpAnimationLaunchSpeed);
-        float takeoff = GetTakeoffPhase(sprintJump);
-        float apex = GetApexPhase(sprintJump);
-        float contact = Mathf.Max(apex, GetContactPhase(sprintJump) - jumpContactPhaseLead);
-
-        if (currentVerticalVelocity > 0f)
+        if (verticalVelocity > 0f)
         {
-            float ascentProgress = 1f - Mathf.Clamp01(currentVerticalVelocity / launchSpeed);
-            return Mathf.Lerp(takeoff, apex, ascentProgress);
+            float ascentProgress = 1f - Mathf.Clamp01(verticalVelocity / launchSpeed);
+            return Mathf.Lerp(phases.takeoff, phases.apex, ascentProgress);
         }
 
-        float descentProgress = Mathf.Clamp01(-currentVerticalVelocity / launchSpeed);
-        return Mathf.Lerp(apex, contact, descentProgress);
+        float descentProgress = Mathf.Clamp01(-verticalVelocity / launchSpeed);
+        return Mathf.Lerp(phases.apex, phases.contact - JumpContactPhaseLead, descentProgress);
     }
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
@@ -744,8 +866,6 @@ public class CharacterMotor : MonoBehaviour
         if (Vector3.Angle(hit.normal, Vector3.up) <= controller.slopeLimit)
         {
             foundWalkableGroundContact = true;
-            if (hit.normal.y > walkableGroundContactNormal.y)
-                walkableGroundContactNormal = hit.normal;
         }
 
         if (Vector3.Dot(hit.normal, Vector3.up) >= 0.5f)
@@ -775,12 +895,10 @@ public class CharacterMotor : MonoBehaviour
 
     private void UpdateAnimator(float gaitValue, bool grounded, float deltaTime = 0f)
     {
-        float blendTime = Mathf.Max(0.01f, animationBlendTime);
-        float nextGait = deltaTime > 0f
+        animationGait = deltaTime > 0f
             ? Mathf.SmoothDamp(animationGait, gaitValue, ref animationBlendVelocity,
-                blendTime, Mathf.Infinity, deltaTime)
+                AnimationBlendTime, Mathf.Infinity, deltaTime)
             : gaitValue;
-        animationGait = nextGait;
 
         if (animator == null || !animator.isActiveAndEnabled)
             return;
@@ -791,7 +909,7 @@ public class CharacterMotor : MonoBehaviour
         animator.SetBool(SprintJump, sprintJumpAnimation);
         animator.SetFloat(JumpTime, jumpAnimationTime);
         float jumpPoseWeight = jumpAnimationActive
-            ? Mathf.Lerp(jumpApexPoseWeight, 1f, Mathf.Clamp01(
+            ? Mathf.Lerp(JumpApexPoseWeight, 1f, Mathf.Clamp01(
                 Mathf.Abs(verticalVelocity) / Mathf.Max(0.01f, jumpAnimationLaunchSpeed)))
             : 1f;
         animator.SetFloat(JumpPoseWeight, jumpPoseWeight);
@@ -812,7 +930,7 @@ public class CharacterMotor : MonoBehaviour
             jumpAnimationActive = false;
             landingAnimationActive = false;
             sprintJumpAnimation = false;
-            airbornePresentationElapsed = fallPresentationGrace;
+            airbornePresentationElapsed = FallPresentationGrace;
             presentationGroundedLatch = false;
         }
     }
@@ -821,6 +939,8 @@ public class CharacterMotor : MonoBehaviour
     {
         planarVelocity = Vector3.zero;
         externalVelocity = Vector3.zero;
+        restedOnContact = false;
+        ResetLedgeEscapeDirection();
         verticalVelocity = 0f;
         animationGait = 0f;
         animationBlendVelocity = 0f;
@@ -833,35 +953,20 @@ public class CharacterMotor : MonoBehaviour
         jumpAnimationTime = 0f;
         landingRecoveryElapsed = 0f;
         landingRecoveryDuration = 0f;
-        airbornePresentationElapsed = 0f;
+        airbornePresentationElapsed = IsGrounded ? 0f : FallPresentationGrace;
         ResetFallAnimation();
         jumpAnimationActive = false;
         landingAnimationActive = false;
         sprintJumpAnimation = false;
         jumpRequested = false;
         presentationGroundedLatch = IsGrounded;
-        if (!IsGrounded)
-            airbornePresentationElapsed = fallPresentationGrace;
-
-        if (animator != null && animator.isActiveAndEnabled)
-        {
-            animator.SetFloat(MoveY, 0f);
-            animator.SetBool(Grounded, IsGrounded);
-            animator.SetBool(Jumping, false);
-            animator.SetBool(SprintJump, false);
-            animator.SetFloat(JumpTime, 0f);
-            animator.SetFloat(JumpPoseWeight, 1f);
-            animator.SetBool(LandingActive, false);
-        }
+        UpdateAnimator(0f, IsGrounded);
     }
 
     private void ResetFallAnimation()
     {
         fallAnimationElapsed = 0f;
         fallAmount = 0f;
-
-        if (animator != null && animator.isActiveAndEnabled)
-            animator.SetFloat(FallAmount, 0f);
     }
 
     public void Teleport(Vector3 position, Quaternion rotation)
@@ -877,6 +982,6 @@ public class CharacterMotor : MonoBehaviour
         IsGrounded = false;
         hasInitializedGroundState = false;
         presentationGroundedLatch = false;
-        airbornePresentationElapsed = fallPresentationGrace;
+        airbornePresentationElapsed = FallPresentationGrace;
     }
 }

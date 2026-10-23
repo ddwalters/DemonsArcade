@@ -158,6 +158,14 @@ public class EquipmentVisualController : MonoBehaviour
                 continue;
 
             ownedVisuals.Add(visualInstance);
+            if (request.Definition.AttachmentMode == EquipmentVisualAttachmentMode.HumanoidParts)
+            {
+                EquipmentVisualBoneAttachments attachments =
+                    visualInstance.GetComponent<EquipmentVisualBoneAttachments>();
+                foreach (GameObject attachedPart in attachments.AttachedParts)
+                    ownedVisuals.Add(attachedPart);
+            }
+
             activeHiddenRegions |= request.Definition.HiddenBodyRegions;
         }
 
@@ -312,6 +320,17 @@ public class EquipmentVisualController : MonoBehaviour
                 attachment = rigAnimator.transform;
                 break;
 
+            case EquipmentVisualAttachmentMode.HumanoidParts:
+                if (!rigAnimator.isHuman)
+                {
+                    ReportVisualIssue(request.Definition,
+                        "HumanoidParts attachments require a valid humanoid Animator");
+                    return false;
+                }
+
+                attachment = rigAnimator.transform;
+                break;
+
             default:
                 ReportVisualIssue(request.Definition, "the attachment mode is not supported");
                 return false;
@@ -334,10 +353,12 @@ public class EquipmentVisualController : MonoBehaviour
             visualInstance.SetActive(false);
             DisableVisualPhysicsAndAnimators(visualInstance);
 
-            if (request.Definition.AttachmentMode == EquipmentVisualAttachmentMode.RigidBone &&
+            if ((request.Definition.AttachmentMode == EquipmentVisualAttachmentMode.RigidBone ||
+                 request.Definition.AttachmentMode == EquipmentVisualAttachmentMode.HumanoidParts) &&
                 !HasRenderableContent(visualInstance))
             {
-                ReportVisualIssue(request.Definition, "the rigid visual prefab has no enabled Renderer with geometry");
+                ReportVisualIssue(request.Definition,
+                    "the visual prefab has no enabled Renderer with geometry");
                 DestroyOwnedObject(visualInstance);
                 DestroyOwnedObject(stagingRoot);
                 visualInstance = null;
@@ -360,6 +381,32 @@ public class EquipmentVisualController : MonoBehaviour
             visualTransform.localRotation = request.Definition.LocalRotation;
             visualTransform.localScale = request.Definition.LocalScale;
 
+            ApplyVisualTint(visualInstance, request.Definition.Tint);
+
+            if (request.Definition.AttachmentMode == EquipmentVisualAttachmentMode.HumanoidParts)
+            {
+                EquipmentVisualBoneAttachments boneAttachments =
+                    visualInstance.GetComponent<EquipmentVisualBoneAttachments>();
+                if (boneAttachments == null)
+                {
+                    ReportVisualIssue(request.Definition,
+                        "HumanoidParts visuals require an EquipmentVisualBoneAttachments component");
+                    DestroyOwnedObject(visualInstance);
+                    DestroyOwnedObject(stagingRoot);
+                    visualInstance = null;
+                    return false;
+                }
+
+                if (!boneAttachments.TryAttachToRig(rigAnimator, out string attachmentFailure))
+                {
+                    ReportVisualIssue(request.Definition, attachmentFailure);
+                    DestroyOwnedObject(visualInstance);
+                    DestroyOwnedObject(stagingRoot);
+                    visualInstance = null;
+                    return false;
+                }
+            }
+
             DestroyOwnedObject(stagingRoot);
             visualInstance.SetActive(true);
             return true;
@@ -368,10 +415,33 @@ public class EquipmentVisualController : MonoBehaviour
         {
             ReportVisualIssue(request.Definition, $"visual setup failed ({exception.Message})");
             if (visualInstance != null)
+            {
+                EquipmentVisualBoneAttachments boneAttachments =
+                    visualInstance.GetComponent<EquipmentVisualBoneAttachments>();
+                if (boneAttachments != null)
+                    boneAttachments.RestorePartsToVisualRoot();
+
                 DestroyOwnedObject(visualInstance);
+            }
             DestroyOwnedObject(stagingRoot);
             visualInstance = null;
             return false;
+        }
+    }
+
+    private static void ApplyVisualTint(GameObject visualRoot, Color tint)
+    {
+        if (tint == Color.white)
+            return;
+
+        var propertyBlock = new MaterialPropertyBlock();
+        foreach (Renderer renderer in visualRoot.GetComponentsInChildren<Renderer>(true))
+        {
+            renderer.GetPropertyBlock(propertyBlock);
+            propertyBlock.SetColor("_BaseColor", tint);
+            propertyBlock.SetColor("_Color", tint);
+            renderer.SetPropertyBlock(propertyBlock);
+            propertyBlock.Clear();
         }
     }
 

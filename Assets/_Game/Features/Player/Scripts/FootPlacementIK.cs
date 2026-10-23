@@ -4,10 +4,18 @@ using UnityEngine;
 public class FootPlacementIK : MonoBehaviour
 {
     private const float MinimumIkWeight = 0.001f;
-    private const float MinimumLookAheadSpeedSquared = 0.04f;
-    private const float AnkleFallbackRatio = 0.1f;
+    private const float IkBlendTime = 0.08f;
+    private const float HipBlendTime = 0.1f;
+    private const float HipDropLimit = 0.25f;
+    private const float DescendResponseScale = 2.5f;
+    private const float DescentBendShare = 1f;
+    private const float SteppingFootHeight = 0.035f;
+    private const float MinimumTravelSpeedSquared = 0.04f;
+    private const float FallbackSoleHeight = 0.08f;
     private const float MinimumSoleHeight = 0.001f;
-    private const float DebugMarkerHeight = 0.1f;
+    private const float MaxFootTiltDegrees = 30f;
+    private const float KneeForwardDistance = 0.25f;
+    private const float ProbeMargin = 0.1f;
     private const int LookAheadSampleCount = 3;
 
     private sealed class FootState
@@ -17,8 +25,6 @@ public class FootPlacementIK : MonoBehaviour
         public HumanBodyBones lowerLegBone;
         public float offset;
         public float offsetVelocity;
-        public float shift;
-        public float shiftVelocity;
     }
 
     private readonly FootState leftFoot = new FootState
@@ -37,17 +43,15 @@ public class FootPlacementIK : MonoBehaviour
 
     private CharacterMotor motor;
     private Animator animator;
-    private FootGroundProbe probe;
     private float ikWeight;
     private float ikWeightVelocity;
-    private float pelvisOffset;
-    private float pelvisVelocity;
+    private float hipOffset;
+    private float hipVelocity;
 
     public void Initialize(CharacterMotor characterMotor, Animator characterAnimator)
     {
         motor = characterMotor;
         animator = characterAnimator;
-        probe = new FootGroundProbe(motor.GroundMask);
         ikWeight = 0f;
         ikWeightVelocity = 0f;
         ResetOffsets();
@@ -55,16 +59,16 @@ public class FootPlacementIK : MonoBehaviour
 
     private void OnAnimatorIK(int layerIndex)
     {
-        if (motor == null || animator == null || probe == null || !animator.isHuman)
+        if (motor == null || animator == null || !animator.isHuman)
             return;
 
         CharacterLocomotionProfile profile = motor.Profile;
         float deltaTime = Time.deltaTime;
-        float targetWeight = motor.IsGrounded && profile.FootIkEnabled ? 1f : 0f;
+        float targetWeight = motor.HasGroundSupport && profile.FootPlacement ? 1f : 0f;
         if (deltaTime > 0f)
         {
-            ikWeight = Mathf.SmoothDamp(ikWeight, targetWeight, ref ikWeightVelocity,
-                profile.IkBlendTime, Mathf.Infinity, deltaTime);
+            ikWeight = Mathf.SmoothDamp(ikWeight, targetWeight, ref ikWeightVelocity, IkBlendTime,
+                Mathf.Infinity, deltaTime);
         }
 
         if (ikWeight < MinimumIkWeight)
@@ -78,155 +82,112 @@ public class FootPlacementIK : MonoBehaviour
         float floorY = animator.transform.position.y;
         Vector3 travel = motor.PlanarVelocity;
         travel.y = 0f;
-        Vector3 travelDirection = travel.sqrMagnitude > MinimumLookAheadSpeedSquared
+        Vector3 travelDirection = travel.sqrMagnitude > MinimumTravelSpeedSquared
             ? travel.normalized
             : Vector3.zero;
-        Vector3 forward = Vector3.ProjectOnPlane(motor.transform.forward, Vector3.up).normalized;
 
-        SolveFoot(leftFoot, floorY, travelDirection, forward, profile, deltaTime);
-        SolveFoot(rightFoot, floorY, travelDirection, forward, profile, deltaTime);
-        ApplyPelvis(profile, deltaTime);
+        SolveFoot(leftFoot, floorY, travelDirection, profile, deltaTime);
+        SolveFoot(rightFoot, floorY, travelDirection, profile, deltaTime);
+        ApplyHips(profile, deltaTime);
     }
 
-    private void SolveFoot(FootState foot, float floorY, Vector3 travelDirection, Vector3 forward,
+    private void SolveFoot(FootState foot, float floorY, Vector3 travelDirection,
         CharacterLocomotionProfile profile, float deltaTime)
     {
-        float legLength = motor.LegLength;
         float reach = motor.MaxStepHeight;
         Vector3 animatedPosition = animator.GetIKPosition(foot.goal);
         Quaternion animatedRotation = animator.GetIKRotation(foot.goal);
         float animatedSoleY = animatedPosition.y - GetSoleHeight(foot.goal);
-        float restHeight = animatedSoleY - floorY;
-        float swingHeight = profile.SwingHeight(legLength);
-        bool swinging = restHeight > swingHeight;
+        float footHeight = animatedSoleY - floorY;
+        bool stepping = footHeight > SteppingFootHeight;
 
         float targetOffset = 0f;
-        float targetShift = 0f;
-        float centerY = floorY;
+        float groundHereY = floorY;
         Vector3 groundNormal = Vector3.up;
-        if (probe.TryGetGround(animatedPosition, floorY, restHeight, reach, out float hitY, out Vector3 normal))
+        if (TryGetGround(animatedPosition, floorY, footHeight, reach, out float hitY, out Vector3 normal))
         {
-            centerY = hitY;
+            groundHereY = hitY;
             targetOffset = hitY - floorY;
             groundNormal = normal;
         }
 
-        if (swinging && travelDirection != Vector3.zero)
+        if (stepping && travelDirection != Vector3.zero)
         {
-            targetOffset = SolveSwingOffset(animatedPosition, animatedSoleY, travelDirection, floorY,
-                restHeight, reach, centerY, targetOffset, profile);
-        }
-        else if (!swinging && forward != Vector3.zero)
-        {
-            SolvePlantedFootprint(animatedPosition, forward, floorY, restHeight, reach, centerY, profile,
-                ref targetOffset, ref targetShift);
+            targetOffset = SolveSteppingOffset(animatedPosition, animatedSoleY, travelDirection, floorY,
+                footHeight, reach, groundHereY, targetOffset, profile);
         }
 
         targetOffset = Mathf.Clamp(targetOffset, -reach, reach);
-        if (profile.DrawDebug)
-            Debug.DrawLine(animatedPosition, animatedPosition + Vector3.up * targetOffset, Color.green);
-
         if (deltaTime > 0f)
         {
+            float responseTime = targetOffset < foot.offset
+                ? profile.FootResponseTime * DescendResponseScale
+                : profile.FootResponseTime;
             foot.offset = Mathf.SmoothDamp(foot.offset, targetOffset, ref foot.offsetVelocity,
-                profile.FootBlendTime, Mathf.Infinity, deltaTime);
-            foot.shift = Mathf.SmoothDamp(foot.shift, targetShift, ref foot.shiftVelocity,
-                profile.FootBlendTime, Mathf.Infinity, deltaTime);
+                responseTime, Mathf.Infinity, deltaTime);
         }
 
         animator.SetIKPositionWeight(foot.goal, ikWeight);
-        animator.SetIKPosition(foot.goal, animatedPosition + Vector3.up * foot.offset + forward * foot.shift);
+        animator.SetIKPosition(foot.goal, animatedPosition + Vector3.up * foot.offset);
 
-        float plantedWeight = 1f - Mathf.Clamp01(restHeight / Mathf.Max(0.001f, swingHeight * 2f));
+        float plantedWeight = 1f - Mathf.Clamp01(footHeight / (SteppingFootHeight * 2f));
         Quaternion tilt = Quaternion.RotateTowards(Quaternion.identity,
-            Quaternion.FromToRotation(Vector3.up, groundNormal), profile.MaxFootTiltDegrees);
+            Quaternion.FromToRotation(Vector3.up, groundNormal), MaxFootTiltDegrees);
         animator.SetIKRotationWeight(foot.goal, ikWeight * plantedWeight);
         animator.SetIKRotation(foot.goal, tilt * animatedRotation);
 
         ApplyKneeHint(foot, reach, profile);
     }
 
-    private void SolvePlantedFootprint(Vector3 animatedPosition, Vector3 forward, float floorY,
-        float restHeight, float reach, float centerY, CharacterLocomotionProfile profile,
-        ref float targetOffset, ref float targetShift)
-    {
-        float legLength = motor.LegLength;
-        float heelOffset = profile.HeelOffset(legLength);
-        float toeOffset = profile.ToeOffset(legLength);
-        Vector3 heelPoint = animatedPosition - forward * heelOffset;
-        Vector3 toePoint = animatedPosition + forward * toeOffset;
-        float heelY = probe.TryGetGround(heelPoint, floorY, restHeight, reach, out float sampledHeelY, out _)
-            ? sampledHeelY
-            : centerY;
-        float toeY = probe.TryGetGround(toePoint, floorY, restHeight, reach, out float sampledToeY, out _)
-            ? sampledToeY
-            : centerY;
-
-        targetOffset = Mathf.Max(centerY, Mathf.Max(heelY, toeY)) - floorY;
-        if (profile.DrawDebug)
-        {
-            DrawMarker(heelPoint, heelY, Color.cyan);
-            DrawMarker(toePoint, toeY, Color.cyan);
-        }
-
-        if (!profile.TreadSnapping || Mathf.Abs(toeY - heelY) <= profile.EdgeHeight(legLength))
-            return;
-
-        bool toeIsHigher = toeY > heelY;
-        Vector3 edge = toeIsHigher
-            ? probe.FindEdge(heelPoint, heelY, toePoint, toeY, floorY, restHeight, reach)
-            : probe.FindEdge(toePoint, toeY, heelPoint, heelY, floorY, restHeight, reach);
-        float edgeAlong = Vector3.Dot(edge - animatedPosition, forward);
-        float margin = profile.EdgeMargin(legLength);
-        float forwardShift = edgeAlong + heelOffset + margin;
-        float backwardShift = edgeAlong - toeOffset - margin;
-        bool stepForward = Mathf.Abs(forwardShift) <= Mathf.Abs(backwardShift);
-        float chosenShift = stepForward ? forwardShift : backwardShift;
-        if (Mathf.Abs(chosenShift) > profile.MaxFootShift(legLength))
-            return;
-
-        targetShift = chosenShift;
-        targetOffset = (stepForward ? toeY : heelY) - floorY;
-        if (profile.DrawDebug)
-            DrawMarker(edge, Mathf.Max(heelY, toeY), Color.yellow);
-    }
-
-    private float SolveSwingOffset(Vector3 animatedPosition, float animatedSoleY, Vector3 travelDirection,
-        float floorY, float restHeight, float reach, float centerY, float currentTargetOffset,
+    private float SolveSteppingOffset(Vector3 animatedPosition, float animatedSoleY, Vector3 travelDirection,
+        float floorY, float footHeight, float reach, float groundHereY, float currentTargetOffset,
         CharacterLocomotionProfile profile)
     {
-        float lookAhead = profile.FootLookAhead(motor.LegLength);
         float highestAheadY = float.NegativeInfinity;
         float farthestAheadY = float.NegativeInfinity;
         for (int i = 1; i <= LookAheadSampleCount; i++)
         {
-            Vector3 aheadPoint = animatedPosition + travelDirection * (lookAhead * i / LookAheadSampleCount);
-            if (!probe.TryGetGround(aheadPoint, floorY, restHeight, reach, out float aheadY, out _))
+            Vector3 aheadPoint = animatedPosition +
+                                 travelDirection * (profile.LookAheadDistance * i / LookAheadSampleCount);
+            if (!TryGetGround(aheadPoint, floorY, footHeight, reach, out float aheadY, out _))
                 continue;
 
             highestAheadY = Mathf.Max(highestAheadY, aheadY);
             farthestAheadY = aheadY;
-            if (profile.DrawDebug)
-                DrawMarker(aheadPoint, aheadY, Color.red);
         }
 
         if (farthestAheadY == float.NegativeInfinity)
             return currentTargetOffset;
 
         float targetOffset = farthestAheadY - floorY;
-        if (highestAheadY > centerY)
-        {
-            float clearanceOffset = highestAheadY + profile.StepClearance(motor.LegLength) - animatedSoleY;
-            targetOffset = Mathf.Max(targetOffset, clearanceOffset);
-        }
+        if (highestAheadY > groundHereY)
+            targetOffset = Mathf.Max(targetOffset, highestAheadY + profile.FootClearance - animatedSoleY);
 
         return targetOffset;
+    }
+
+    private bool TryGetGround(Vector3 point, float floorY, float footHeight, float reach,
+        out float groundY, out Vector3 normal)
+    {
+        float footAllowance = Mathf.Max(0f, footHeight);
+        Vector3 origin = new Vector3(point.x, floorY + reach + footAllowance + ProbeMargin, point.z);
+        float distance = reach * 2f + footAllowance + ProbeMargin * 2f;
+        if (motor.TryFindWalkableGround(origin, distance, out RaycastHit hit))
+        {
+            groundY = hit.point.y;
+            normal = hit.normal;
+            return true;
+        }
+
+        groundY = floorY;
+        normal = Vector3.up;
+        return false;
     }
 
     private void ApplyKneeHint(FootState foot, float reach, CharacterLocomotionProfile profile)
     {
         Transform lowerLeg = animator.GetBoneTransform(foot.lowerLegBone);
-        float hintWeight = ikWeight * profile.KneeHintWeight *
+        float hintWeight = ikWeight * profile.KneeForward *
                            Mathf.Clamp01(Mathf.Abs(foot.offset) / Mathf.Max(0.01f, reach * 0.5f));
         if (lowerLeg == null || hintWeight <= 0f)
         {
@@ -235,25 +196,25 @@ public class FootPlacementIK : MonoBehaviour
         }
 
         Vector3 forward = Vector3.ProjectOnPlane(motor.transform.forward, Vector3.up).normalized;
-        Vector3 hintPosition = lowerLeg.position +
-                               forward * (motor.LegLength * 0.25f) +
+        Vector3 hintPosition = lowerLeg.position + forward * KneeForwardDistance +
                                Vector3.up * (foot.offset * 0.5f);
         animator.SetIKHintPosition(foot.hint, hintPosition);
         animator.SetIKHintPositionWeight(foot.hint, hintWeight);
     }
 
-    private void ApplyPelvis(CharacterLocomotionProfile profile, float deltaTime)
+    private void ApplyHips(CharacterLocomotionProfile profile, float deltaTime)
     {
         float lowestOffset = Mathf.Min(0f, Mathf.Min(leftFoot.offset, rightFoot.offset));
-        float dropLimit = profile.PelvisDropLimit(motor.LegLength);
-        float targetOffset = Mathf.Clamp(lowestOffset * profile.PelvisFollowRatio, -dropLimit, 0f);
+        float footDifference = Mathf.Abs(leftFoot.offset - rightFoot.offset);
+        float bendDrop = lowestOffset < 0f ? footDifference * DescentBendShare : 0f;
+        float targetOffset = Mathf.Clamp((lowestOffset - bendDrop) * profile.HipFollow, -HipDropLimit, 0f);
         if (deltaTime > 0f)
         {
-            pelvisOffset = Mathf.SmoothDamp(pelvisOffset, targetOffset, ref pelvisVelocity,
-                profile.PelvisBlendTime, Mathf.Infinity, deltaTime);
+            hipOffset = Mathf.SmoothDamp(hipOffset, targetOffset, ref hipVelocity, HipBlendTime,
+                Mathf.Infinity, deltaTime);
         }
 
-        animator.bodyPosition += Vector3.up * (pelvisOffset * ikWeight);
+        animator.bodyPosition += Vector3.up * (hipOffset * ikWeight);
     }
 
     private float GetSoleHeight(AvatarIKGoal goal)
@@ -261,13 +222,7 @@ public class FootPlacementIK : MonoBehaviour
         float height = goal == AvatarIKGoal.LeftFoot
             ? animator.leftFeetBottomHeight
             : animator.rightFeetBottomHeight;
-        return height > MinimumSoleHeight ? height : motor.LegLength * AnkleFallbackRatio;
-    }
-
-    private static void DrawMarker(Vector3 point, float groundY, Color color)
-    {
-        Vector3 ground = new Vector3(point.x, groundY, point.z);
-        Debug.DrawLine(ground, ground + Vector3.up * DebugMarkerHeight, color);
+        return height > MinimumSoleHeight ? height : FallbackSoleHeight;
     }
 
     private void ClearGoals(FootState foot)
@@ -281,13 +236,9 @@ public class FootPlacementIK : MonoBehaviour
     {
         leftFoot.offset = 0f;
         leftFoot.offsetVelocity = 0f;
-        leftFoot.shift = 0f;
-        leftFoot.shiftVelocity = 0f;
         rightFoot.offset = 0f;
         rightFoot.offsetVelocity = 0f;
-        rightFoot.shift = 0f;
-        rightFoot.shiftVelocity = 0f;
-        pelvisOffset = 0f;
-        pelvisVelocity = 0f;
+        hipOffset = 0f;
+        hipVelocity = 0f;
     }
 }

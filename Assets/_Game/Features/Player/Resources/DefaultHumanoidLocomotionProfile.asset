@@ -12,25 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55219acfd4857724a956c3f435f35bad, type: 3}
   m_Name: DefaultHumanoidLocomotionProfile
   m_EditorClassIdentifier: Assembly-CSharp::CharacterLocomotionProfile
-  maxStepHeightRatio: 0.55
-  maxStepHeightOverride: 0.45
-  pelvisDropLimitRatio: 0.3
-  footLookAheadRatio: 0.7
-  swingHeightRatio: 0.04
-  stepClearanceRatio: 0.2
-  useMotorStepUp: 1
-  stepSmoothTime: 0.12
-  footIkEnabled: 1
-  drawDebug: 0
-  ikBlendTime: 0.08
-  footBlendTime: 0.04
-  pelvisBlendTime: 0.1
-  pelvisFollowRatio: 0.5
-  maxFootTiltDegrees: 30
-  kneeHintWeight: 0.8
-  treadSnapping: 0
-  heelOffsetRatio: 0.08
-  toeOffsetRatio: 0.25
-  maxFootShiftRatio: 0.3
-  edgeMarginRatio: 0.03
-  edgeHeightRatio: 0.03
+  maxStepHeight: 0.5
+  stepSmoothingDistance: 0.5
+  cameraEaseTime: 0.1
+  footPlacement: 1
+  lookAheadDistance: 0.18
+  footClearance: 0.25
+  footResponseTime: 0.04
+  hipFollow: 0.3
+  kneeForward: 0.6

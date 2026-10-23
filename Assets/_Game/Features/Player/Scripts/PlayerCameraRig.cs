@@ -1,20 +1,22 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [DefaultExecutionOrder(100)]
 public class PlayerCameraRig : MonoBehaviour
 {
+    private const float ObstructionReturnTime = 0.22f;
+    private const float CollisionRadius = 0.2f;
+    private const float CollisionPadding = 0.05f;
+
     [SerializeField] private Camera viewCamera;
     [SerializeField] private Transform viewPivot;
+    [Tooltip("Where the camera sits relative to the character: right, up, back.")]
     [SerializeField] private Vector3 thirdPersonOffset = new Vector3(0.45f, 0.2f, -3.25f);
     [SerializeField, Range(1f, 179f)] private float fieldOfView = 60f;
-    [SerializeField, Min(0.01f)] private float transitionTime = 0.18f;
-    [SerializeField, Min(0.01f)] private float obstructionReturnTime = 0.22f;
-    [SerializeField, Min(0.01f)] private float collisionRadius = 0.2f;
-    [SerializeField, Min(0f)] private float collisionPadding = 0.05f;
-    [SerializeField] private LayerMask collisionMask = ~((1 << 2) | (1 << 5) | (1 << 9));
+    [Tooltip("Layers that push the camera in so it doesn't clip through walls.")]
+    [FormerlySerializedAs("collisionMask")]
+    [SerializeField] private LayerMask collisionLayers = ~((1 << 2) | (1 << 5) | (1 << 9));
 
-    private Vector3 offset;
-    private Vector3 offsetVelocity;
     private float distance;
     private float distanceVelocity;
     private float pitch;
@@ -24,8 +26,6 @@ public class PlayerCameraRig : MonoBehaviour
     private Vector3 pivotRestLocalPosition;
 
     public Camera ViewCamera => viewCamera;
-    public Vector3 EyePosition => viewPivot.position;
-    public bool IsThirdPerson => true;
 
     private void Awake()
     {
@@ -65,8 +65,6 @@ public class PlayerCameraRig : MonoBehaviour
 
     private void ResetPlacement()
     {
-        offset = thirdPersonOffset;
-        offsetVelocity = Vector3.zero;
         distanceVelocity = 0f;
         PlaceCamera(0f, true);
     }
@@ -80,24 +78,20 @@ public class PlayerCameraRig : MonoBehaviour
 
         viewPivot.localPosition = pivotRestLocalPosition;
         if (stepSmoothing != null)
-            viewPivot.position += Vector3.up * stepSmoothing.VerticalOffset;
+            viewPivot.position += Vector3.up * stepSmoothing.CameraOffset;
 
         // Keep orbit orientation in world space when movement turns the player root.
         viewPivot.rotation = Quaternion.Euler(pitch, yaw, 0f);
 
-        if (!immediate && deltaTime > 0f)
-            offset = Vector3.SmoothDamp(offset, thirdPersonOffset, ref offsetVelocity,
-                transitionTime, Mathf.Infinity, deltaTime);
-
-        float safeDistance = offset.magnitude;
-        Vector3 direction = safeDistance > 0.001f ? offset / safeDistance : Vector3.zero;
+        float safeDistance = thirdPersonOffset.magnitude;
+        Vector3 direction = safeDistance > 0.001f ? thirdPersonOffset / safeDistance : Vector3.zero;
         if (safeDistance > 0.001f)
         {
-            if (Physics.CheckSphere(viewPivot.position, collisionRadius, collisionMask, QueryTriggerInteraction.Ignore))
+            if (Physics.CheckSphere(viewPivot.position, CollisionRadius, collisionLayers, QueryTriggerInteraction.Ignore))
                 safeDistance = 0f;
-            else if (Physics.SphereCast(viewPivot.position, collisionRadius, viewPivot.TransformDirection(direction),
-                out var hit, safeDistance, collisionMask, QueryTriggerInteraction.Ignore))
-                safeDistance = Mathf.Max(0f, hit.distance - collisionPadding);
+            else if (Physics.SphereCast(viewPivot.position, CollisionRadius, viewPivot.TransformDirection(direction),
+                out var hit, safeDistance, collisionLayers, QueryTriggerInteraction.Ignore))
+                safeDistance = Mathf.Max(0f, hit.distance - CollisionPadding);
         }
 
         if (immediate || safeDistance < distance)
@@ -107,7 +101,7 @@ public class PlayerCameraRig : MonoBehaviour
         }
         else if (deltaTime > 0f)
             distance = Mathf.SmoothDamp(distance, safeDistance, ref distanceVelocity,
-                obstructionReturnTime, Mathf.Infinity, deltaTime);
+                ObstructionReturnTime, Mathf.Infinity, deltaTime);
 
         viewCamera.transform.localPosition = direction * distance;
         viewCamera.transform.localRotation = Quaternion.identity;
