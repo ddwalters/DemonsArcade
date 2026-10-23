@@ -18,6 +18,12 @@ namespace NodeTree.Editor
                 return true;
             }
 
+            if (asset is DialogOwnerDatabaseSO)
+            {
+                DialogOwnerEditorWindow.Open();
+                return true;
+            }
+
             return false;
         }
     }

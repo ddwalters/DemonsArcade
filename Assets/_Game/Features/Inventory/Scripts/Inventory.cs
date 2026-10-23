@@ -14,7 +14,7 @@ public class Inventory : MonoBehaviour
     public InventoryGrid gridOnMouse { get; set; }
     public InventoryTypeCollection inventoryType;
     public Item selectedItem { get; private set; }
-    public ItemToolTip tooltip;
+    public InventoryItemTooltip tooltip;
 
     private InventoryManager inventoryManager;
     private Canvas canvas;

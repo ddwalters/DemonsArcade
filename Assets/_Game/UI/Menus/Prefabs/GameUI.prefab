@@ -901,14 +901,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.055, g: 0.07, b: 0.09, a: 0.98}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: 0484b7ae2f449c2459088d455bc3e773, type: 3}
+  m_Texture: {fileID: 0}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -7743,7 +7743,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &905975317907738512
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7782,6 +7782,20 @@ MonoBehaviour:
   ItemDescription: {fileID: 4250332290818158896}
   backgroundRectTransform: {fileID: 5942652224101614090}
   border: {fileID: 1588695158572854861}
+  statIcons:
+  - stat: 0
+    icon: {fileID: 21300000, guid: 9f1a51cbd58567240ad35659f0c7c509, type: 3}
+  - stat: 1
+    icon: {fileID: 21300000, guid: ba6070ed1853fc84eacbe4f907d6b6c8, type: 3}
+  - stat: 2
+    icon: {fileID: 21300000, guid: 2886271e47b170540a5608b9e2dae37d, type: 3}
+  - stat: 3
+    icon: {fileID: 21300000, guid: 4bb0376a8e912bd4c867a1879ef0ff0a, type: 3}
+  - stat: 7
+    icon: {fileID: 21300000, guid: 79c951b5a7d4faa4eb01346d558970ff, type: 3}
+  maxTooltipWidth: 244
+  tooltipPadding: {x: 10, y: 8}
+  cursorOffset: {x: 18, y: 18}
 --- !u!1 &4621319769528515125
 GameObject:
   m_ObjectHideFlags: 0

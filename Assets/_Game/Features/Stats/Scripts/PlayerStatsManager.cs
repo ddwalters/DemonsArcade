@@ -90,8 +90,11 @@ public class PlayerStatsManager : MonoBehaviour
     #region Health
     public void DamagePlayer(float damageAmount)
     {
-        float incomingDamage = Mathf.Max(0f, damageAmount);
-        incomingDamage = Mathf.Max(0f, incomingDamage - GetEquipmentBonus(EquipmentStat.Defense));
+        if (damageAmount <= 0f)
+            return;
+
+        float incomingDamage = Mathf.Max(0f,
+            damageAmount - GetEquipmentBonus(EquipmentStat.Defense));
         statsData.currentHealth = Mathf.Max(0f, statsData.currentHealth - incomingDamage);
         if (statsData.currentHealth == 0)
         {

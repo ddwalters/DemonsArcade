@@ -8,9 +8,10 @@ using UnityEngine.UIElements;
 namespace NodeTree.Editor
 {
     [NodeFor(typeof(DialogNodeData))]
-    public class DialogNode : BaseNode
+    public class DialogNode : BaseNode, IOwnerSpeakerNode
     {
         private TextField _dialogTextField;
+        private OwnerPickerElement _ownerPicker;
         private VisualElement _conditionListContainer;
         private EnumField _failBehaviorField;
 
@@ -21,6 +22,9 @@ namespace NodeTree.Editor
         private FloatField _fontSizeField;
         private ColorField _fontColorField;
         private EnumFlagsField _fontStyleField;
+
+        public string OwnerId => _ownerPicker?.OwnerId ?? string.Empty;
+        public PortraitSide Side => _ownerPicker?.Side ?? PortraitSide.Left;
 
         public string DialogText { get; set; }
         public AudioClip TypingTickClip { get; set; }
@@ -43,6 +47,9 @@ namespace NodeTree.Editor
             _dialogTextField = richText.textField;
             mainContainer.Add(richText.container);
 
+            _ownerPicker = new OwnerPickerElement(id => OwnerPickerElement.FindSideInGraph(this, id));
+            mainContainer.Add(_ownerPicker);
+
             BuildStyleSection();
             BuildConditionSection();
             RefreshOutputPorts();
@@ -55,6 +62,9 @@ namespace NodeTree.Editor
                 DialogText = DialogText,
                 TypingTickClip = TypingTickClip,
                 TextSpeed = TextSpeed,
+                OwnerId = _ownerPicker.OwnerId,
+                Mood = _ownerPicker.Mood,
+                Side = _ownerPicker.Side,
                 FontAsset = FontAsset,
                 FontSize = FontSize,
                 FontColor = FontColor,
@@ -78,6 +88,7 @@ namespace NodeTree.Editor
             FontStyle = d.FontStyle;
             _conditions = new List<ConditionBase>(d.Conditions ?? new List<ConditionBase>());
             _conditionFailBehavior = d.ConditionFailBehavior;
+            _ownerPicker.SetValues(d.OwnerId, d.Mood, d.Side);
 
             _dialogTextField?.SetValueWithoutNotify(DialogText);
             _typingTickClipField?.SetValueWithoutNotify(TypingTickClip);

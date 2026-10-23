@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: RowanDialogue
   m_EditorClassIdentifier: Hiileike.Nodetree::NodeTree.NodeTreeGraphSO
   Nodes:
-  - rid: 5520813321165733974
-  - rid: 5520813321165733975
-  - rid: 5520813321165733976
-  - rid: 5520813321165733977
-  - rid: 5520813321165733978
+  - rid: 5520813321165733981
+  - rid: 5520813321165733982
+  - rid: 5520813321165733983
+  - rid: 5520813321165733984
+  - rid: 5520813321165733985
   Edges:
   - OutputNodeGuid: start
     InputNodeGuid: hello
@@ -36,7 +36,7 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 5520813321165733974
+    - rid: 5520813321165733981
       type: {class: StartNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
       data:
         Guid: start
@@ -44,66 +44,7 @@ MonoBehaviour:
         HasSeen: 0
         Conditions: []
         ConditionFailBehavior: 0
-    - rid: 5520813321165733975
-      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
-      data:
-        Guid: hello
-        Position: {x: 300, y: 100}
-        HasSeen: 0
-        Conditions: []
-        ConditionFailBehavior: 0
-        DialogText: 'ROWAN
-
-          Welcome to the practice yard! I am testing
-          the same walking and stair movement as you.'
-        TypingTickClip: {fileID: 0}
-        FontAsset: {fileID: 0}
-        FontSize: 26
-        FontColor: {r: 1, g: 1, b: 1, a: 1}
-        FontStyle: 0
-        TextSpeed: 0
-    - rid: 5520813321165733976
-      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
-      data:
-        Guid: course
-        Position: {x: 600, y: 100}
-        HasSeen: 0
-        Conditions: []
-        ConditionFailBehavior: 0
-        DialogText: 'ROWAN
-
-          Try the green box for a short jump. The orange
-          box is deliberately too tall. My patrol takes me up the stairs, through
-          the doorway, and back around.'
-        TypingTickClip: {fileID: 0}
-        FontAsset: {fileID: 0}
-        FontSize: 26
-        FontColor: {r: 1, g: 1, b: 1, a: 1}
-        FontStyle: 0
-        TextSpeed: 0
-    - rid: 5520813321165733977
-      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
-      data:
-        Guid: bye
-        Position: {x: 900, y: 100}
-        HasSeen: 0
-        Conditions: []
-        ConditionFailBehavior: 0
-        DialogText: 'ROWAN
-
-          Catch me again whenever you like. I will pick
-          up my patrol where we stopped.
-
-
-          Use your interaction button
-          to continue; Escape or controller Back/Cancel closes this conversation.'
-        TypingTickClip: {fileID: 0}
-        FontAsset: {fileID: 0}
-        FontSize: 26
-        FontColor: {r: 1, g: 1, b: 1, a: 1}
-        FontStyle: 0
-        TextSpeed: 0
-    - rid: 5520813321165733978
+    - rid: 5520813321165733982
       type: {class: EndNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
       data:
         Guid: end
@@ -111,3 +52,65 @@ MonoBehaviour:
         HasSeen: 0
         Conditions: []
         ConditionFailBehavior: 0
+    - rid: 5520813321165733983
+      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: hello
+        Position: {x: 300, y: 100}
+        HasSeen: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+        DialogText: Welcome to the practice yard! I am testing the same walking and
+          stair movement as you.
+        TypingTickClip: {fileID: 0}
+        FontAsset: {fileID: 0}
+        FontSize: 26
+        FontColor: {r: 1, g: 1, b: 1, a: 1}
+        FontStyle: 0
+        TextSpeed: 0
+        OwnerId: 926223b3de174829a2257ab40f857843
+        Mood: 
+        Side: 0
+    - rid: 5520813321165733984
+      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: bye
+        Position: {x: 892, y: 79}
+        HasSeen: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+        DialogText: 'Catch me again whenever you like. I will pick up my patrol where
+          we stopped.
+
+
+          Use your interaction button to continue; Escape
+          or controller Back/Cancel closes this conversation.'
+        TypingTickClip: {fileID: 0}
+        FontAsset: {fileID: 0}
+        FontSize: 26
+        FontColor: {r: 1, g: 1, b: 1, a: 1}
+        FontStyle: 0
+        TextSpeed: 0
+        OwnerId: 926223b3de174829a2257ab40f857843
+        Mood: 
+        Side: 0
+    - rid: 5520813321165733985
+      type: {class: DialogNodeData, ns: NodeTree, asm: Hiileike.Nodetree}
+      data:
+        Guid: course
+        Position: {x: 600, y: 100}
+        HasSeen: 0
+        Conditions: []
+        ConditionFailBehavior: 0
+        DialogText: Try the green box for a short jump. The orange box is deliberately
+          too tall. My patrol takes me up the stairs, through the doorway, and back
+          around.
+        TypingTickClip: {fileID: 0}
+        FontAsset: {fileID: 0}
+        FontSize: 26
+        FontColor: {r: 1, g: 1, b: 1, a: 1}
+        FontStyle: 0
+        TextSpeed: 0
+        OwnerId: 926223b3de174829a2257ab40f857843
+        Mood: 
+        Side: 0

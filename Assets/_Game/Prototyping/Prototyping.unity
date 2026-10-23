@@ -1979,6 +1979,7 @@ Transform:
   - {fileID: 560301656}
   - {fileID: 2094209876}
   - {fileID: 1219775201}
+  - {fileID: 800000000000000002}
   m_Father: {fileID: 1232183424}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &888738797
@@ -6561,6 +6562,352 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1249961202}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &800000000000000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 800000000000000002}
+  m_Layer: 0
+  m_Name: Armor test pickups
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &800000000000000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 800000000000000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 810000000000000101}
+  - {fileID: 810000000000000102}
+  - {fileID: 810000000000000103}
+  - {fileID: 810000000000000104}
+  - {fileID: 810000000000000105}
+  - {fileID: 810000000000000106}
+  - {fileID: 810000000000000107}
+  - {fileID: 810000000000000108}
+  - {fileID: 810000000000000109}
+  m_Father: {fileID: 872280759}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &810000000000000001
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 800000000000000002}
+    m_Modifications:
+    - target: {fileID: 100000, guid: 48efb468b9194f5b82036d6fcf97a4c3, type: 3}
+      propertyPath: m_Name
+      value: Winter Hat
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 48efb468b9194f5b82036d6fcf97a4c3, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -9.62031
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 48efb468b9194f5b82036d6fcf97a4c3, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.27
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 48efb468b9194f5b82036d6fcf97a4c3, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.14126
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 48efb468b9194f5b82036d6fcf97a4c3, type: 3}
+--- !u!4 &810000000000000101 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400000, guid: 48efb468b9194f5b82036d6fcf97a4c3, type: 3}
+  m_PrefabInstance: {fileID: 810000000000000001}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &810000000000000002
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 800000000000000002}
+    m_Modifications:
+    - target: {fileID: 100000, guid: c5de71f758bf4110833aa51800a68f9d, type: 3}
+      propertyPath: m_Name
+      value: Winter Coat
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: c5de71f758bf4110833aa51800a68f9d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -6.62031
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: c5de71f758bf4110833aa51800a68f9d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.27
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: c5de71f758bf4110833aa51800a68f9d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.14126
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: c5de71f758bf4110833aa51800a68f9d, type: 3}
+--- !u!4 &810000000000000102 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400000, guid: c5de71f758bf4110833aa51800a68f9d, type: 3}
+  m_PrefabInstance: {fileID: 810000000000000002}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &810000000000000003
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 800000000000000002}
+    m_Modifications:
+    - target: {fileID: 100000, guid: e0bdae2fef0447b69af9abab0fba43fd, type: 3}
+      propertyPath: m_Name
+      value: Winter Boots
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: e0bdae2fef0447b69af9abab0fba43fd, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -3.62031
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: e0bdae2fef0447b69af9abab0fba43fd, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.27
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: e0bdae2fef0447b69af9abab0fba43fd, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.14126
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e0bdae2fef0447b69af9abab0fba43fd, type: 3}
+--- !u!4 &810000000000000103 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400000, guid: e0bdae2fef0447b69af9abab0fba43fd, type: 3}
+  m_PrefabInstance: {fileID: 810000000000000003}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &810000000000000004
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 800000000000000002}
+    m_Modifications:
+    - target: {fileID: 100000, guid: f7f45800baa04f999cdf4c3703d20088, type: 3}
+      propertyPath: m_Name
+      value: Scout Cap
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: f7f45800baa04f999cdf4c3703d20088, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -9.62031
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: f7f45800baa04f999cdf4c3703d20088, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.27
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: f7f45800baa04f999cdf4c3703d20088, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.85874
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: f7f45800baa04f999cdf4c3703d20088, type: 3}
+--- !u!4 &810000000000000104 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400000, guid: f7f45800baa04f999cdf4c3703d20088, type: 3}
+  m_PrefabInstance: {fileID: 810000000000000004}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &810000000000000005
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 800000000000000002}
+    m_Modifications:
+    - target: {fileID: 100000, guid: b2e3d910578a442495726362641f16f9, type: 3}
+      propertyPath: m_Name
+      value: Scout Coat
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: b2e3d910578a442495726362641f16f9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -6.62031
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: b2e3d910578a442495726362641f16f9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.27
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: b2e3d910578a442495726362641f16f9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.85874
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: b2e3d910578a442495726362641f16f9, type: 3}
+--- !u!4 &810000000000000105 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400000, guid: b2e3d910578a442495726362641f16f9, type: 3}
+  m_PrefabInstance: {fileID: 810000000000000005}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &810000000000000006
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 800000000000000002}
+    m_Modifications:
+    - target: {fileID: 100000, guid: 873950ba08f34239b5234404c591f14e, type: 3}
+      propertyPath: m_Name
+      value: Scout Boots
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 873950ba08f34239b5234404c591f14e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -3.62031
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 873950ba08f34239b5234404c591f14e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.27
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 873950ba08f34239b5234404c591f14e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 2.85874
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 873950ba08f34239b5234404c591f14e, type: 3}
+--- !u!4 &810000000000000106 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400000, guid: 873950ba08f34239b5234404c591f14e, type: 3}
+  m_PrefabInstance: {fileID: 810000000000000006}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &810000000000000007
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 800000000000000002}
+    m_Modifications:
+    - target: {fileID: 100000, guid: 3ab1d16f6f3e45b08260297b9f083731, type: 3}
+      propertyPath: m_Name
+      value: Sun Hat
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 3ab1d16f6f3e45b08260297b9f083731, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -9.62031
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 3ab1d16f6f3e45b08260297b9f083731, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.27
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 3ab1d16f6f3e45b08260297b9f083731, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 5.85874
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 3ab1d16f6f3e45b08260297b9f083731, type: 3}
+--- !u!4 &810000000000000107 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400000, guid: 3ab1d16f6f3e45b08260297b9f083731, type: 3}
+  m_PrefabInstance: {fileID: 810000000000000007}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &810000000000000008
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 800000000000000002}
+    m_Modifications:
+    - target: {fileID: 100000, guid: 961b92f918d54ad9bc435772d4d5603c, type: 3}
+      propertyPath: m_Name
+      value: Sun Coat
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 961b92f918d54ad9bc435772d4d5603c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -6.62031
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 961b92f918d54ad9bc435772d4d5603c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.27
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: 961b92f918d54ad9bc435772d4d5603c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 5.85874
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 961b92f918d54ad9bc435772d4d5603c, type: 3}
+--- !u!4 &810000000000000108 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400000, guid: 961b92f918d54ad9bc435772d4d5603c, type: 3}
+  m_PrefabInstance: {fileID: 810000000000000008}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &810000000000000009
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 800000000000000002}
+    m_Modifications:
+    - target: {fileID: 100000, guid: e002e9c8d1aa4a0aad1574e82a256794, type: 3}
+      propertyPath: m_Name
+      value: Heavy Vest
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: e002e9c8d1aa4a0aad1574e82a256794, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -3.62031
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: e002e9c8d1aa4a0aad1574e82a256794, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.27
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: e002e9c8d1aa4a0aad1574e82a256794, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 5.85874
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e002e9c8d1aa4a0aad1574e82a256794, type: 3}
+--- !u!4 &810000000000000109 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 400000, guid: e002e9c8d1aa4a0aad1574e82a256794, type: 3}
+  m_PrefabInstance: {fileID: 810000000000000009}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

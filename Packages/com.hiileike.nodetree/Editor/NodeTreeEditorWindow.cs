@@ -16,6 +16,9 @@ namespace NodeTree.Editor
         private ToolbarSearchField nodeSearchField;
         private ListView scriptableObjectListView;
         private ToolbarSearchField scriptableObjectSearchField;
+        private ListView ownerListView;
+        private ToolbarSearchField ownerSearchField;
+        private List<DialogOwner> filteredOwners = new List<DialogOwner>();
         private TreeGraphView mainGraphView;
         [SerializeField]
         private NodeTreeGraphSO currentGraph;
@@ -49,6 +52,8 @@ namespace NodeTree.Editor
             nodeSearchField = visualTreeDesigner.Q<ToolbarSearchField>("node-search-field");
             scriptableObjectListView = visualTreeDesigner.Q<ListView>("scriptable-object-list-view");
             scriptableObjectSearchField = visualTreeDesigner.Q<ToolbarSearchField>("scriptable-object-search-field");
+            ownerListView = visualTreeDesigner.Q<ListView>("owner-list-view");
+            ownerSearchField = visualTreeDesigner.Q<ToolbarSearchField>("owner-search-field");
             mainGraphView = visualTreeDesigner.Q<TreeGraphView>("tree-graph-view");
 
             var toolbar = new Toolbar();
@@ -77,6 +82,14 @@ namespace NodeTree.Editor
 
             PopulateNodes();
             PopulateScriptableObjects();
+            PopulateOwners();
+
+            visualTreeDesigner.Q<Button>("owner-add-button").clicked += () => DialogOwnerEditorWindow.Open(createNew: true);
+            ownerSearchField.RegisterValueChangedCallback(evt => ApplyOwnerFilter(evt.newValue));
+            DialogOwnerDatabaseUtility.Changed -= OnOwnersChanged;
+            DialogOwnerDatabaseUtility.Changed += OnOwnersChanged;
+            Undo.undoRedoPerformed -= OnOwnersChanged;
+            Undo.undoRedoPerformed += OnOwnersChanged;
 
             mainGraphView.RegisterCallback<DragUpdatedEvent>(OnDragUpdated);
             mainGraphView.RegisterCallback<DragPerformEvent>(OnDragPerform);
@@ -108,6 +121,70 @@ namespace NodeTree.Editor
                 (element as Label).text = filteredScriptableObjects[index].name;
             };
         }
+
+        private void OnDisable()
+        {
+            DialogOwnerDatabaseUtility.Changed -= OnOwnersChanged;
+            Undo.undoRedoPerformed -= OnOwnersChanged;
+        }
+
+        #region Dialog Owners
+        private void OnOwnersChanged()
+        {
+            if (ownerListView != null)
+                ApplyOwnerFilter(ownerSearchField?.value);
+        }
+
+        private void PopulateOwners()
+        {
+            ownerListView.fixedItemHeight = 28;
+            ownerListView.selectionType = SelectionType.None;
+            ownerListView.makeItem = () =>
+            {
+                var row = new VisualElement();
+                row.style.flexDirection = FlexDirection.Row;
+                row.style.alignItems = Align.Center;
+
+                var pfp = new Image { name = "pfp", scaleMode = ScaleMode.ScaleToFit };
+                pfp.style.width = 24;
+                pfp.style.height = 24;
+                pfp.style.marginRight = 6;
+                pfp.style.backgroundColor = new Color(0f, 0f, 0f, 0.25f);
+                row.Add(pfp);
+
+                var nameLabel = new Label { name = "owner-name" };
+                nameLabel.style.flexGrow = 1;
+                row.Add(nameLabel);
+
+                row.Add(new Button { name = "owner-edit", text = "Edit" });
+                return row;
+            };
+            ownerListView.bindItem = (element, index) =>
+            {
+                var owner = filteredOwners[index];
+                element.Q<Image>("pfp").sprite = owner.GetPortrait(null);
+                element.Q<Label>("owner-name").text = owner.DisplayName;
+
+                var editButton = element.Q<Button>("owner-edit");
+                editButton.clickable = new Clickable(() => DialogOwnerEditorWindow.Open(owner.Id));
+            };
+
+            ApplyOwnerFilter(string.Empty);
+        }
+
+        private void ApplyOwnerFilter(string searchTerm)
+        {
+            var db = DialogOwnerDatabaseUtility.Find();
+            var owners = db != null ? db.Owners : new List<DialogOwner>();
+
+            filteredOwners = string.IsNullOrWhiteSpace(searchTerm)
+                ? owners.ToList()
+                : owners.Where(o => o.DisplayName != null && o.DisplayName.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) >= 0).ToList();
+
+            ownerListView.itemsSource = filteredOwners;
+            ownerListView.Rebuild();
+        }
+        #endregion
 
         private void ApplyScriptableObjectFilter(string searchTerm)
         {

@@ -13,6 +13,14 @@
             <uie:ToolbarSearchField name="scriptable-object-search-field" style="width: 80%;" />
             <ui:ListView name="scriptable-object-list-view" />
 
+            <ui:Label text="Dialog Owners" style="font-size: 14px; -unity-font-style: bold; margin-top: 10px;" />
+            <ui:VisualElement class="hr-line" />
+            <ui:VisualElement name="owner-search-row">
+                <uie:ToolbarSearchField name="owner-search-field" />
+                <ui:Button name="owner-add-button" text="+" tooltip="Create a new character" />
+            </ui:VisualElement>
+            <ui:ListView name="owner-list-view" />
+
         </ui:VisualElement>
 
         <ui:VisualElement name="graph-view-container">

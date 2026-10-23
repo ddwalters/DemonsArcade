@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 public enum EquipmentStat
 {
@@ -18,12 +17,11 @@ public struct EquipmentBonus
 {
     public EquipmentStat stat;
 
-    [Range(0, 10)]
     public int points;
 
     public EquipmentBonus(EquipmentStat stat, int points)
     {
         this.stat = stat;
-        this.points = Mathf.Clamp(points, 0, 10);
+        this.points = points;
     }
 }

@@ -32,6 +32,9 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void SetHeld(bool held)
     {
         IsHeld = held;
+        if (held)
+            inventory?.tooltip?.HideToolTip(this);
+
         ItemData definition = Instance.Definition;
         bool slotView = IsEquipment && !held;
         icon.sprite = slotView ? inventory.SlotIcon(this) : definition.icon;
@@ -54,14 +57,13 @@ public class Item : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if (IsHeld || inventory.tooltip == null || definition.itemStats == null)
             return;
 
-        InventoryManager manager = FindAnyObjectByType<InventoryManager>();
-        string description = manager != null
-            ? EquipmentDescription.Build(definition, manager.CurrentEquipment)
-            : definition.itemStats.CreateItemDescriptionText();
-
-        inventory.tooltip.ShowToolTip(definition.itemStats.GetItemName(), description,
-            definition.rarity != null ? definition.rarity.rarityColor : Color.white);
+        EquipmentTooltipViewModel viewModel = EquipmentDescription.Build(definition);
+        inventory.tooltip.ShowToolTip(viewModel,
+            definition.rarity != null ? definition.rarity.rarityColor : Color.white,
+            this);
     }
 
-    public void OnPointerExit(PointerEventData eventData) => inventory.tooltip?.HideToolTip();
+    public void OnPointerExit(PointerEventData eventData) => inventory?.tooltip?.HideToolTip(this);
+
+    private void OnDisable() => inventory?.tooltip?.HideToolTip(this);
 }

@@ -1,129 +1,90 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using UnityEngine;
+
+public sealed class EquipmentTooltipViewModel
+{
+    public string ItemName { get; set; }
+    public string DetailText { get; set; }
+    public string SetName { get; set; }
+    public List<EquipmentTooltipStat> Stats { get; } = new();
+}
+
+public struct EquipmentTooltipStat
+{
+    public EquipmentStat Stat { get; }
+    public string Label { get; }
+    public int Value { get; }
+
+    public EquipmentTooltipStat(EquipmentStat stat, string label, int value)
+    {
+        Stat = stat;
+        Label = label;
+        Value = value;
+    }
+}
 
 public static class EquipmentDescription
 {
-    public static string Build(ItemData item, EquipmentTotals totals)
+    public static EquipmentTooltipViewModel Build(ItemData item)
     {
+        var viewModel = new EquipmentTooltipViewModel();
         if (item == null)
-            return string.Empty;
+            return viewModel;
 
-        var text = new StringBuilder();
-        if (item.itemStats != null)
-            text.Append(item.itemStats.CreateItemDescriptionText());
+        ItemStatsData stats = item.itemStats;
+        if (stats == null)
+            return viewModel;
 
-        EquipmentSetDefinition set = item.itemStats != null ? item.itemStats.GetEquipmentSet() : null;
-        if (set == null)
-            return text.ToString();
+        viewModel.ItemName = stats.GetItemName();
+        var bonuses = new Dictionary<EquipmentStat, int>();
 
-        int pieceCount = totals != null ? totals.GetSetPieceCount(set) : 0;
-        EquipmentSetBonus[] tiers = set.bonuses ?? System.Array.Empty<EquipmentSetBonus>();
-        if (tiers.Length == 0)
-            return text.ToString();
+        int defense = stats.GetDefense();
+        if (defense != 0)
+            AddBonus(bonuses, EquipmentStat.Defense, defense);
 
-        text.Append("\nSet progress: ")
-            .Append(string.IsNullOrWhiteSpace(set.displayName) ? "Equipment Set" : set.displayName)
-            .Append(" (").Append(pieceCount).Append(" equipped)");
-
-        foreach (EquipmentSetBonus tier in tiers
-            .Where(tier => tier != null)
-            .OrderBy(tier => Mathf.Max(2, tier.requiredPieces)))
+        IReadOnlyList<EquipmentBonus> equipmentBonuses = stats.GetEquipmentBonuses();
+        if (equipmentBonuses != null)
         {
-            int requiredPieces = Mathf.Max(2, tier.requiredPieces);
-            bool isActive = pieceCount >= requiredPieces;
-
-            text.Append("\n")
-                .Append(requiredPieces).Append(" pieces (")
-                .Append(isActive ? "active" : "inactive")
-                .Append(')');
-
-            AppendBonusSummary(text, tier.bonuses);
+            for (int i = 0; i < equipmentBonuses.Count; i++)
+            {
+                EquipmentBonus bonus = equipmentBonuses[i];
+                AddBonus(bonuses, bonus.stat, bonus.points);
+            }
         }
 
-        return text.ToString();
-    }
-
-    internal static void AppendBonusLines(StringBuilder text, IReadOnlyList<EquipmentBonus> bonuses, string prefix)
-    {
-        if (bonuses == null || bonuses.Count == 0)
-            return;
-
-        foreach (var bonus in SumBonuses(bonuses))
+        foreach (var bonus in bonuses.OrderBy(entry => entry.Key))
         {
             if (bonus.Value == 0)
                 continue;
 
-            text.Append('\n').Append(prefix).Append(GetStatLabel(bonus.Key)).Append(": ")
-                .Append(FormatPoints(bonus.Value));
-        }
-    }
-
-    internal static void AppendSetRequirements(StringBuilder text, EquipmentSetDefinition set)
-    {
-        if (set == null || set.bonuses == null || set.bonuses.Length == 0)
-            return;
-
-        var requirements = set.bonuses
-            .Where(tier => tier != null)
-            .Select(tier => Mathf.Max(2, tier.requiredPieces))
-            .Distinct()
-            .OrderBy(requiredPieces => requiredPieces)
-            .ToArray();
-
-        if (requirements.Length == 0)
-            return;
-
-        text.Append("\nSet: ")
-            .Append(string.IsNullOrWhiteSpace(set.displayName) ? "Equipment Set" : set.displayName)
-            .Append(" (requires ")
-            .Append(string.Join(", ", requirements))
-            .Append(" pieces)");
-    }
-
-    private static void AppendBonusSummary(StringBuilder text, IReadOnlyList<EquipmentBonus> bonuses)
-    {
-        var summedBonuses = SumBonuses(bonuses);
-        if (summedBonuses.Count == 0)
-            return;
-
-        text.Append(": ");
-        bool first = true;
-        foreach (var bonus in summedBonuses)
-        {
-            if (bonus.Value == 0)
-                continue;
-
-            if (!first)
-                text.Append(", ");
-
-            text.Append(GetStatLabel(bonus.Key)).Append(' ').Append(FormatPoints(bonus.Value));
-            first = false;
+            viewModel.Stats.Add(new EquipmentTooltipStat(
+                bonus.Key,
+                GetStatLabel(bonus.Key),
+                bonus.Value));
         }
 
-        if (first)
-            text.Append(": no bonus");
+        var details = new List<string>();
+        if (stats.GetWeaponType() != WeaponType.NonWeapon && stats.GetDamage() > 0f)
+            details.Add("Damage " + stats.GetDamage().ToString("0.##"));
+
+        if (stats.GetValue() > 0)
+            details.Add("Value " + stats.GetValue());
+
+        viewModel.DetailText = string.Join("  ·  ", details);
+
+        EquipmentSetDefinition set = stats.GetEquipmentSet();
+        viewModel.SetName = set != null && !string.IsNullOrWhiteSpace(set.displayName)
+            ? set.displayName
+            : null;
+
+        return viewModel;
     }
 
-    private static Dictionary<EquipmentStat, int> SumBonuses(IReadOnlyList<EquipmentBonus> bonuses)
+    private static void AddBonus(Dictionary<EquipmentStat, int> bonuses, EquipmentStat stat, int value)
     {
-        var sums = new Dictionary<EquipmentStat, int>();
-        if (bonuses == null)
-            return sums;
-
-        for (int i = 0; i < bonuses.Count; i++)
-        {
-            EquipmentBonus bonus = bonuses[i];
-            int points = Mathf.Clamp(bonus.points, 0, 10);
-            if (points == 0)
-                continue;
-
-            sums.TryGetValue(bonus.stat, out int current);
-            sums[bonus.stat] = current + points;
-        }
-
-        return sums;
+        bonuses.TryGetValue(stat, out int currentValue);
+        bonuses[stat] = currentValue + value;
     }
 
     private static string GetStatLabel(EquipmentStat stat)

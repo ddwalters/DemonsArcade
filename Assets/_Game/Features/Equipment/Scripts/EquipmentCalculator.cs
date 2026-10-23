@@ -71,7 +71,7 @@ public static class EquipmentCalculator
         for (int i = 0; i < bonuses.Count; i++)
         {
             EquipmentBonus bonus = bonuses[i];
-            Add(totals, bonus.stat, Mathf.Clamp(bonus.points, 0, 10));
+            Add(totals, bonus.stat, bonus.points);
         }
     }
 

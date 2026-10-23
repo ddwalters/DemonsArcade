@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ public class ItemStatsData
     [SerializeField] int value;
     [SerializeField] float weaponCoolDownTime;
     [SerializeField] int manaUsage;
-    [SerializeField, Range(0, 10)] int defense;
+    [SerializeField] int defense;
     [SerializeField] List<EquipmentBonus> equipmentBonuses = new();
     [SerializeField] EquipmentSetDefinition equipmentSet;
     [SerializeField] EquipmentVisualDefinition equipmentVisual;
@@ -56,7 +57,7 @@ public class ItemStatsData
     public WeaponType GetWeaponType() => weaponType;
     public ArmorType GetArmorType() => armorType;
     public GameObject GetPrefab() => prefab;
-    public int GetDefense() => Mathf.Clamp(defense, 0, 10);
+    public int GetDefense() => defense;
     public IReadOnlyList<EquipmentBonus> GetEquipmentBonuses() => equipmentBonuses;
     public EquipmentSetDefinition GetEquipmentSet() => equipmentSet;
     public EquipmentVisualDefinition GetEquipmentVisual() => equipmentVisual;
@@ -71,12 +72,84 @@ public class ItemStatsData
         if (value > 0)
             text.Append("\nValue: ").Append(value);
 
-        if (GetDefense() > 0)
-            text.Append("\nDefense: +").Append(GetDefense());
+        if (GetDefense() != 0)
+            text.Append("\nDefense: ")
+                .Append(GetDefense() > 0 ? $"+{GetDefense()}" : GetDefense().ToString());
 
-        EquipmentDescription.AppendBonusLines(text, equipmentBonuses, "");
-        EquipmentDescription.AppendSetRequirements(text, equipmentSet);
+        AppendBonusLines(text, equipmentBonuses);
+        AppendSetRequirements(text, equipmentSet);
 
         return text.ToString();
+    }
+
+    private static void AppendBonusLines(StringBuilder text, IReadOnlyList<EquipmentBonus> bonuses)
+    {
+        if (bonuses == null || bonuses.Count == 0)
+            return;
+
+        var totals = new Dictionary<EquipmentStat, int>();
+        for (int i = 0; i < bonuses.Count; i++)
+        {
+            EquipmentBonus bonus = bonuses[i];
+            int points = bonus.points;
+            totals.TryGetValue(bonus.stat, out int currentTotal);
+            totals[bonus.stat] = currentTotal + points;
+        }
+
+        foreach (var total in totals.OrderBy(entry => entry.Key))
+        {
+            if (total.Value == 0)
+                continue;
+
+            text.Append('\n').Append(GetStatLabel(total.Key)).Append(": ")
+                .Append(total.Value > 0 ? $"+{total.Value}" : total.Value.ToString());
+        }
+    }
+
+    private static void AppendSetRequirements(StringBuilder text, EquipmentSetDefinition set)
+    {
+        if (set == null || set.bonuses == null || set.bonuses.Length == 0)
+            return;
+
+        int[] requirements = set.bonuses
+            .Where(tier => tier != null)
+            .Select(tier => Mathf.Max(2, tier.requiredPieces))
+            .Distinct()
+            .OrderBy(requiredPieces => requiredPieces)
+            .ToArray();
+
+        if (requirements.Length == 0)
+            return;
+
+        text.Append("\nSet: ")
+            .Append(string.IsNullOrWhiteSpace(set.displayName) ? "Equipment Set" : set.displayName)
+            .Append(" (requires ")
+            .Append(string.Join(", ", requirements))
+            .Append(" pieces)");
+    }
+
+    private static string GetStatLabel(EquipmentStat stat)
+    {
+        switch (stat)
+        {
+            case EquipmentStat.Defense:
+                return "Defense";
+            case EquipmentStat.Attack:
+                return "Attack";
+            case EquipmentStat.ColdResistance:
+                return "Cold Resistance";
+            case EquipmentStat.HeatResistance:
+                return "Heat Resistance";
+            case EquipmentStat.FireResistance:
+                return "Fire Resistance";
+            case EquipmentStat.ShockResistance:
+                return "Shock Resistance";
+            case EquipmentStat.SlipResistance:
+                return "Slip Resistance";
+            case EquipmentStat.StaminaRecovery:
+                return "Stamina Recovery";
+            default:
+                return stat.ToString();
+        }
     }
 }

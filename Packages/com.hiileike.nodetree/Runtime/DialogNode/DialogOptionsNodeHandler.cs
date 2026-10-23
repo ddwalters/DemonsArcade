@@ -21,6 +21,10 @@ namespace NodeTree
         public FontStyles FontStyle = FontStyles.Normal;
 
         public float TextSpeed = 0f;
+
+        public string OwnerId;
+        public string Mood;
+        public PortraitSide Side;
     }
 
     [Preserve]
@@ -44,6 +48,7 @@ namespace NodeTree
             }
 
             uiManager.ClearOptions();
+            uiManager.ShowSpeaker(_data.OwnerId, _data.Mood, _data.Side);
             uiManager.ApplyTextStyle(_data.FontAsset, _data.FontSize, _data.FontColor, _data.FontStyle);
             uiManager.DisplayText(_data.DialogText, _data.TextSpeed, _data.TypingTickClip);
 

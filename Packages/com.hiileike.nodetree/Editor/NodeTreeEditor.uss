@@ -35,6 +35,26 @@
     min-height: 0;
 }
 
+#owner-search-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+#owner-search-field {
+    flex-grow: 1;
+}
+
+#owner-add-button {
+    width: 22px;
+    margin-left: 4px;
+}
+
+#owner-list-view {
+    flex-grow: 1;
+    min-height: 0;
+}
+
 #graph-view-container {
     flex-grow: 1;
 }

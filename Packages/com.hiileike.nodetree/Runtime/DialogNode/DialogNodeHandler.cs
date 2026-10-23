@@ -19,6 +19,10 @@ namespace NodeTree
         public FontStyles FontStyle = FontStyles.Normal;
 
         public float TextSpeed = 0f;
+
+        public string OwnerId;
+        public string Mood;
+        public PortraitSide Side;
     }
 
     [Preserve]
@@ -44,6 +48,7 @@ namespace NodeTree
             if (_data.HasSeen) return;
 
             uiManager.ClearOptions();
+            uiManager.ShowSpeaker(_data.OwnerId, _data.Mood, _data.Side);
             uiManager.ApplyTextStyle(_data.FontAsset, _data.FontSize, _data.FontColor, _data.FontStyle);
 
             var connectedEdge = graph.Edges.FirstOrDefault(x => x.OutputNodeGuid == _data.Guid && x.OutputPortIndex == 0);
