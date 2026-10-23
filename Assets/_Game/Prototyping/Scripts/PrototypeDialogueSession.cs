@@ -9,6 +9,7 @@ public class PrototypeDialogueSession : MonoBehaviour
 {
     public DialogRunner runner;
     public TMP_Text continueHint;
+    public PrototypeQuestReward questReward;
     private PlayerController player;
     private InteractionController interaction;
     private PlayerModeController mode;
@@ -37,8 +38,7 @@ public class PrototypeDialogueSession : MonoBehaviour
         interaction = player.GetComponent<InteractionController>();
         mode = player.GetComponent<PlayerModeController>();
         mode?.ResetToGameplay();
-        // Clone the actual action, including any binding overrides. Disabling player
-        // controls during conversation must not disable the continue action as well.
+
         sourceInput = player.GetNewControls().BasicActionMap.Interact;
         InputActionMap map = sourceInput.actionMap.Clone();
         dialogueControls = ScriptableObject.CreateInstance<InputActionAsset>();
@@ -69,13 +69,17 @@ public class PrototypeDialogueSession : MonoBehaviour
         if (runner == null || player == null)
             return;
 
-        if (!runner.IsDialogActive && !locked)
+        bool dialogIsActive = runner.IsDialogActive;
+        bool rewardModalIsOpen = questReward != null && questReward.IsOpen;
+        bool gameplayMustStayLocked = dialogIsActive || rewardModalIsOpen;
+
+        if (!gameplayMustStayLocked && !locked)
         {
             continueInput?.Disable();
             backInput?.Disable();
         }
 
-        if (runner.IsDialogActive && !locked)
+        if (gameplayMustStayLocked && !locked)
         {
             // Settings may have changed since this scene started.
             continueInput.Disable();
@@ -93,16 +97,27 @@ public class PrototypeDialogueSession : MonoBehaviour
             if (mode != null)
                 mode.enabled = false;
             locked = true;
-            continueInput.Enable();
-            backInput.Enable();
         }
 
-        if (runner.IsDialogActive &&
+        if (rewardModalIsOpen)
+        {
+            continueInput?.Disable();
+            backInput?.Disable();
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else if (dialogIsActive)
+        {
+            continueInput?.Enable();
+            backInput?.Enable();
+        }
+
+        if (dialogIsActive && !rewardModalIsOpen &&
             (Keyboard.current?.escapeKey.wasPressedThisFrame == true ||
              Gamepad.current?.buttonEast.wasPressedThisFrame == true))
             runner.StopDialog();
 
-        if (locked && !runner.IsDialogActive)
+        if (locked && !dialogIsActive && !rewardModalIsOpen)
             ReleasePlayer();
     }
 

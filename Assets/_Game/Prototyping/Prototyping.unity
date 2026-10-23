@@ -6070,6 +6070,7 @@ GameObject:
   - component: {fileID: 1213900528}
   - component: {fileID: 1213900530}
   - component: {fileID: 600000000000000041}
+  - component: {fileID: 600000000000000042}
   m_Layer: 0
   m_Name: Prototype dialogue
   m_TagString: Untagged
@@ -6131,6 +6132,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PrototypeDialogueSession
   runner: {fileID: 1213900528}
   continueHint: {fileID: 1521061048}
+  questReward: {fileID: 600000000000000042}
 --- !u!1 &1219775200
 GameObject:
   m_ObjectHideFlags: 0
@@ -11841,6 +11843,215 @@ MonoBehaviour:
   ownerNameText: {fileID: 600000000000000024}
   dialogueText: {fileID: 124605893}
   responseOptions: {fileID: 1513289790}
+--- !u!114 &600000000000000042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1213900527}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb75b619e3344192a3d84ea3e6889482, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PrototypeQuestReward
+--- !u!1 &20517001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 20517002}
+  - component: {fileID: 20517003}
+  - component: {fileID: 20517004}
+  - component: {fileID: 20517005}
+  - component: {fileID: 20517006}
+  - component: {fileID: 20517007}
+  m_Layer: 7
+  m_Name: Alden
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &20517002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 20517001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: -0.9025853, z: 0, w: 0.4305111}
+  m_LocalPosition: {x: -2.5, y: 1.03, z: -6.8}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 20517009}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -129, z: 0}
+--- !u!143 &20517003
+CharacterController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 20517001}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Height: 2
+  m_Radius: 0.35
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.035
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &20517004
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 20517001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d5ff7798e4440adb8548bd568aecb1d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PrototypePatrolNpc
+  holdDuration: 0.5
+  holdInteract: 0
+  isInteractable: 1
+  tooltipMessage: Talk
+  displayName: Alden
+  waypoints: []
+  waypointReachDistance: 0.45
+  waypointVerticalReachDistance: 0.75
+  pathPointReachDistance: 0.1
+  repathInterval: 0.75
+  failedPathRetryDelay: 1
+  dialogue: {fileID: 11400000, guid: 541e3d1ac50f47f8b6012fa709e569e8, type: 2}
+  runner: {fileID: 1213900528}
+--- !u!114 &20517005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 20517001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc830973e67751c4ab207d8ececaf238, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterMotor
+  walkSpeed: 2.2
+  sprintSpeed: 5
+  jumpHeight: 1.1
+  groundLayers:
+    serializedVersion: 2
+    m_Bits: 471
+  locomotionProfile: {fileID: 0}
+--- !u!114 &20517006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 20517001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 373b52eb9bf8c40f785bb6947a1aee66, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: AstarPathfindingProject::Pathfinding.Seeker
+  version: 1
+  drawGizmos: 1
+  detailedGizmos: 0
+  startEndModifier:
+    addPoints: 0
+    exactStartPoint: 3
+    exactEndPoint: 3
+    useRaycasting: 0
+    mask:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    useGraphRaycasting: 0
+  traversableTags: -1
+  tagPenalties: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+  graphMask:
+    value: -1
+--- !u!114 &20517007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 20517001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 18bbfe7401c448ecbdf19247e02c5701, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NpcConversationFacing
+  bodyTurnSpeed: 360
+--- !u!1001 &20517008
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 20517002}
+    m_Modifications:
+    - target: {fileID: -9070493210130169274, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
+      propertyPath: m_Name
+      value: Alden Model
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5822821947120931875, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value:
+      objectReference: {fileID: 2100000, guid: b5d3d52b3a0a4d7cb538e066069a1bbe, type: 2}
+    - target: {fileID: 5866666021909216657, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
+      propertyPath: m_Controller
+      value:
+      objectReference: {fileID: 9100000, guid: b66c0081f04d7ae4689a1105a9bebb59, type: 2}
+    - target: {fileID: 5866666021909216657, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
+      propertyPath: m_CullingMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
+--- !u!4 &20517009 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 6172cf97d65f84a4aadded7dfbac756d, type: 3}
+  m_PrefabInstance: {fileID: 20517008}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -11855,3 +12066,4 @@ SceneRoots:
   - {fileID: 848586251}
   - {fileID: 1747773313}
   - {fileID: 1232183424}
+  - {fileID: 20517002}
