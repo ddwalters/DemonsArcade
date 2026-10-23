@@ -14,5 +14,6 @@ public enum ArmorType
     Chestpiece,
     Leggings,
     Boots,
-    Necklace
+    Necklace,
+    Ring
 }

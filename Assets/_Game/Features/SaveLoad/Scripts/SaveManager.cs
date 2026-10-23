@@ -97,6 +97,22 @@ public class SaveManager : MonoBehaviour
 
     public static bool IsSaveScene(string scenePath) => scenePath == TownScene;
 
+    public static bool HasValidInventoryLayout(IReadOnlyList<SavedContainer> inventory)
+    {
+        if (inventory == null || (inventory.Count != 8 && inventory.Count != 10))
+            return false;
+
+        int highestSlot = inventory.Count == 8 ? 7 : (int)EquipmentSlot.RingRight;
+        var slots = new HashSet<int>();
+        foreach (SavedContainer container in inventory)
+        {
+            if (container == null || container.slot < 0 || container.slot > highestSlot || !slots.Add(container.slot))
+                return false;
+        }
+
+        return true;
+    }
+
     public List<SaveData> ListSaves() => store.List();
 
     public bool Save()
@@ -124,7 +140,7 @@ public class SaveManager : MonoBehaviour
                 world = world.Values.ToList()
             };
 
-            for (int slot = 0; slot <= 7; slot++)
+            for (int slot = 0; slot <= (int)EquipmentSlot.RingRight; slot++)
                 save.inventory.Add(new SavedContainer { slot = slot, items = catalog.Capture(inventory.GetItems(slot).list) });
 
             store.Write(save);
@@ -148,9 +164,7 @@ public class SaveManager : MonoBehaviour
         {
             // Read and resolve everything before replacing the current session.
             var save = store.Read(entry.playthrough.id, entry.id);
-            if (save.scenePath != TownScene || save.stats.currentHealth <= 0 || save.inventory.Count != 8 ||
-                save.inventory.Select(container => container.slot).Distinct().Count() != 8 ||
-                save.inventory.Any(container => container.slot < 0 || container.slot > 7))
+            if (save.scenePath != TownScene || save.stats.currentHealth <= 0 || !HasValidInventoryLayout(save.inventory))
                 throw new InvalidDataException("This save has an invalid player state.");
 
             foreach (var container in save.inventory)
@@ -301,6 +315,10 @@ public class SaveManager : MonoBehaviour
             inventory.SetPlayerInventoryType(save.stats.inventoryType);
             foreach (var container in save.inventory)
                 inventory.ReplaceItems(container.slot, catalog.Restore(container.items));
+
+            for (int slot = (int)EquipmentSlot.RingLeft; slot <= (int)EquipmentSlot.RingRight; slot++)
+                if (!save.inventory.Any(container => container.slot == slot))
+                    inventory.ReplaceItems(slot, new List<ItemInstance>());
 
             inventory.RebuildEquipment();
         }

@@ -10,7 +10,9 @@ public static class GiveExampleArmor
         "Winter Hat",
         "Winter Coat",
         "Winter Pants",
-        "Winter Boots"
+        "Winter Boots",
+        "Copper Ring",
+        "Moonstone Ring"
     };
 
     [MenuItem(MenuPath, true)]
@@ -43,7 +45,7 @@ public static class GiveExampleArmor
 
         if (definitions.Any(item => item == null))
         {
-            Debug.LogError("One or more Winter Gear items are missing from the ItemCatalog.");
+            Debug.LogError("One or more example equipment items are missing from the ItemCatalog.");
             return;
         }
 
@@ -60,6 +62,6 @@ public static class GiveExampleArmor
             }
         }
 
-        Debug.Log($"Added {addedCount} of {definitions.Length} Winter Gear items to the player inventory.");
+        Debug.Log($"Added {addedCount} of {definitions.Length} example equipment items to the player inventory.");
     }
 }

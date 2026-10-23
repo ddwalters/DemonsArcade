@@ -6,8 +6,10 @@ using UnityEngine.SceneManagement;
 
 public class InventoryManager : MonoBehaviour
 {
+    public const int FirstLootGridId = (int)EquipmentSlot.RingRight + 1;
+
     private Dictionary<int, (List<ItemInstance> list, InventoryType type)> ItemDataInformation;
-    private int nextGridId = 8;
+    private int nextGridId = FirstLootGridId;
     private EquipmentTotals currentEquipment;
     private bool playerInventoryTypeBound;
 
@@ -67,7 +69,7 @@ public class InventoryManager : MonoBehaviour
 
         ItemDataInformation = new Dictionary<int, (List<ItemInstance>, InventoryType)>();
         ItemDataInformation.Add(0, (new List<ItemInstance>(), playerType));
-        for (int id = 1; id <= 7; id++)
+        for (int id = (int)EquipmentSlot.Helmet; id <= (int)EquipmentSlot.RingRight; id++)
             ItemDataInformation.Add(id, (new List<ItemInstance>(), InventoryType.OneByOneMinimal));
 
         currentEquipment = EquipmentCalculator.Calculate(Array.Empty<ItemData>());
@@ -92,7 +94,8 @@ public class InventoryManager : MonoBehaviour
         playerInventoryTypeBound = true;
     }
 
-    public static bool IsEquipmentGrid(int id) => id >= 1 && id <= 7;
+    public static bool IsEquipmentGrid(int id) =>
+        id >= (int)EquipmentSlot.Helmet && id <= (int)EquipmentSlot.RingRight;
 
     public static bool CanEquip(ItemData definition, EquipmentSlot slot)
     {
@@ -106,11 +109,17 @@ public class InventoryManager : MonoBehaviour
         if (slot == EquipmentSlot.LeftHand)
             return weapon == WeaponType.Shield;
 
+        if (slot == EquipmentSlot.RingLeft || slot == EquipmentSlot.RingRight)
+            return weapon == WeaponType.NonWeapon && definition.itemStats.GetArmorType() == ArmorType.Ring;
+
         return weapon == WeaponType.NonWeapon && definition.itemStats.GetArmorType() == (ArmorType)((int)slot - 1);
     }
 
     public Sprite GetSlotIcon(int id, ItemData definition)
     {
+        if (id == (int)EquipmentSlot.RingLeft || id == (int)EquipmentSlot.RingRight)
+            return definition != null ? definition.icon : null;
+
         if (id < (int)EquipmentSlot.RightHand)
             return armorSlotIcons != null && id > 0 && id <= armorSlotIcons.Length ? armorSlotIcons[id - 1] : definition.icon;
 
@@ -175,7 +184,7 @@ public class InventoryManager : MonoBehaviour
     public IEnumerable<ItemData> EnumerateEquippedItems()
     {
         EnsureInitialized();
-        for (int id = 1; id <= 7; id++)
+        for (int id = (int)EquipmentSlot.Helmet; id <= (int)EquipmentSlot.RingRight; id++)
         {
             foreach (ItemInstance item in ItemDataInformation[id].list)
             {

@@ -32,5 +32,7 @@ public enum EquipmentSlot
     Boots = 4,
     Necklace = 5,
     RightHand = 6,
-    LeftHand = 7
+    LeftHand = 7,
+    RingLeft = 8,
+    RingRight = 9
 }

@@ -85,7 +85,6 @@ public class Inventory : MonoBehaviour
             DestroyView(previous);
         }
         var root = Instantiate(GridPrefab(gridId), isPlayerGrid ? playerGridHolder : worldGridHolder);
-        openGrids[gridId] = root;
         var main = MainGrid(root);
         main.id = gridId;
         if (!isPlayerGrid)
@@ -93,17 +92,40 @@ public class Inventory : MonoBehaviour
                 if (child != main.transform)
                     child.gameObject.SetActive(false);
 
-        PopulateGrid(main);
+        InventoryPlayerPanel playerPanel = null;
+        if (isPlayerGrid && gridId == 0)
+        {
+            InventoryGrid[] equipmentSlots = root.GetComponentsInChildren<InventoryGrid>(true)
+                .Where(slot => slot != main && InventoryManager.IsEquipmentGrid(slot.id)).ToArray();
+            GameObject panelRoot = new("PlayerInventoryPanel", typeof(RectTransform), typeof(CanvasRenderer));
+            panelRoot.layer = 5;
+            RectTransform panelRect = (RectTransform)panelRoot.transform;
+            panelRect.SetParent(playerGridHolder, false);
+            panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 0.5f);
+            panelRect.pivot = new Vector2(0.5f, 0.5f);
+            panelRect.anchoredPosition = Vector2.zero;
+            playerPanel = panelRoot.AddComponent<InventoryPlayerPanel>();
+            playerPanel.Initialize(root, main, equipmentSlots, inventoryManager,
+                FindAnyObjectByType<PlayerController>());
+            openGrids[gridId] = panelRoot;
 
-        if (isPlayerGrid)
-            foreach (var slot in root.GetComponentsInChildren<InventoryGrid>())
-                if (slot != main && InventoryManager.IsEquipmentGrid(slot.id))
-                    PopulateGrid(slot);
+            // Populate after the view builder has added ring grid clones so every grid gets
+            // the inventory owner binding and any saved records.
+            PopulateGrid(main);
+            foreach (InventoryGrid slot in playerPanel.EquipmentGrids)
+                PopulateGrid(slot);
+        }
+        else
+        {
+            openGrids[gridId] = root;
+            PopulateGrid(main);
+        }
 
         foreach (var entry in openGrids)
         {
             var layout = entry.Value.GetComponent<InventoryPanelLayout>() ?? entry.Value.AddComponent<InventoryPanelLayout>();
-            layout.Configure(canvas, entry.Key == 0, openGrids.Count > 1);
+            InventoryPlayerPanel entryPlayerPanel = entry.Value.GetComponent<InventoryPlayerPanel>();
+            layout.Configure(canvas, entryPlayerPanel != null, openGrids.Count > 1, entryPlayerPanel);
         }
     }
 

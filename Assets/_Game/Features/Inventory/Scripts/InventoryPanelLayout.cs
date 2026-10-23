@@ -13,9 +13,11 @@ public class InventoryPanelLayout : MonoBehaviour
     private bool playerPanel;
     private bool split;
     private bool dirty;
+    private InventoryPlayerPanel playerPanelView;
     private readonly Vector3[] corners = new Vector3[4];
 
-    public void Configure(Canvas canvas, bool isPlayerPanel, bool splitView)
+    public void Configure(Canvas canvas, bool isPlayerPanel, bool splitView,
+        InventoryPlayerPanel customPlayerPanel = null)
     {
         if (panel == null)
         {
@@ -27,6 +29,7 @@ public class InventoryPanelLayout : MonoBehaviour
         canvasRect = (RectTransform)canvas.transform;
         playerPanel = isPlayerPanel;
         split = splitView;
+        playerPanelView = customPlayerPanel;
         dirty = true;
     }
 
@@ -38,6 +41,12 @@ public class InventoryPanelLayout : MonoBehaviour
 
     public void Fit()
     {
+        if (playerPanelView != null)
+        {
+            FitPlayerPanel();
+            return;
+        }
+
         panel.localScale = originalScale;
         Rect available = canvasRect.rect;
         if (split)
@@ -58,6 +67,32 @@ public class InventoryPanelLayout : MonoBehaviour
         bounds = VisibleBounds();
         Vector3 offset = available.center - (Vector2)bounds.center;
         panel.position += canvasRect.TransformVector(offset);
+        previousSize = canvasRect.rect.size;
+        dirty = false;
+    }
+
+    private void FitPlayerPanel()
+    {
+        playerPanelView.ApplyResponsiveLayout(split);
+        panel.localScale = originalScale;
+
+        Rect available = canvasRect.rect;
+        if (split)
+        {
+            available.width *= 0.5f;
+            available.x += available.width;
+        }
+
+        available.xMin += Padding;
+        available.xMax -= Padding;
+        available.yMin += Padding;
+        available.yMax -= Padding;
+
+        Vector2 preferredSize = playerPanelView.PreferredSize;
+        float scale = Mathf.Min(1f, available.width / Mathf.Max(preferredSize.x, 1f),
+            available.height / Mathf.Max(preferredSize.y, 1f));
+        panel.localScale = originalScale * scale;
+        panel.position = canvasRect.TransformPoint(available.center);
         previousSize = canvasRect.rect.size;
         dirty = false;
     }

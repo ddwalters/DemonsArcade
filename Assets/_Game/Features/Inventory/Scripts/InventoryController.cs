@@ -29,9 +29,9 @@ public class InventoryController : MonoBehaviour
     private void ApplyMode(PlayerMode next)
     {
         inventory.CloseAllGrids();
-        bool inventoryOpen = next == PlayerMode.Inventory || next == PlayerMode.Looting;
         if (goldCounter != null)
-            goldCounter.SetActive(inventoryOpen);
+            goldCounter.SetActive(false);
+        bool inventoryOpen = next == PlayerMode.Inventory || next == PlayerMode.Looting;
         if (!inventoryOpen)
             return;
 
