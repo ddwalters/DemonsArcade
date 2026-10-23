@@ -15,6 +15,14 @@ public class CharacterMotor : MonoBehaviour
     [SerializeField] private LayerMask groundMask = ~((1 << 9) | (1 << 5));
     [SerializeField, Min(0f)] private float groundProbeDistance = 0.15f;
 
+    [Header("Steps")]
+    [Tooltip("Leave empty to use the shared Resources/DefaultHumanoidLocomotionProfile. Assign one to override it for this character.")]
+    [SerializeField] private CharacterLocomotionProfile locomotionProfile;
+    [Tooltip("Read only. Measured from the rig at startup.")]
+    [SerializeField] private float measuredLegLength;
+    [Tooltip("Read only. The profile's step ratio times the measured leg length.")]
+    [SerializeField] private float effectiveMaxStepHeight;
+
     [Header("Air movement")]
     [SerializeField] private float gravity = -24f;
     [SerializeField, Min(0f)] private float jumpHeight = 1.1f;
@@ -69,8 +77,31 @@ public class CharacterMotor : MonoBehaviour
     private static readonly int LandingActive = Animator.StringToHash("LandingActive");
     private static readonly int FallAmount = Animator.StringToHash("FallAmount");
     private const float MinimumFallAnimationSpeed = 0.15f;
+    private const string SharedProfileResource = "DefaultHumanoidLocomotionProfile";
+    private const float StepRayHeight = 0.012f;
+    private const float StepRaySpread = 0.6f;
+    private const float StepProbeReach = 0.08f;
+    private const float StepVerticalNormalY = 0.3f;
+    private const float StepTreadSample = 0.05f;
+    private const float StepTreadDepthMargin = 0.05f;
+    private const float StepLiftMargin = 0.02f;
+    private const float StepSkinLift = 0.01f;
+    private const float StepAdvance = 0.06f;
+    private const float StepUpGraceTime = 0.15f;
+    private const float StepRejectLogInterval = 0.5f;
+    private const float StepGroundSearch = 0.2f;
+    private const float MinimumStepRise = 0.015f;
+    private const float StepHeightTolerance = 0.005f;
+    private const float ControllerStepOffsetWithMotorStepUp = 0.05f;
+    private const float MinimumReportedStep = 0.02f;
+    private const float MaximumReportedStepRatio = 1.25f;
 
     private CharacterController controller;
+    private CharacterLocomotionProfile profile;
+    private StepSmoothing stepSmoothing;
+    private float legLength;
+    private float lastStepRejectLogTime;
+    private float stepUpGraceRemaining;
     private float animationGait;
     private Vector3 planarVelocity;
     private Vector3 externalVelocity;
@@ -98,6 +129,13 @@ public class CharacterMotor : MonoBehaviour
     private Vector3 walkableGroundContactNormal = Vector3.up;
 
     public bool IsGrounded { get; private set; }
+    public CharacterLocomotionProfile Profile => profile;
+    public float LegLength => legLength;
+    public float MaxStepHeight => profile.MaxStepHeight(legLength);
+    public LayerMask GroundMask => groundMask;
+    public Vector3 PlanarVelocity => planarVelocity;
+
+    public event Action<float> SteppedVertically;
 
     private void Awake()
     {
@@ -105,6 +143,46 @@ public class CharacterMotor : MonoBehaviour
         animator = GetComponentInChildren<Animator>();
         if (animator != null)
             animator.applyRootMotion = false;
+
+        profile = locomotionProfile != null ? locomotionProfile : LoadSharedProfile();
+        RefreshRigMetrics();
+        AddLocomotionComponents();
+    }
+
+    private static CharacterLocomotionProfile LoadSharedProfile()
+    {
+        CharacterLocomotionProfile shared = Resources.Load<CharacterLocomotionProfile>(SharedProfileResource);
+        return shared != null ? shared : CharacterLocomotionProfile.CreateDefault();
+    }
+
+    public void RefreshRigMetrics()
+    {
+        if (!HumanoidLegMetrics.TryMeasure(animator, out legLength))
+            legLength = controller.height * 0.5f;
+
+        if (profile.UsesMotorStepUp)
+            controller.stepOffset = Mathf.Min(ControllerStepOffsetWithMotorStepUp, controller.height);
+
+        measuredLegLength = legLength;
+        effectiveMaxStepHeight = MaxStepHeight;
+    }
+
+    private void AddLocomotionComponents()
+    {
+        stepSmoothing = GetComponent<StepSmoothing>();
+        if (stepSmoothing == null)
+            stepSmoothing = gameObject.AddComponent<StepSmoothing>();
+
+        stepSmoothing.Initialize(this, animator);
+
+        if (animator == null || !animator.isHuman)
+            return;
+
+        FootPlacementIK footIk = animator.GetComponent<FootPlacementIK>();
+        if (footIk == null)
+            footIk = animator.gameObject.AddComponent<FootPlacementIK>();
+
+        footIk.Initialize(this, animator);
     }
 
     public void RequestJump()
@@ -153,7 +231,8 @@ public class CharacterMotor : MonoBehaviour
         }
 
         bool previouslyGrounded = IsGrounded;
-        bool groundedAtStart = TryGetGround(out Vector3 groundNormal);
+        stepUpGraceRemaining = Mathf.Max(0f, stepUpGraceRemaining - deltaTime);
+        bool groundedAtStart = TryGetGround(out Vector3 groundNormal) || stepUpGraceRemaining > 0f;
         IsGrounded = groundedAtStart;
         if (groundedAtStart)
         {
@@ -221,8 +300,20 @@ public class CharacterMotor : MonoBehaviour
         foundWalkableGroundContact = false;
         walkableGroundContactNormal = Vector3.up;
         Vector3 startingPosition = transform.position;
+        if (profile.UsesMotorStepUp && groundedAtStart && !acceptedJumpThisTick && verticalVelocity <= 0f &&
+            TryStepUp(locomotionDisplacement + externalDisplacement, out float stepRise))
+        {
+            controller.Move(Vector3.up * stepRise);
+            stepUpGraceRemaining = StepUpGraceTime;
+        }
+
         CollisionFlags collisions = controller.Move(displacement);
+        if (ShouldSnapToGround(previouslyGrounded, acceptedJumpThisTick, collisions))
+            SnapToGround();
+
         Vector3 actualDisplacement = transform.position - startingPosition;
+        if (groundedAtStart && !acceptedJumpThisTick && (collisions & CollisionFlags.Sides) != 0)
+            LimitVelocityToAchievedMotion(actualDisplacement - externalDisplacement, deltaTime);
 
         if ((collisions & CollisionFlags.Above) != 0 && verticalVelocity > 0f)
             verticalVelocity = 0f;
@@ -230,7 +321,7 @@ public class CharacterMotor : MonoBehaviour
         Vector3 probedGroundNormal = Vector3.up;
         bool hasGroundProbe = verticalVelocity <= 0f && TryGetGround(out probedGroundNormal);
         bool hasWalkableGround = verticalVelocity <= 0f &&
-            (foundWalkableGroundContact || hasGroundProbe);
+            (foundWalkableGroundContact || hasGroundProbe || stepUpGraceRemaining > 0f);
         if (hasWalkableGround)
         {
             IsGrounded = true;
@@ -246,6 +337,12 @@ public class CharacterMotor : MonoBehaviour
         {
             IsGrounded = false;
             groundNormal = Vector3.up;
+        }
+
+        if (previouslyGrounded && IsGrounded && !acceptedJumpThisTick)
+        {
+            float expectedVerticalTravel = locomotionDisplacement.y + externalDisplacement.y;
+            ReportVerticalStep(actualDisplacement.y - expectedVerticalTravel);
         }
 
         float actualDownwardSpeed = Mathf.Max(0f, -actualDisplacement.y / deltaTime);
@@ -331,6 +428,151 @@ public class CharacterMotor : MonoBehaviour
             : transform.TransformDirection(new Vector3(input.x, 0f, input.y));
         direction = Vector3.ProjectOnPlane(direction, Vector3.up);
         return direction.sqrMagnitude > 0.000001f ? direction.normalized : Vector3.zero;
+    }
+
+    private bool TryStepUp(Vector3 displacement, out float rise)
+    {
+        rise = 0f;
+        Vector3 planar = Vector3.ProjectOnPlane(displacement, Vector3.up);
+        float planarDistance = planar.magnitude;
+        if (planarDistance <= 0.0001f)
+            return false;
+
+        Vector3 direction = planar / planarDistance;
+        Vector3 center = transform.TransformPoint(controller.center);
+        float feetY = center.y - controller.height * 0.5f;
+        float expectedGroundY = feetY - controller.skinWidth;
+        float groundY = expectedGroundY;
+        if (Physics.Raycast(center, Vector3.down, out RaycastHit groundHit,
+                controller.height * 0.5f + StepGroundSearch, groundMask, QueryTriggerInteraction.Ignore))
+        {
+            groundY = groundHit.point.y;
+        }
+
+        float supportY = Mathf.Max(groundY, expectedGroundY);
+        if (!TryFindRiserFace(center, supportY, direction, planarDistance, out float faceDistance))
+            return false;
+
+        float maximumRise = MaxStepHeight;
+        float walkableNormalY = Mathf.Cos(controller.slopeLimit * Mathf.Deg2Rad);
+        Vector3 treadOrigin = new Vector3(center.x, supportY + maximumRise + StepLiftMargin, center.z) +
+                              direction * (faceDistance + StepTreadSample);
+        float treadSearch = maximumRise + StepLiftMargin + StepTreadDepthMargin;
+        if (!Physics.Raycast(treadOrigin, Vector3.down, out RaycastHit tread, treadSearch, groundMask,
+                QueryTriggerInteraction.Ignore) || tread.normal.y < walkableNormalY)
+        {
+            return RejectStep("no walkable tread within " + maximumRise.ToString("0.00") + " m beyond the riser");
+        }
+
+        float treadRise = tread.point.y - supportY;
+        if (profile.DrawDebug)
+            Debug.DrawLine(treadOrigin, tread.point, Color.green);
+
+        if (treadRise < MinimumStepRise)
+            return false;
+
+        if (treadRise > maximumRise + StepHeightTolerance)
+        {
+            return RejectStep("rise " + treadRise.ToString("0.00") + " m is above the max step " +
+                              maximumRise.ToString("0.00") + " m");
+        }
+
+        float clearanceRadius = Mathf.Max(0.01f, controller.radius - controller.skinWidth * 2f);
+        float halfSegment = Mathf.Max(0f, controller.height * 0.5f - controller.radius);
+        Vector3 bottom = center + Vector3.down * halfSegment;
+        Vector3 top = center + Vector3.up * halfSegment;
+        float lift = treadRise + StepSkinLift;
+        if (Physics.CapsuleCast(bottom, top, clearanceRadius, Vector3.up, lift, groundMask,
+                QueryTriggerInteraction.Ignore))
+        {
+            return RejectStep("no headroom to lift " + lift.ToString("0.00") + " m");
+        }
+
+        Vector3 liftOffset = Vector3.up * (lift + StepLiftMargin);
+        float advance = Mathf.Max(0f, faceDistance - controller.radius) + StepAdvance;
+        if (Physics.CapsuleCast(bottom + liftOffset, top + liftOffset, clearanceRadius, direction, advance,
+                groundMask, QueryTriggerInteraction.Ignore))
+        {
+            return RejectStep("blocked above the step");
+        }
+
+        rise = lift;
+        return true;
+    }
+
+    private void LimitVelocityToAchievedMotion(Vector3 achievedDisplacement, float deltaTime)
+    {
+        Vector3 achievedVelocity = Vector3.ProjectOnPlane(achievedDisplacement, Vector3.up) / deltaTime;
+        if (achievedVelocity.sqrMagnitude < planarVelocity.sqrMagnitude)
+            planarVelocity = achievedVelocity;
+    }
+    private bool RejectStep(string reason)
+    {
+        if (profile.DrawDebug && Time.time - lastStepRejectLogTime >= StepRejectLogInterval)
+        {
+            lastStepRejectLogTime = Time.time;
+            Debug.Log("Step rejected: " + reason, this);
+        }
+
+        return false;
+    }
+    private bool TryFindRiserFace(Vector3 center, float groundY, Vector3 direction, float planarDistance,
+        out float faceDistance)
+    {
+        faceDistance = float.MaxValue;
+        Vector3 side = Vector3.Cross(Vector3.up, direction);
+        float reach = controller.radius + planarDistance + StepProbeReach;
+        for (int i = -1; i <= 1; i++)
+        {
+            Vector3 origin = new Vector3(center.x, groundY + StepRayHeight, center.z) +
+                             side * (controller.radius * StepRaySpread * i);
+            bool hitRiser = Physics.Raycast(origin, direction, out RaycastHit hit, reach, groundMask,
+                QueryTriggerInteraction.Ignore) && hit.normal.y < StepVerticalNormalY;
+            if (profile.DrawDebug)
+                Debug.DrawRay(origin, direction * reach, hitRiser ? Color.magenta : Color.gray);
+
+            if (hitRiser && hit.distance < faceDistance)
+                faceDistance = hit.distance;
+        }
+
+        return faceDistance < float.MaxValue;
+    }    private void ReportVerticalStep(float stepDelta)
+    {
+        float magnitude = Mathf.Abs(stepDelta);
+        if (magnitude < MinimumReportedStep || magnitude > MaxStepHeight * MaximumReportedStepRatio)
+            return;
+
+        SteppedVertically?.Invoke(stepDelta);
+    }
+
+    private bool ShouldSnapToGround(bool previouslyGrounded, bool jumpedThisTick, CollisionFlags collisions)
+    {
+        return previouslyGrounded && !jumpedThisTick && verticalVelocity <= 0f &&
+               jumpGroundingGrace <= 0f && stepUpGraceRemaining <= 0f &&
+               (collisions & CollisionFlags.Below) == 0 && !foundWalkableGroundContact;
+    }
+
+    private void SnapToGround()
+    {
+        float radius = Mathf.Max(0.01f, controller.radius * 0.9f);
+        Vector3 center = transform.TransformPoint(controller.center);
+        Vector3 capsuleBottom = center + Vector3.down * (controller.height * 0.5f - controller.radius);
+        const float originLift = 0.05f;
+        float maximumDrop = MaxStepHeight;
+        Vector3 origin = capsuleBottom + Vector3.up * originLift;
+        if (!Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit,
+                originLift + maximumDrop + 0.1f, groundMask, QueryTriggerInteraction.Ignore) ||
+            !IsWalkableGroundHit(hit))
+        {
+            return;
+        }
+
+        float verticalGap = hit.distance - originLift -
+            (controller.radius - radius) / Mathf.Max(0.01f, hit.normal.y);
+        if (verticalGap <= groundProbeContactTolerance || verticalGap > maximumDrop)
+            return;
+
+        controller.Move(Vector3.down * verticalGap);
     }
 
     private bool TryGetGround(out Vector3 normal)
@@ -629,6 +871,9 @@ public class CharacterMotor : MonoBehaviour
         controller.enabled = false;
         transform.SetPositionAndRotation(position, rotation);
         controller.enabled = wasEnabled;
+        if (stepSmoothing != null)
+            stepSmoothing.ResetOffset();
+
         IsGrounded = false;
         hasInitializedGroundState = false;
         presentationGroundedLatch = false;

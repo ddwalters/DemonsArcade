@@ -50,6 +50,30 @@ Animator, preventing it from adding travel on top of the motor's arc.
 These normalized markers, jump height, gravity, air acceleration, recovery times,
 and contact tolerances are editable on `CharacterMotor` in the Inspector.
 
+## Steps and foot placement
+
+Every `CharacterMotor` gets step handling automatically, so the player, Rowan and any
+future humanoid share it. Nothing is wired per prefab.
+
+- `CharacterLocomotionProfile` holds the limits as ratios of the measured leg length,
+  so a rescaled or customised character needs no retuning. Assign one on the motor to
+  override the defaults for a model. Without one the motor uses the shared asset at
+  `Features/Player/Resources/DefaultHumanoidLocomotionProfile` - edit that to tune every
+  humanoid at once. Turn on `Draw Debug` in the profile to see the foot targets. Call
+  `CharacterMotor.RefreshRigMetrics()` after changing a character's size or rig.
+- `CharacterMotor` handles steps itself. With `Use Motor Step Up` on it casts thin rays at foot
+  height to find a riser, reads the tread height with a ray beyond it, and lifts the capsule
+  onto the tread when it is within the maximum step height, leaving the `CharacterController`
+  step offset at a small value for tiny bumps. Anything taller is a wall, so nothing can creep
+  over it. It also snaps down onto steps lower than that height instead of falling, and raises
+  `SteppedVertically` with the signed height of each step it takes.
+- `StepSmoothing` turns those steps into a decaying vertical offset applied to the
+  model root and the camera pivot. The capsule and collision are never moved by it.
+- `FootPlacementIK` runs in `OnAnimatorIK` (the Locomotion layer has IK Pass on). It probes
+  the whole foot, heel and toe, not just the ankle. A swinging foot looks ahead and is lifted
+  a clearance above the highest tread in range. A planted foot that straddles a tread edge is
+  slid onto one tread (`Tread Snapping`, off by default). The pelvis follows the lower foot partly and a knee
+  hint keeps the knees forward. All correction is clamped to the profile limits.
 ## Retained animation assets
 
 The Humanoid clip library contains only `CalmIdle`, `Walking`, `Running`,

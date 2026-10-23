@@ -20,6 +20,8 @@ public class PlayerCameraRig : MonoBehaviour
     private float pitch;
     private float yaw;
     private int playerLayer;
+    private StepSmoothing stepSmoothing;
+    private Vector3 pivotRestLocalPosition;
 
     public Camera ViewCamera => viewCamera;
     public Vector3 EyePosition => viewPivot.position;
@@ -28,9 +30,14 @@ public class PlayerCameraRig : MonoBehaviour
     private void Awake()
     {
         playerLayer = 1 << gameObject.layer;
+        if (viewPivot != null)
+            pivotRestLocalPosition = viewPivot.localPosition;
+
         ApplyFieldOfView();
         ResetView();
     }
+
+    private void Start() => stepSmoothing = GetComponent<StepSmoothing>();
 
     private void OnValidate() => ApplyFieldOfView();
 
@@ -70,6 +77,10 @@ public class PlayerCameraRig : MonoBehaviour
     {
         if (viewCamera == null || viewPivot == null)
             return;
+
+        viewPivot.localPosition = pivotRestLocalPosition;
+        if (stepSmoothing != null)
+            viewPivot.position += Vector3.up * stepSmoothing.VerticalOffset;
 
         // Keep orbit orientation in world space when movement turns the player root.
         viewPivot.rotation = Quaternion.Euler(pitch, yaw, 0f);
