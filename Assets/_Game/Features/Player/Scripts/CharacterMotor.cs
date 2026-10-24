@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(CharacterController), typeof(StepSmoothing))]
 public class CharacterMotor : MonoBehaviour
 {
     [Header("Movement")]
@@ -159,19 +159,14 @@ public class CharacterMotor : MonoBehaviour
     private void AddLocomotionComponents()
     {
         stepSmoothing = GetComponent<StepSmoothing>();
-        if (stepSmoothing == null)
-            stepSmoothing = gameObject.AddComponent<StepSmoothing>();
-
         stepSmoothing.Initialize(this, animator);
 
         if (animator == null || !animator.isHuman)
             return;
 
         FootPlacementIK footIk = animator.GetComponent<FootPlacementIK>();
-        if (footIk == null)
-            footIk = animator.gameObject.AddComponent<FootPlacementIK>();
-
-        footIk.Initialize(this, animator);
+        if (footIk != null)
+            footIk.Initialize(this, animator);
     }
 
     public void RequestJump()

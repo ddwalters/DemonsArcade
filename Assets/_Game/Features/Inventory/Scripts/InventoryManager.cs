@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+[RequireComponent(typeof(PartyManager))]
 public class InventoryManager : MonoBehaviour
 {
     public const int FirstLootGridId = (int)EquipmentSlot.RingRight + 1;
@@ -12,7 +13,6 @@ public class InventoryManager : MonoBehaviour
     public PartyManager Party { get; private set; }
     private int nextGridId = FirstLootGridId;
     private EquipmentTotals currentEquipment;
-    private bool playerInventoryTypeBound;
 
     public event Action<EquipmentTotals> EquipmentChanged;
     public EquipmentTotals CurrentEquipment
@@ -41,19 +41,9 @@ public class InventoryManager : MonoBehaviour
         }
 
         DontDestroyOnLoad(gameObject);
-        Party = GetComponent<PartyManager>() ?? gameObject.AddComponent<PartyManager>();
+        Party = GetComponent<PartyManager>();
 
-        PlayerStatsManager playerStats = FindAnyObjectByType<PlayerController>()?.GetComponent<PlayerStatsManager>();
-        if (playerStats != null)
-        {
-            Initialize(playerStats.GetPlayerStats().inventoryType);
-            playerInventoryTypeBound = true;
-        }
-        else
-        {
-            // The inventory can be created before the player during scene startup.
-            Initialize(InventoryType.EightColumnFull);
-        }
+        Initialize(Party.Get(PartyManager.PlayerId).Stats.inventoryType);
 
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
@@ -62,7 +52,15 @@ public class InventoryManager : MonoBehaviour
 
     private void OnDestroy() => SceneManager.sceneLoaded -= OnSceneLoaded;
 
-    private void OnSceneLoaded(Scene scene, LoadSceneMode mode) => RebuildEquipment();
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (mode == LoadSceneMode.Single)
+        {
+            ItemDataInformation.Clear();
+            nextGridId = FirstLootGridId;
+        }
+        RebuildEquipment();
+    }
 
     public void Initialize(InventoryType playerType)
     {
@@ -70,32 +68,14 @@ public class InventoryManager : MonoBehaviour
             return;
 
         ItemDataInformation = new Dictionary<int, (List<ItemInstance>, InventoryType)>();
-        ItemDataInformation.Add(0, (new List<ItemInstance>(), playerType));
-        for (int id = (int)EquipmentSlot.Helmet; id <= (int)EquipmentSlot.RingRight; id++)
-            ItemDataInformation.Add(id, (new List<ItemInstance>(), InventoryType.OneByOneMinimal));
-
-        if (Party != null)
-            for (int id = 0; id < FirstLootGridId; id++) Party.Get(PartyManager.PlayerId).BindContainer(id, ItemDataInformation[id].list);
+        Party.Get(PartyManager.PlayerId).Stats.inventoryType = playerType;
         currentEquipment = EquipmentCalculator.Calculate(Array.Empty<ItemData>());
     }
 
     private void EnsureInitialized()
     {
         if (ItemDataInformation == null)
-            Initialize(InventoryType.EightColumnFull);
-    }
-
-    private void BindPlayerInventoryTypeIfAvailable()
-    {
-        if (playerInventoryTypeBound)
-            return;
-
-        PlayerStatsManager playerStats = FindAnyObjectByType<PlayerController>()?.GetComponent<PlayerStatsManager>();
-        if (playerStats == null)
-            return;
-
-        SetPlayerInventoryType(playerStats.GetPlayerStats().inventoryType);
-        playerInventoryTypeBound = true;
+            Initialize(InventoryType.CharacterBagFull);
     }
 
     public static bool IsEquipmentGrid(int id) =>
@@ -149,9 +129,9 @@ public class InventoryManager : MonoBehaviour
     public (List<ItemInstance> list, InventoryType type) GetItems(int id, string ownerId = null)
     {
         EnsureInitialized();
-        if (id >= 0 && id < FirstLootGridId && ownerId != null && ownerId != PartyManager.PlayerId)
+        if (id >= 0 && id < FirstLootGridId)
         {
-            var member = Party.Get(ownerId) ?? throw new ArgumentException("Unknown inventory owner.");
+            var member = Party.Get(ownerId ?? PartyManager.PlayerId) ?? throw new ArgumentException("Unknown inventory owner.");
             return (member.GetItems(id), id == 0 ? member.Stats.inventoryType : InventoryType.OneByOneMinimal);
         }
         return ItemDataInformation[id];
@@ -160,8 +140,7 @@ public class InventoryManager : MonoBehaviour
     public void SetPlayerInventoryType(InventoryType type)
     {
         EnsureInitialized();
-        ItemDataInformation[0] = (GetItems(0).list, type);
-        playerInventoryTypeBound = true;
+        Party.Get(PartyManager.PlayerId).Stats.inventoryType = type;
     }
 
     public void ReplaceItems(int id, List<ItemInstance> items)
@@ -178,7 +157,6 @@ public class InventoryManager : MonoBehaviour
     public void RebuildEquipment()
     {
         EnsureInitialized();
-        BindPlayerInventoryTypeIfAvailable();
         RecomputeEquipment();
         RefreshRightHandWeapon();
     }
@@ -327,8 +305,7 @@ public class InventoryManager : MonoBehaviour
         member.Equipment = EquipmentCalculator.Calculate(items);
         if (member.Actor != null)
         {
-            var equipment = member.Actor.GetComponent<PlayerEquipment>() ?? member.Actor.AddComponent<PlayerEquipment>();
-            if (member.Actor.GetComponent<EquipmentVisualController>() == null) member.Actor.AddComponent<EquipmentVisualController>();
+            var equipment = member.Actor.GetComponent<PlayerEquipment>();
             equipment.SetEquipment(member.Equipment, items);
             var weapons = member.Actor.GetComponent<WeaponsHandler>();
             if (weapons != null)
@@ -360,12 +337,6 @@ public class InventoryManager : MonoBehaviour
             return null;
 
         PlayerEquipment playerEquipment = player.GetComponent<PlayerEquipment>();
-        if (playerEquipment == null)
-            playerEquipment = player.gameObject.AddComponent<PlayerEquipment>();
-
-        if (player.GetComponent<EquipmentVisualController>() == null)
-            player.gameObject.AddComponent<EquipmentVisualController>();
-
         return playerEquipment;
     }
 

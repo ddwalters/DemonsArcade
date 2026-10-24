@@ -1,12 +1,12 @@
 using UnityEngine;
 
 // Scene binding only. Identity and appearance come from the linked definition/Node Tree.
-[RequireComponent(typeof(PlayerStatsManager))]
+[RequireComponent(typeof(PlayerStatsManager), typeof(PlayerEquipment), typeof(EquipmentVisualController))]
 public sealed class PartyMemberActor : MonoBehaviour
 {
     [SerializeField] private PartyCharacterDefinition definition;
     private PartyManager boundParty;
-    private PartyMember boundMember;
+    private CharacterRecord boundMember;
 
     private void Start() => Bind();
     private void Update()
@@ -33,7 +33,7 @@ public sealed class PartyMemberActor : MonoBehaviour
         boundMember = member;
         member.Actor = gameObject;
         member.Definition = definition;
-        GetComponent<PlayerStatsManager>().RestoreStats(member.Stats);
+        GetComponent<PlayerStatsManager>().BindRecord(member);
         FindAnyObjectByType<InventoryManager>()?.RebuildMemberEquipment(member.Id);
         return true;
     }

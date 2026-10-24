@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
-[RequireComponent(typeof(CharacterMotor))]
+[RequireComponent(typeof(CharacterMotor), typeof(PlayerModeController), typeof(PlayerStatsManager))]
+[RequireComponent(typeof(PlayerEquipment), typeof(EquipmentVisualController))]
 public class PlayerController : MonoBehaviour
 {
     [Header("Look")]
@@ -11,7 +13,20 @@ public class PlayerController : MonoBehaviour
     [Header("Sprint")]
     [SerializeField] private float staminaUsageRate = 4f;
 
-    public int goldAmount;
+    [FormerlySerializedAs("goldAmount")]
+    [SerializeField] private int startingGold;
+    public int goldAmount
+    {
+        get => PartyManager.Current?.Get(PartyManager.PlayerId)?.Gold ?? startingGold;
+        set
+        {
+            var record = PartyManager.Current?.Get(PartyManager.PlayerId);
+            if (record != null)
+                record.Gold = value;
+            else
+                startingGold = value;
+        }
+    }
 
     private PlayerStatsManager statsManager;
     private CharacterMotor motor;
@@ -25,18 +40,6 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        foreach (var existing in FindObjectsByType<PlayerController>())
-        {
-            if (existing != this && existing.controls != null)
-            {
-                existing.RestoreLocation(transform.position, transform.rotation);
-                gameObject.SetActive(false);
-                Destroy(gameObject);
-                return;
-            }
-        }
-
-        DontDestroyOnLoad(gameObject);
         motor = GetComponent<CharacterMotor>();
         cameraRig = GetComponent<PlayerCameraRig>();
         statsManager = GetComponent<PlayerStatsManager>();
@@ -58,7 +61,13 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable() => controls?.BasicActionMap.Enable();
     private void OnDisable() => controls?.BasicActionMap.Disable();
-    private void OnDestroy() => controls?.Dispose();
+    private void OnDestroy()
+    {
+        var record = PartyManager.Current?.Get(PartyManager.PlayerId);
+        if (record != null && record.Actor == gameObject)
+            record.Actor = null;
+        controls?.Dispose();
+    }
 
     private void Start()
     {

@@ -6,9 +6,9 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+[DefaultExecutionOrder(-300)]
 public class SaveManager : MonoBehaviour
 {
-    public const string TownScene = "Assets/_Game/Scenes/Town/_Town.unity";
     public static SaveManager Instance { get; private set; }
     public PlaythroughData ActivePlaythrough { get; private set; }
     public bool IsLoading { get; private set; }
@@ -23,15 +23,14 @@ public class SaveManager : MonoBehaviour
     private readonly Dictionary<UnityEngine.Object, string> saveBlocks = new();
     private readonly Dictionary<string, SavedWorldObject> world = new();
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void Bootstrap()
-    {
-        if (Instance == null)
-            new GameObject("SaveManager").AddComponent<SaveManager>();
-    }
-
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            gameObject.SetActive(false);
+            Destroy(gameObject);
+            return;
+        }
         Instance = this;
         DontDestroyOnLoad(gameObject);
         store = new SaveStore(Path.Combine(Application.persistentDataPath, "Saves"));
@@ -71,8 +70,10 @@ public class SaveManager : MonoBehaviour
             if (IsLoading || FindAnyObjectByType<LoadLevel>()?.IsLoading == true)
                 return "Saving is unavailable while loading.";
 
-            if (!IsSaveScene(SceneManager.GetActiveScene().path))
-                return "Saving is only available in Town.";
+            var scene = SceneManager.GetActiveScene();
+            var configuration = SceneConfiguration.ForScene(scene);
+            if (configuration != null && (!configuration.gameplayScene || !configuration.saveProgress))
+                return "Progress saving is disabled for this scene.";
 
             var player = FindAnyObjectByType<PlayerController>();
             if (player == null || ActivePlaythrough == null)
@@ -94,8 +95,6 @@ public class SaveManager : MonoBehaviour
             return null;
         }
     }
-
-    public static bool IsSaveScene(string scenePath) => scenePath == TownScene;
 
     public static bool HasValidInventoryLayout(IReadOnlyList<SavedContainer> inventory)
     {
@@ -132,7 +131,7 @@ public class SaveManager : MonoBehaviour
                 playthrough = ActivePlaythrough,
                 savedAtUtc = DateTime.UtcNow.ToString("O"),
                 playSeconds = playSeconds,
-                scenePath = TownScene,
+                scenePath = SceneManager.GetActiveScene().path,
                 position = player.transform.position,
                 rotation = player.transform.rotation,
                 stats = player.GetComponent<PlayerStatsManager>().GetPlayerStats(),
@@ -165,7 +164,7 @@ public class SaveManager : MonoBehaviour
         {
             // Read and resolve everything before replacing the current session.
             var save = store.Read(entry.playthrough.id, entry.id);
-            if (save.scenePath != TownScene || save.stats.currentHealth <= 0 || !HasValidInventoryLayout(save.inventory))
+            if (SceneUtility.GetBuildIndexByScenePath(save.scenePath) < 0 || save.stats.currentHealth <= 0 || !HasValidInventoryLayout(save.inventory))
                 throw new InvalidDataException("This save has an invalid player state.");
 
             foreach (var container in save.inventory)
@@ -178,7 +177,7 @@ public class SaveManager : MonoBehaviour
             pendingSave = save;
             ActivePlaythrough = save.playthrough;
             LastError = null;
-            StartCoroutine(ReplaceSession(1));
+            StartCoroutine(ReplaceSession(SceneUtility.GetBuildIndexByScenePath(save.scenePath)));
             return true;
         }
         catch (Exception exception)
@@ -237,20 +236,21 @@ public class SaveManager : MonoBehaviour
 
     public void RecordCollected(WorldSaveObject target)
     {
-        if (target != null && SceneManager.GetActiveScene().path == TownScene)
+        if (target != null && (SceneConfiguration.ForScene(target.gameObject.scene)?.saveProgress ?? true))
             world[target.SaveId] = new SavedWorldObject { id = target.SaveId, collected = true };
     }
 
     public void CaptureWorld()
     {
-        if (SceneManager.GetActiveScene().path != TownScene)
+        var configuration = SceneConfiguration.ForScene(SceneManager.GetActiveScene());
+        if (configuration != null && (!configuration.gameplayScene || !configuration.saveProgress))
             return;
 
         var identifiers = new HashSet<string>();
         foreach (var target in FindObjectsByType<WorldSaveObject>())
         {
             if (string.IsNullOrEmpty(target.SaveId) || !identifiers.Add(target.SaveId))
-                throw new InvalidOperationException("Town contains a missing or duplicate world save identifier.");
+                throw new InvalidOperationException("The scene contains a missing or duplicate world save identifier.");
 
             world[target.SaveId] = target.Capture(catalog);
         }
@@ -274,7 +274,7 @@ public class SaveManager : MonoBehaviour
 
         Time.timeScale = 1f;
         yield return null;
-        yield return SceneManager.LoadSceneAsync(scene);
+        yield return SceneFlow.Load(scene, captureSession: false);
     }
 
     private void SceneLoaded(Scene scene, LoadSceneMode mode) => StartCoroutine(InitializeScene(scene));
@@ -284,7 +284,8 @@ public class SaveManager : MonoBehaviour
         // Container Start methods and HUD bindings must run before restoration.
         yield return null;
         sessionMode = FindAnyObjectByType<PlayerModeController>();
-        if (scene.buildIndex == 0)
+        var configuration = SceneConfiguration.ForScene(scene);
+        if (configuration != null && !configuration.gameplayScene)
         {
             ActivePlaythrough = null;
             world.Clear();
@@ -294,7 +295,7 @@ public class SaveManager : MonoBehaviour
             yield break;
         }
 
-        if (scene.path != TownScene)
+        if (configuration != null && !configuration.saveProgress)
         {
             IsLoading = false;
             yield break;
@@ -302,6 +303,11 @@ public class SaveManager : MonoBehaviour
 
         var player = FindAnyObjectByType<PlayerController>();
         var inventory = FindAnyObjectByType<InventoryManager>();
+        if (player == null || inventory == null)
+        {
+            IsLoading = false;
+            yield break;
+        }
         if (pendingSave != null)
         {
             var save = pendingSave;
@@ -337,7 +343,7 @@ public class SaveManager : MonoBehaviour
 
         IsLoading = false;
         PlayerModeController.ForPlayer(player).ResetToGameplay();
-        if (initialSave)
+        if (initialSave && (configuration?.createInitialSave ?? false))
             Save();
     }
 }

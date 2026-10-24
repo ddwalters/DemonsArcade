@@ -26,9 +26,9 @@ public class UIController : MonoBehaviour
 
         GameObject menuCanvas = FindChild("MenuCanvas");
         GameObject interactionRoot = menuCanvas != null ? menuCanvas : gameObject;
-        menuGroup = GetOrAddCanvasGroup(interactionRoot);
+        menuGroup = GetCanvasGroup(interactionRoot);
         if (startScreen != null)
-            startGroup = GetOrAddCanvasGroup(startScreen);
+            startGroup = GetCanvasGroup(startScreen);
     }
 
     private void Start()
@@ -220,12 +220,9 @@ public class UIController : MonoBehaviour
             loadingScreen = FindChild("LoadingScreen");
     }
 
-    private static CanvasGroup GetOrAddCanvasGroup(GameObject target)
+    private static CanvasGroup GetCanvasGroup(GameObject target)
     {
         CanvasGroup group = target.GetComponent<CanvasGroup>();
-        if (group == null)
-            group = target.AddComponent<CanvasGroup>();
-
         return group;
     }
 

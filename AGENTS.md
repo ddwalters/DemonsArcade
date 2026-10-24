@@ -1,5 +1,13 @@
 # AGENTS.md Configuration
 
+## Read design documents before work
+
+- At the start of every session, read `Assets/GameDesign.md` before planning or changing the project. Do not rely only on previous chat context or memory.
+- Before working on a feature, read its root `Feature.md`. Include the relevant UI area's `Feature.md` when changing presentation.
+- When switching features, read the new feature's `Feature.md` before starting its work. For changes spanning multiple features, read each affected feature document first.
+- Keep Current, Agreed, and Unfinished distinct. Existing or temporary implementation does not automatically establish an agreed design choice.
+- Update the affected feature documents when work is completed. Update `Assets/GameDesign.md` when an agreed project-wide rule changes.
+
 ## Routing preferences
 
 ```toml
@@ -52,3 +60,11 @@ Never create Git commits, including local commits, or amend existing commits. Th
 ### Readability
 
 Preserve the user's readable formatting. Expand switch cases instead of compressing them together. Simplify unnecessary code without compressing readable statements merely to reduce line count.
+
+## Project docs
+
+### Read the design docs first
+
+- At the start of every new session in this repository, read `Assets/GameDesign.md` before doing any work.
+- When beginning work on an existing feature, read that feature's `Feature.md` in its folder (for example `Assets/_Game/Features/Player/Feature.md`) before changing anything in it.
+- If a feature folder has no `Feature.md`, say so instead of guessing, and ask whether one should be created.

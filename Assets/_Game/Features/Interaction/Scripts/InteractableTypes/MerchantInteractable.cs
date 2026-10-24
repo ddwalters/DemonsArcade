@@ -25,7 +25,7 @@ public class MerchantInteractable : InteractableBase
 
     private void Start()
     {
-        gridId = inventoryManager.AddNewGridList(InventoryType.EightColumnFull);
+        gridId = inventoryManager.AddNewGridList(InventoryType.CharacterBagFull);
 
         foreach (var itemData in items)
         {

@@ -15,15 +15,9 @@ public sealed class DialogueLayout : MonoBehaviour
         Right
     }
 
-    private const float PortraitSize = 160f;
-    private const float PortraitInset = 24f;
-    private const float TextGap = 24f;
-    private const float OptionsWidth = 380f;
-    private const float OptionsGap = 24f;
-    private const float DialogueTop = 60f;
-    private const float DialogueBottom = 43f;
-    private const float OwnerNameTop = 20f;
-    private const float OwnerNameHeight = 28f;
+    [SerializeField, Min(0f)] private float textGap = 24f;
+    [SerializeField, Min(0f)] private float optionsGap = 24f;
+    private Vector2 textPadding;
 
     [SerializeField] private Image leftPortraitImage;
     [SerializeField] private Image rightPortraitImage;
@@ -41,7 +35,7 @@ public sealed class DialogueLayout : MonoBehaviour
 
     private void Awake()
     {
-        ApplyPortraitGeometry();
+        textPadding = new Vector2(dialogueText.offsetMin.x, -dialogueText.offsetMax.x);
         RefreshLayout();
     }
 
@@ -80,15 +74,14 @@ public sealed class DialogueLayout : MonoBehaviour
         if (rightPortrait != null)
             rightPortrait.gameObject.SetActive(dialogVisible && side == SpeakerSide.Right && hasPortrait);
 
-        float leftMargin = side == SpeakerSide.Left
-            ? PortraitInset + PortraitSize + TextGap
-            : PortraitInset;
-        float rightMargin = side == SpeakerSide.Right
-            ? PortraitInset + PortraitSize + TextGap
-            : PortraitInset;
-
+        float leftMargin = textPadding.x;
+        float rightMargin = textPadding.y;
+        if (hasPortrait && side == SpeakerSide.Left)
+            leftMargin = leftPortrait.anchoredPosition.x + leftPortrait.rect.width + textGap;
+        if (hasPortrait && side == SpeakerSide.Right)
+            rightMargin = -rightPortrait.anchoredPosition.x + rightPortrait.rect.width + textGap;
         if (hasOptions)
-            rightMargin = OptionsWidth + OptionsGap + PortraitInset;
+            rightMargin = Mathf.Max(rightMargin, responseOptions.rect.width + optionsGap + textPadding.y);
 
         SetDialogueMargins(leftMargin, rightMargin);
         SetOwnerNameMargins(leftMargin, rightMargin);
@@ -127,41 +120,14 @@ public sealed class DialogueLayout : MonoBehaviour
 
     private void SetDialogueMargins(float left, float right)
     {
-        dialogueText.anchorMin = Vector2.zero;
-        dialogueText.anchorMax = Vector2.one;
-        dialogueText.pivot = new Vector2(0.5f, 0.5f);
-        dialogueText.offsetMin = new Vector2(left, DialogueBottom);
-        dialogueText.offsetMax = new Vector2(-right, -DialogueTop);
+        dialogueText.offsetMin = new Vector2(left, dialogueText.offsetMin.y);
+        dialogueText.offsetMax = new Vector2(-right, dialogueText.offsetMax.y);
     }
 
     private void SetOwnerNameMargins(float left, float right)
     {
         RectTransform nameRect = ownerNameText.rectTransform;
-        nameRect.anchorMin = new Vector2(0f, 1f);
-        nameRect.anchorMax = new Vector2(1f, 1f);
-        nameRect.pivot = new Vector2(0f, 1f);
-        nameRect.anchoredPosition = new Vector2(left, -OwnerNameTop);
-        nameRect.sizeDelta = new Vector2(-left - right, OwnerNameHeight);
-    }
-
-    private void ApplyPortraitGeometry()
-    {
-        if (leftPortrait != null)
-        {
-            leftPortrait.anchorMin = new Vector2(0f, 0.5f);
-            leftPortrait.anchorMax = new Vector2(0f, 0.5f);
-            leftPortrait.pivot = new Vector2(0f, 0.5f);
-            leftPortrait.anchoredPosition = new Vector2(PortraitInset, 0f);
-            leftPortrait.sizeDelta = new Vector2(PortraitSize, PortraitSize);
-        }
-
-        if (rightPortrait != null)
-        {
-            rightPortrait.anchorMin = new Vector2(1f, 0.5f);
-            rightPortrait.anchorMax = new Vector2(1f, 0.5f);
-            rightPortrait.pivot = new Vector2(1f, 0.5f);
-            rightPortrait.anchoredPosition = new Vector2(-PortraitInset, 0f);
-            rightPortrait.sizeDelta = new Vector2(PortraitSize, PortraitSize);
-        }
+        nameRect.offsetMin = new Vector2(left, nameRect.offsetMin.y);
+        nameRect.offsetMax = new Vector2(-right, nameRect.offsetMax.y);
     }
 }

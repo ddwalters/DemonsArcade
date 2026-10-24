@@ -32,7 +32,7 @@ public class DungeonScale : MonoBehaviour
         GameObject SpawnPoint = GameObject.Find("_SpawnPoint");
         if (Player != null)
         {
-            Player.transform.position = SpawnPoint.transform.position;
+            Player.GetComponent<PlayerController>().RestoreLocation(SpawnPoint.transform.position, SpawnPoint.transform.rotation);
         }
 
         BakeRuntime[] bakeRuntime = GetComponentsInChildren<BakeRuntime>();

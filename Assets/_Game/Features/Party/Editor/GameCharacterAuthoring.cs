@@ -73,9 +73,9 @@ public static class GameCharacterAuthoring
         if (existing.Length > 1) throw new InvalidOperationException("Resolve duplicate character links before creating another definition.");
         if (existing.Length == 1) return existing[0];
 
-        const string folder = "Assets/Resources/Party";
-        if (!AssetDatabase.IsValidFolder("Assets/Resources")) AssetDatabase.CreateFolder("Assets", "Resources");
-        if (!AssetDatabase.IsValidFolder(folder)) AssetDatabase.CreateFolder("Assets/Resources", "Party");
+        const string folder = "Assets/_Game/Features/Party/Resources/Party";
+        if (!AssetDatabase.IsValidFolder("Assets/_Game/Features/Party/Resources")) AssetDatabase.CreateFolder("Assets/_Game/Features/Party", "Resources");
+        if (!AssetDatabase.IsValidFolder(folder)) AssetDatabase.CreateFolder("Assets/_Game/Features/Party/Resources", "Party");
         var definition = ScriptableObject.CreateInstance<PartyCharacterDefinition>();
         definition.dialogueOwnerId = owner.Id;
         var serialized = new SerializedObject(definition);

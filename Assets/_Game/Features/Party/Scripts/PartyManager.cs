@@ -3,49 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-// Session data survives scene actors. Dismissal changes membership, never ownership.
-public sealed class PartyMember
-{
-    public string Id { get; }
-    private NodeTree.DialogOwner DialogueOwner => Definition != null ? Definition.DialogueOwner : PartyCharacterIdentity.Resolve(Id);
-    public string Name => IsPlayer
-        ? SaveManager.Instance?.ActivePlaythrough?.characterName ?? DialogueOwner?.DisplayName ?? "Player"
-        : DialogueOwner?.DisplayName ?? "Unknown character";
-    public Sprite Portrait => DialogueOwner?.GetPortrait(null);
-    public PartyCharacterDefinition Definition { get; internal set; }
-    public GameObject Actor { get; internal set; }
-    public PlayerStatsData Stats { get; internal set; } = new();
-    public EquipmentTotals Equipment { get; internal set; } = EquipmentCalculator.Calculate(Array.Empty<ItemData>());
-    public bool IsPlayer => Id == PartyManager.PlayerId;
-    private readonly List<ItemInstance>[] containers = new List<ItemInstance>[10];
-
-    public PartyMember(string id)
-    {
-        if (string.IsNullOrWhiteSpace(id)) throw new ArgumentException("A character needs a stable ID.");
-        Id = id;
-        for (int i = 0; i < containers.Length; i++) containers[i] = new List<ItemInstance>();
-    }
-
-    public List<ItemInstance> GetItems(int slot) => containers[slot];
-    internal void BindContainer(int slot, List<ItemInstance> items) => containers[slot] = items;
-    public void GainExperience(int amount) => CharacterProgression.GainExperience(Stats, amount);
-}
-
+[DefaultExecutionOrder(-200)]
 public sealed class PartyManager : MonoBehaviour
 {
     public const string PlayerId = "player";
     public const int Capacity = 3;
     public static PartyManager Current { get; private set; }
-    private readonly Dictionary<string, PartyMember> characters = new();
+    private readonly Dictionary<string, CharacterRecord> characters = new();
     private readonly List<string> members = new();
     private PlayerController player;
     public IReadOnlyList<string> MemberIds => members.AsReadOnly();
-    public IEnumerable<PartyMember> Characters => characters.Values;
+    public IEnumerable<CharacterRecord> Characters => characters.Values;
     public string LeaderId { get; private set; } = PlayerId;
     public event Action PartyChanged;
 
     private void Awake()
     {
+        if (Current != null && Current != this)
+        {
+            gameObject.SetActive(false);
+            Destroy(gameObject);
+            return;
+        }
         Current = this;
         GetOrCreate(PlayerId);
         members.Add(PlayerId);
@@ -59,15 +38,15 @@ public sealed class PartyManager : MonoBehaviour
 
     private void OnDestroy() { if (Current == this) Current = null; }
 
-    public PartyMember Get(string id) => id != null && characters.TryGetValue(id, out var member) ? member : null;
-    public PartyMember GetOrCreate(string id)
+    public CharacterRecord Get(string id) => id != null && characters.TryGetValue(id, out var member) ? member : null;
+    public CharacterRecord GetOrCreate(string id)
     {
         if (!characters.TryGetValue(id, out var member))
         {
             var definition = PartyCharacterDefinition.Resolve(id);
             if (definition == null || definition.ValidationError != null)
                 throw new InvalidOperationException("Cannot register character " + id + ": " + (definition?.ValidationError ?? "No game character definition."));
-            member = new PartyMember(id) { Definition = definition };
+            member = new CharacterRecord(id) { Definition = definition };
             member.Stats = JsonUtility.FromJson<PlayerStatsData>(JsonUtility.ToJson(definition.startingStats));
             characters.Add(id, member);
         }
@@ -108,14 +87,16 @@ public sealed class PartyManager : MonoBehaviour
     {
         if (player == null) return;
         var member = Get(PlayerId);
+        if (member.Actor == player.gameObject)
+            return;
         member.Actor = player.gameObject;
-        member.Stats = player.GetComponent<PlayerStatsManager>().GetPlayerStats();
+        player.GetComponent<PlayerStatsManager>().BindRecord(member);
     }
 
     public SavedParty Capture(ItemCatalog catalog)
     {
         var result = new SavedParty { leaderId = LeaderId, memberIds = new List<string>(members) };
-        foreach (PartyMember member in Characters.Where(member => !member.IsPlayer))
+        foreach (CharacterRecord member in Characters.Where(member => !member.IsPlayer))
         {
             var saved = new SavedPartyMember { id = member.Id, stats = member.Stats };
             for (int slot = 0; slot < 10; slot++)

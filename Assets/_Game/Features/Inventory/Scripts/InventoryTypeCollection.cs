@@ -7,7 +7,7 @@ public enum InventoryType
     // minimal: Doesn't include player layout
     // full: Includes full player layout
     OneByOneMinimal,
-    EightColumnFull,
+    CharacterBagFull,
     SixByThreeMinimal
 }
 
@@ -22,21 +22,24 @@ public class InventoryTypeCollection : ScriptableObject
     }
 
     [Header("Character Bag")]
-    [SerializeField, Min(1), Tooltip("Rows in each eight-column character bag. Occupied rows are retained when reducing this value until their items are moved.")]
+    [SerializeField, Min(1), Tooltip("Rows in each character bag. Occupied rows and columns are retained when reducing dimensions until their items are moved.")]
     private int bagRows = 4;
+    [SerializeField, Min(1)] private int bagColumns = 8;
+    public int BagColumns => Mathf.Max(1, bagColumns);
     public int BagRows => Mathf.Max(1, bagRows);
 
     // One source of dimensions for views, placement, pickups, and saved contents.
     public Vector2Int GetGridSize(InventoryType type, IEnumerable<ItemInstance> items = null)
     {
         var grid = Array.Find(this[type].GetComponentsInChildren<InventoryGrid>(true), candidate => candidate.id == 0);
-        Vector2Int size = type == InventoryType.EightColumnFull ? new Vector2Int(8, BagRows) : grid.gridSize;
-        if (type == InventoryType.EightColumnFull && items != null)
+        Vector2Int size = type == InventoryType.CharacterBagFull ? new Vector2Int(BagColumns, BagRows) : grid.gridSize;
+        if (type == InventoryType.CharacterBagFull && items != null)
         {
             foreach (var item in items)
             {
                 int occupiedRows = checked(item.Position.y + InventoryPlacement.Size(item.Definition, item.Rotation).y);
                 size.y = Mathf.Max(size.y, occupiedRows);
+                size.x = Mathf.Max(size.x, checked(item.Position.x + InventoryPlacement.Size(item.Definition, item.Rotation).x));
             }
         }
         return size;

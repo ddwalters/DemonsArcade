@@ -42,8 +42,6 @@ public class PatrolNpc : InteractableBase
         characterController = GetComponent<CharacterController>();
         seeker = GetComponent<Seeker>();
         conversationFacing = GetComponent<NpcConversationFacing>();
-        if (conversationFacing == null)
-            conversationFacing = gameObject.AddComponent<NpcConversationFacing>();
         ResolveDialogRunner();
         SetToolTip("Talk");
         UpdateInteractableState();

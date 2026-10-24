@@ -2,6 +2,8 @@
 
 ## Feature documentation
 
+At the start of each session, read this document before planning or changing the project. Before working on a feature, read its Feature.md, including the relevant UI area's document when changing presentation. Read the new feature's document whenever switching features. For work spanning several features, read all affected feature documents first. Do not rely only on previous chat context or memory.
+
 Each feature has a Feature.md file at its root, split into Current, Agreed, and Unfinished sections.
 
 - Current: what is implemented, including current values, controls, and layouts.

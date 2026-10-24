@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayerStatsManager : MonoBehaviour
 {
     private PlayerStatsData statsData;
+    private CharacterRecord characterRecord;
 
     [SerializeField, Min(0f)] private float staminaRecoveryRate = 1.5f;
 
@@ -23,8 +24,17 @@ public class PlayerStatsManager : MonoBehaviour
 
     private void EnsureStatsInitialized()
     {
+        if (characterRecord == null && GetComponent<PlayerController>() != null && PartyManager.Current != null)
+            BindRecord(PartyManager.Current.Get(PartyManager.PlayerId));
         if (statsData == null)
             statsData = new PlayerStatsData();
+    }
+
+    public void BindRecord(CharacterRecord record)
+    {
+        characterRecord = record;
+        statsData = record.Stats;
+        MigrateResourceScale();
     }
 
     // A new scene changes the view, not the live player session.
@@ -183,6 +193,8 @@ public class PlayerStatsManager : MonoBehaviour
         StopAllCoroutines();
         temporaryEffects = 0;
         statsData = data ?? new PlayerStatsData();
+        if (characterRecord != null)
+            characterRecord.Stats = statsData;
         MigrateResourceScale();
         isUsingStamina = false;
     }

@@ -27,7 +27,7 @@ public class PlayerModeController : MonoBehaviour
         if (player == null)
             return null;
 
-        return player.GetComponent<PlayerModeController>() ?? player.gameObject.AddComponent<PlayerModeController>();
+        return player.GetComponent<PlayerModeController>();
     }
 
     private void Update()
